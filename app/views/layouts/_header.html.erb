@@ -1,0 +1,18 @@
+<header>
+<h1>Play Space Invaders</h1>
+<nav class="round">
+<ul>
+  <li><%= link_to "Home", '/' %></li>
+  <li><%= link_to "Help", '/pages/help' %></li>
+  <li><%= link_to "Play", '/mt_invaders_alone.html' %></li>
+  <li><%= link_to "Comments", '/pages/comments' %></li>
+  <% signed_in = false %>
+  <% if !signed_in then %>
+    <li><%= link_to "Sign in", '#'%></li>
+    <li>
+    <%= link_to "Sign up", '#', :class => "signup_button round" %>
+    </li>
+  <% end %>
+</ul>
+</nav>
+</header>

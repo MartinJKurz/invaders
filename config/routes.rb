@@ -1,7 +1,21 @@
 Invaders::Application.routes.draw do
+  get "pages/home"
+  get "pages/contact"
+  get "pages/about"
+  get "pages/news"
+  get "pages/help"
+  get "pages/comments"
+
   resources :users
 
   match '/signup',  :to => 'users#new'
+
+  root :to => 'pages#home'
+
+  # last line:
+  #match ':action' => 'users#new'
+  match ':action' => 'static#:action'
+
 
   # get "users/new"
 
