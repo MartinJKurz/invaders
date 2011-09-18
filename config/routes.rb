@@ -1,14 +1,65 @@
+=begin
+
+invaders is a static page, should be changed:
+1. the html must be dynamically created from a html.erb
+   - VC only:
+   - controller for the game(s)
+2. invaders is just one of many games.
+   more games can be added by the admin:
+   - MVC!
+    - M: the Game
+    - V: the <game>.html.erb
+    - additional resources for the view (the game JS)
+    - C: functionality for the admin to add, delete, change games
+
+
+currently these files are used for invaders:
+mt_invaders_alone.html
+mt_invaders.js
+mootools-core-1.4.0-full-compat-yc.js
+lib/mt_sounds.js
+lib/mt_blockfont.js
+invader_sounds/...
+
+1. VC
+- a game controller
+- invaders action
+- invaders view
+- invaders resources
+
+2. using MVC:
+all files must be in the database
+
+Game model with these fields:
+- <game>.html.erb
+- resources
+
+
+=end
+
+
+
+
 Invaders::Application.routes.draw do
+  get "log_in" => "sessions#new", :as => "log_in"
+  get "log_out" => "sessions#destroy", :as => "log_out"
+
   get "pages/home"
   get "pages/contact"
   get "pages/about"
   get "pages/news"
   get "pages/help"
   get "pages/comments"
+  get "pages/get_current_user"
+
+  # TODO: move:
+  post "pages/post_score"
 
   resources :users
+  resources :sessions
 
   match '/signup',  :to => 'users#new'
+  # get "signup" => "users#new", :as => "signup"    # same as above? why? Ryan uses this syntax
 
   root :to => 'pages#home'
 

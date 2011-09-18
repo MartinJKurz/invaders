@@ -7,6 +7,8 @@
   min-height: 100%;
   height:     auto !important;
   overflow:   hidden !important;
+
+  position: relative;
 }
 
 body {
@@ -16,6 +18,23 @@ body {
 
 html {
   height: 100%;
+}
+
+.flash {
+  color: red;
+  background-color: rgba(80,80,255,0.7);
+  font-size: 200%;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+
+form {
+  line-height: 0.5;
+}
+
+form p {
+  margin-bottom: 0.3em;
 }
 
 .bottom {

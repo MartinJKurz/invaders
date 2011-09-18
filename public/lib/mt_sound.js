@@ -1,35 +1,9 @@
-/*
-var Sound = new Class({
-	initialize: function (filename, vol, n) {
-		this.filename = filename;
-		this.idx = 0;
-		this.sound = [n];
-		this.n = n;
-		var i, au;
-		for (i=0; i<n; i++) {
-			au = this.sound[i] = new Element('audio', {src: filename, volume: vol});
-			au.volume = vol;
-		}
-	},
-	play: function() {
-		var s = this.sound[this.idx];
-		if ($defined(s)) {
-			s.play();
-		}
-		this.idx = (this.idx+1) % this.n;
-	},
-});
 
-Sound.check = function() {
-	var au = new Element('audio');
-	return $defined(au.play);
-}
-*/
-
-// a singleton:
 var Sounds = new Class({
 	initialize: function() {
 		var au = new Element('audio');
+		// this.supported = $defined(au.play);
+		// this.supported = au.play !== undefined;  // ok!
 		this.supported = $defined(au.play);
 		this.sounds = {};
 		this.on = true;

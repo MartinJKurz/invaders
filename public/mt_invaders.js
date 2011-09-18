@@ -113,8 +113,7 @@ var Colors = {
 var State = {
 	running:	1,
 	paused:		2,
-	gameOver:	3,
-	textInput:	4
+	gameOver:	3
 };
 
 var numShots = 2;
@@ -740,14 +739,107 @@ var Controller = new Class({
 		this.fm.getFont(10);
 		this.selecting = false;
 		this.highscores = [];
-		this.readHighscores();
+
+		//this.readHighscores();
+	    this.clearHighscores();
 		this.saveHighscores();
+
 		this.level = 1;
 		this.loadSounds();
 		this.sounds.setVolume(0.25);
 
         this.sounds.on = false;
+
+        this.userName = null;
 	},
+
+    postScore: function() {
+
+      var url = 'pages/post_score';
+      var ctrl = this;
+
+      var myAjax = new Request({
+        url:url,
+        method: 'post',
+        data: 'message from client',
+        headers: {
+          'X-Transaction': 'POST Example',
+          
+          'X-CSRF-Token': "OVY7GaorEWikDXJr68ie2E14886V/fFGJKHYuKwT3oM="
+          //'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+        },
+
+        onComplete: function(json) {
+          var obj = JSON.decode(json);
+          console.log('result: ' + json);
+        }
+      });
+
+      //myAjax.send();
+      //myAjax.send('sending sdfjhlsfhklhas');
+      myAjax.send('XXXX', 'YYYY');
+      //myAjax.send({XX: 'YYYY'});
+    },
+
+    postScoreJS : function() {
+      var req = new XMLHttpRequest();
+
+      req.open('post', '/pages/post_score');
+      function handleStateChange() {
+        // console.log("readyState = " + req.readyState + (req.readyState >= 3 ? " HTTP-Status = " + req.status : ''));
+        if (4 === req.readyState && 200 === req.status) {
+          var json = req.responseText;
+          var obj = JSON.decode(json);
+          console.log('RES: ' + json);
+        }
+      }
+
+      req.onreadystatechange = handleStateChange;
+      //req.setRequestHeader('User-Agent','XMLHTTP/1.0');
+      req.setRequestHeader('Content-type', 'application/json');
+      //req.setRequestHeader('Content-type', 'text/plain');
+      //req.setRequestHeader('X-CSRF-Token', 'OVY7GaorEWikDXJr68ie2E14886V/fFGJKHYuKwT3oM=');
+
+
+      //req.send(null);
+      //req.send("789");
+      var t = {score: this.points};
+      var d = JSON.encode(t);
+      console.log('sending: ' + d);
+      req.send(d);
+    },
+
+    getUserFromServer: function() {
+
+      console.log('get user');
+      // test
+      this.postScoreJS();
+
+      var url = 'pages/get_current_user.json';
+      var ctrl = this;
+
+      var myAjax = new Request({
+        url:url,
+        method: 'get',
+        onComplete: function(json) {
+          console.log('onComplete -> ' + json);
+          var obj = JSON.decode(json);
+          var logged_in = null !== obj;
+          if (logged_in) {
+            ctrl.userName = obj.name;
+            ctrl.addHighscore();
+            console.log('get user -> ' + ctrl.userName);
+          } else {
+            ctrl.userName = null;
+            console.log('get user -> null');
+          }
+          ctrl.showNewGame(logged_in);
+          ctrl.state = State.gameOver;
+        }
+      });
+
+      myAjax.send();
+    },
 	setupCanvases: function(parentDiv, width, height) {
 
 		parentDiv.setStyle('width', width + 'px');
@@ -835,10 +927,6 @@ var Controller = new Class({
 		// visible size - depending on available space:
 		this.overlayCanvas.setStyle('width', wh + 'px');
 		this.overlayCanvas.setStyle('height', wh + 'px');
-
-        if (this.state === State.textInput) {
-			this.positionTextInput();
-        }
     },
 	setupCanvasesFull: function(parentDiv) {
 
@@ -918,7 +1006,7 @@ var Controller = new Class({
 		this.sounds.createSound('ufo_lowpitch', 'invader_sounds/ufo_lowpitch.wav', 0.5, 10);
 	},
 	clearHighscores: function() {
-		this.highscores = [{name:'dummy',score:1230}];
+		//this.highscores = [{name:'dummy',score:1230}];
 		this.saveHighscores();
 	},
 	readHighscores: function() {
@@ -939,7 +1027,6 @@ var Controller = new Class({
 			this.highscores.push({name:'Z',score:100});
 			this.highscores.push({name:'olga',score:80});
 			*/
-			this.highscores.push({name:'dummy',score:1230});
 		} else {
 			this.highscores = JSON.decode(json);
 		}
@@ -1203,102 +1290,6 @@ var Controller = new Class({
 				break;
 		}
 	},
-	checkUserName: function(s) {
-		var s2 = s.toUpperCase();
-		s2 = s2.substring(0,userNameLength);
-		return s2;
-	},
-	textInputChanged: function(ev) {
-		if (13 === ev.code) {
-			this.textInputFinished(ev);
-			return;
-		}
-		var s = ev.target.value;
-		var s2 = this.checkUserName(s);
-		if (s2 !== s) {
-			ev.target.value = s2;
-		}
-		// this.showInputText(s2);
-		var res = this.showInputText(s2);
-		this.textInput.value = res;
-	},
-	textInputFinished: function(ev) {
-		this.userName = ev.target.value;
-		this.addHighscore();
-		this.showNewGame();
-		this.state = State.gameOver;
-		var parentDiv = $('app');
-		parentDiv.removeChild(this.textInput);
-		this.showOverlay();
-	},
-	getTextInfoPosition: function() {
-		var fsz = 6;
-		var fw = fsz*6;
-		var h = 7*fsz;
-		var tw = userNameLength * fw;
-		var tx = 0.5*(800-tw);
-		var ty = 0.5*(800-h);
-		var px = tx-fsz;
-		var py = ty-fsz;
-		var w = tw+2*fsz;
-        var wh = $defined(this.wh) ? this.wh : 500;
-		var abs_px = tx * wh/800;
-		var abs_py = py * wh/800;
-		var abs_w = w * wh/800;
-		var abs_h = 6*fsz * wh/800;
-		return {
-			px:px,
-			py:py,
-			w:w,
-			h:h,
-			tx:tx,
-			ty:ty,
-			fsz:fsz,
-			abs_px:abs_px,
-			abs_py:abs_py,
-			abs_w:abs_w,
-			abs_h:abs_h
-		};
-	},
-	showInputText: function(line) {
-		var pos = this.getTextInfoPosition();
-		var font = this.fm.getFont(pos.fsz);
-		this.overlayCtx.fillStyle = 'white';
-		this.overlayCtx.fillRect(pos.px, pos.py, pos.w, pos.h);
-		var res = font.writeLine(Colors.text, this.overlayCtx, line, pos.tx, pos.ty, null);
-		return res;
-	},
-	positionTextInput: function() {
-		var pos = this.getTextInfoPosition();
-		var cx = this.ctx.canvas.getOffsets().x;
-		var cy = this.ctx.canvas.getOffsets().y;
-		this.textInput.setStyle('position', 'absolute');
-		this.textInput.setStyle('left', (cx + pos.abs_px) + 'px');
-		this.textInput.setStyle('top', (cy + pos.abs_py) + 'px');
-		this.textInput.setStyle('width', pos.abs_w + 'px');
-		this.textInput.setStyle('height', pos.abs_h + 'px');
-	},
-	inputUserName: function() {
-		// this.userName = 'mak';
-		var parentDiv = $('app');
-		this.state = State.textInput;
-		if (!$defined(this.textInput)) {
-			this.textInput = new Element('input');
-			this.textInput.set('type', 'text');
-			this.textInput.setStyle('background-color', 'rgba(0,0,255,0)');
-			this.textInput.setStyle('color', 'rgba(0,0,0,0.0)');
-			this.textInput.setStyle('border', '0px');
-			parentDiv.appendChild(this.textInput);
-
-			this.textInput.addEvent('keyup', this.textInputChanged.bind(this));
-			this.positionTextInput();
-		}
-		parentDiv.appendChild(this.textInput);
-		this.clearOverlay();
-		this.showOverlay();
-		this.textInput.focus();
-		res = this.showInputText('');
-	},
 	addHighscore: function() {
 		var scoreSort = function(a,b) {
 			return b.score - a.score;
@@ -1309,11 +1300,18 @@ var Controller = new Class({
 		this.highscores = this.highscores.slice(0,maxScores);
 		this.saveHighscores();
 	},
-	showNewGame: function() {
-		var text = [
-			'new Game',
-			'show Highscores'
-		];
+	addHighscoreLocal: function() {
+		var scoreSort = function(a,b) {
+			return b.score - a.score;
+		};
+		var hs = {name:this.userName, score:this.points};
+		this.highscores.push(hs);
+		this.highscores.sort(scoreSort);
+		this.highscores = this.highscores.slice(0,maxScores);
+		this.saveHighscores();
+	},
+	showNewGame: function(logged_in) {
+		var text = logged_in ? ['new Game',	'show Highscores'] : ['new Game'];
 		var cb = [
 			this.start,
 			this.showHighscore
@@ -1334,11 +1332,13 @@ var Controller = new Class({
 		if ((n < maxScores || ls && ls.score < this.points) && this.points > 100) {
 			if ($defined(this.userName)) {
 				this.addHighscore();
-				this.showNewGame();
+				this.showNewGame(this.userName !== null);
 			} else {
-				this.inputUserName();
+                this.getUserFromServer();
 			}
-		}
+		} else {
+		  this.showNewGame(this.userName !== null);
+        }
 	},
 
 	showHighscore: function() {
@@ -1365,9 +1365,7 @@ var Controller = new Class({
 	},
 	showOverlay: function() {
 		this.overlayCanvas.setStyle('display', '');
-		if (State.textInput !== this.state) {
-			this.overlayCanvas.focus();
-		}
+		this.overlayCanvas.focus();
 	},
 	hideOverlay: function() {
 		this.overlayCanvas.setStyle('display', 'none');
@@ -1401,7 +1399,7 @@ var Controller = new Class({
 			'paused',
 			"press 'p' to continue"
 		];
-		this.showOverlayText(4, text);
+		this.showOverlayText(8, text);
 	},
 	showLine: function(ctx, sz, line, x, y, opt) {
 		var font = this.fm.getFont(sz);
@@ -1569,50 +1567,45 @@ var Controller = new Class({
 			default:
 		}
 	},
-	keydownOverlay: function(ev) {
-		switch (this.state) {
-			case State.textInput:
-				break;
-			default:
+    keydownOverlay: function(ev) {
 
-				switch (ev.code) {
-					case 38: // up
-						if (this.state === State.gameOver) {
-							this.changeSelection(-1);
-						}
-						break;
-					case 40: // down
-						if (this.state === State.gameOver) {
-							this.changeSelection(1);
-						}
-						break;
-					case 13:
-						if (this.selecting) {
-							this.useSelection();
-						}
-						break;
-					case 83: // 's'
-						this.toggleSound();
-						break;
-					case 80:
-						switch (this.state) {
-							case State.paused:
-								this.state = State.running;
-								this.unpause();
-								break;
-							case State.gameOver:
-								this.start();
-								break;
-							case State.running:
-								this.state = State.paused;
-								break;
-						}
-						break;
-					default:
-						;
-				}
-		}
-	},
+      switch (ev.code) {
+        case 38: // up
+          if (this.state === State.gameOver) {
+            this.changeSelection(-1);
+          }
+          break;
+        case 40: // down
+          if (this.state === State.gameOver) {
+            this.changeSelection(1);
+          }
+          break;
+        case 13:
+          if (this.selecting) {
+            this.useSelection();
+          }
+          break;
+        case 83: // 's'
+          this.toggleSound();
+          break;
+        case 80:
+          switch (this.state) {
+            case State.paused:
+              this.state = State.running;
+              this.unpause();
+              break;
+            case State.gameOver:
+              this.start();
+              break;
+            case State.running:
+              this.state = State.paused;
+              break;
+          }
+          break;
+        default:
+          ;
+      }
+    },
 	keyupOverlay: function(ev) {
 		switch (ev.code) {
 			default:
