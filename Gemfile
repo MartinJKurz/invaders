@@ -11,13 +11,15 @@ gem 'bcrypt-ruby', '3.0.0', :require => 'bcrypt'
 
 gem 'kaminari', '0.12.4'
 
+# MAK - problems with JS runtime
+# commenting out some with #js
 
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
-  gem 'sass-rails', "~> 3.1.0.rc"
-  gem 'coffee-rails', "~> 3.1.0.rc"
-  gem 'uglifier', '1.0.3'
+  #js gem 'sass-rails', "~> 3.1.0.rc"
+  #js gem 'coffee-rails', "~> 3.1.0.rc"
+  #js gem 'uglifier', '1.0.3'
 end
 
 gem 'jquery-rails', '1.0.14'
@@ -41,4 +43,5 @@ group :development do
   gem 'rspec-rails', '2.6.1'
   gem 'annotate', '2.4.0'
 end
+
 
