@@ -44,4 +44,8 @@ group :development do
   gem 'annotate', '2.4.0'
 end
 
+group :production do
+  # gems specifically for Heroku go here
+  gem "pg"
+end
 
