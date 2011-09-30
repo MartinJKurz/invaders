@@ -1,0 +1,33 @@
+<!--
+TODO:
+  - error
+-->
+<%= simple_form_for user do |f| %>
+  <% if user.errors.any? %>
+    <div class="error_messages">
+      <h2>Form is invalid</h2>
+      <ul>
+        <% for message in user.errors.full_messages %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% else %>
+  <% end %>
+  <!-- %= f.error_messages %> -->
+  <%= f.error_notification %> <!-- ??? no errors displayed -->
+  <% if create %>
+    <%= f.input :name, :input_html => {:size => 20} %>
+  <% end %>
+  <% if create %>
+    <%= f.input :password, :input_html => {:size => 20}%>
+  <% else %>
+    <%= f.input :password, :input_html => {:size => 20}, :label => 'New Password' %>
+  <% end %>
+  <!-- %= f.input :password_confirmation, :required => true, :input_html => {:size => 20}, :label => 'Confirmation' % -->
+  <%= f.input :password_confirmation, :input_html => {:size => 20}, :label => 'Confirmation' %>
+  <%= f.input :sound, :components => [:label, :input] %>
+  <%= f.input :volume, :input_html => {:min => 0, :max => 1, :step => 0.05} %><br/>
+  <%= f.button :submit %>
+<% end %>
+

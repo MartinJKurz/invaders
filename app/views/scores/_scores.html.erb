@@ -1,0 +1,37 @@
+
+<div id="users_list">
+<%= paginate @scores %>
+  <table class="font50">
+    <tr>
+      <th class='sortable'><%= sortable 'name', :sort_column %></th>
+
+      <th class='sortable'><%= sortable 'score', :sort_column %></th>
+      <th class='sortable'><%= sortable 'scores.created_at', :sort_column, 'Created At' %></th>
+      <% if user_is_admin %>
+        <th class='sortable'><%= sortable 'scores.id', :sort_column, 'Id' %></th>
+        <th class='sortable'><%= sortable 'game_id', :sort_column, 'Game Id' %></th>
+      <% end %>
+    </tr>
+
+    <% @scores.each do |score| %>
+      <tr>
+        <td><%= score.name %></td>
+        <td><%= score.score %></td>
+        <td><%= localTimeStringLong(score.created_at) %></td>
+        <% if user_is_admin %>
+          <td><%= score.id %></td>
+          <td><%= score.game_id %></td>
+          <td><%= link_to 'Destroy', 'destroy?id=' + score.id.to_s, :confirm => 'Really?' %></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </table>
+  <% if user_is_admin %>
+    <ul>
+      <li><%= link_to 'Destroy low', 'destroy_low_scores' %></li>
+      <li><%= link_to 'Destroy old', 'destroy_old_scores' %></li>
+    </ul>
+  <% end %>
+</div>
+
+

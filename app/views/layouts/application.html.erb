@@ -2,8 +2,13 @@
 <html>
   <head>
     <title><%= title %></title>
+    <%= javascript_include_tag "application" %>
+
     <%= csrf_meta_tag %>
     <%= render 'layouts/stylesheets' %>
+    <meta name="robots" content="all">
+    <meta name="description" content="Alien Invasion. A HTML5 game, with similarities to Space Invaders.">
+    <meta name="keywords" content="Space Invasion. Alien Invasion. Space Invaders. Space Invasion. Defender">
   </head>
   <body>
 
@@ -19,7 +24,7 @@
       <%= yield %>
       </section>
       <%= render 'layouts/footer' %>
-      <%= debug(params) if Rails.env.development? %>
+      <!-- = debug(params) if Rails.env.development? % -->
     </div>
   </body>
 </html>

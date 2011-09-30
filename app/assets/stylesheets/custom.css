@@ -11,6 +11,12 @@
   position: relative;
 }
 
+.useful {
+  /*display: none;*/
+  color: rgba(0,0,0,0);
+  font-size: 0px;
+}
+
 body {
   background-image: url(background.png);
   height:     100%;
@@ -21,16 +27,38 @@ html {
 }
 
 .flash {
-  color: red;
-  background-color: rgba(80,80,255,0.7);
-  font-size: 200%;
+  color: blue;
+  background-color: rgba(80,255,80,0.7);
+  background-color: rgba(255,80,80,0.7);
+  font-size: 180%;
   position: absolute;
-  right: 0px;
+  width: 32%;
   top: 0px;
 }
+#flash_warning {
+  background-color: rgba(255,255,0,0.7);
+  color: red;
+  width: 100%;
+  top: 200px;
+}
+#flash_error {
+  background-color: rgba(255,255,0,0.7);
+  border: 1px solid red;
+  color: red;
+  width: 100%;
+  top: 200px;
+}
 
-form {
-  line-height: 0.5;
+.error_messages {
+  border: 1px solid red;
+  background-color: rgba(255,255,0,0.7);
+}
+.error_messages, .error_messages h2 {
+  color: red;
+  margin-bottom: 0;
+}
+.error_messages ul {
+  margin: 0;
 }
 
 form p {
@@ -63,23 +91,23 @@ section h1 {
 
 section h2 {
   font-size: 140%;
+  margin-bottom: 0;
 }
 
 /* Links */
 
-a {
-  color: #09c;
+a, a:visited {
+  color: #060;
+  font-weight: bold;
   text-decoration: none;
 }
 
-a:hover {
-  color: #069;
-  text-decoration: underline;
+a:focus, a:hover {
+  border: solid red 1px;
+  box-shadow:8px 8px 8px #666;
+  background-color: white;
 }
 
-a:visited {
-  color: #069;
-}
 
 .no_margin {
   margin: 0px;
@@ -95,7 +123,8 @@ nav {
   background-color: white;
   padding: 0 0.7em;
   white-space: nowrap;
-  font-size:20px;
+  font-size:130%;
+  border: 1px solid black;
 }
 
 nav ul {
@@ -109,30 +138,19 @@ nav ul li {
   padding: 0.2em 0;
   border: solid rgba(0,0,0,0) 1px;
 }
-nav ul li:hover {
-  border: solid red 1px;
-}
 
 nav ul li a {
   padding: 0 5px;
   font-weight: bold;
 }
 
-nav ul li a:visited {
-  color: #09c;
-}
-
-nav ul li a:hover {
-  text-decoration: none;
-}
-
-/* Sign up button */
-
 a.signup_button {
   text-align: center;
-  color: #fff;
+  color: orange;
   background: #66ff66;
   font-weight: bold;
+  padding: 4px;
+  border: 1px solid red;
 }
 
 .round {
@@ -157,5 +175,84 @@ footer {
 
 .news_td {
     vertical-align: top;
+}
+
+.simple_form label {
+  float: left;
+  width: 180px;
+  text-align: right;
+  margin: 2px 10px;
+}
+
+.simple_form div.input {
+  margin-bottom: 10px;
+}
+.simple_form label.collection_radio {
+  margin-right: 10px;
+  margin-left: 2px;
+}
+
+.simple_form .error {
+  clear: left;
+  margin-left: 120px;
+  font-size: 12px;
+  color: #D00;
+  display: block;
+}
+
+.simple_form .hint {
+  clear: left;
+  margin-left: 120px;
+  font-size: 12px;
+  color: #555;
+  display: block;
+  font-style: italic;
+}
+
+.simple_form div label abbr {
+  border: none;
+  font-size: 100%;
+  vertical-align: -15%;
+  color: red;
+}
+
+.font50 {
+  font-size: 50%;
+}
+
+
+.font75 {
+  font-size: 75%;
+}
+
+
+th.sortable > .current {
+  padding-right: 20px;
+  background-repeat: no-repeat;
+  background-position: right center;
+}
+
+th.sortable > .asc {
+  background-image: url(up_arrow.png);
+}
+
+th.sortable > .desc {
+  background-image: url(down_arrow.png);
+}
+
+nav.pagination {
+  float: none;
+  background-color: rgba(0,0,0,0);
+  border: none;
+  font-size: 70%;
+  font-weight: bold;
+  padding: 0;
+}
+
+.hide_following + * {
+  display: none;
+}
+.show_following + * {
+  visibility: visible;
 }
 

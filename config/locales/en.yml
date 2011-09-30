@@ -3,3 +3,21 @@
 
 en:
   hello: "Hello world"
+
+  time:
+    formats:
+      default: "%Y-%m-%d"
+      short: "%b %d"
+      long: "%B %d, %Y"
+
+  datetime:
+    formats:
+      full: "%b %d. %Y %H:%M:%S"
+      full_minute: "%b %d. %Y %H:%M"
+      day: "%b %d. %Y"
+
+  datetime_uu:
+    formats:
+      full: "%Y/%m/%d %H:%M:%S"
+      full_minute: "%Y/%m/%d %H:%M"
+      day: "%Y/%m/%d"

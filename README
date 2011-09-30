@@ -1,6 +1,6 @@
-Space Invaders Clone.
+Games Website
 - a Ruby on Rails based Website,
-- the game is implemented in Javascript,
+- the games are implemented in Javascript,
 - users can play without loggin in, highscores will then be saved on client side, using local storage
 - with login, highscores are saved on server
 - simple login: unique nickname and password, no other information will be used

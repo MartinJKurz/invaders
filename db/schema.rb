@@ -11,7 +11,15 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20110916161230) do
+ActiveRecord::Schema.define(:version => 20110930101450) do
+
+  create_table "scores", :force => true do |t|
+    t.integer  "game_id"
+    t.integer  "user_id"
+    t.integer  "score"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "users", :force => true do |t|
     t.string   "name"
@@ -19,6 +27,9 @@ ActiveRecord::Schema.define(:version => 20110916161230) do
     t.datetime "updated_at"
     t.string   "password_hash"
     t.string   "password_salt"
+    t.boolean  "sound"
+    t.float    "volume",        :default => 1.0
+    t.integer  "logins",        :default => 0
   end
 
   add_index "users", ["name"], :name => "index_users_on_name", :unique => true

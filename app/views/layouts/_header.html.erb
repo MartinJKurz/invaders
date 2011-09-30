@@ -1,25 +1,24 @@
-<%  def current_user_loc %>
-  <%    @current_user_loc ||= User.find(session[:user_id]) if session[:user_id] %>
-<%  end %>
-
 <header>
-<h1>Play Space Invaders</h1>
 <nav class="round">
 <ul>
   <li><%= link_to "Home", '/' %></li>
   <li><%= link_to "Help", '/pages/help' %></li>
-  <li><%= link_to "Play", '/mt_invaders_alone.html' %></li>
-  <li><%= link_to "Comments", '/pages/comments' %></li>
+  <li><%= link_to "Play", '/pages/invaders' %></li>
+  <li><%= link_to "Users", '/users' %></li>
+  <li><%= link_to "Scores", '/scores/index' %></li>
+  <!-- <li>< %= link_to "Comments", '/pages/comments' %></li> -->
   <% cu = current_user %> 
   <% if cu %>
     <li><%= link_to "Log out", '/log_out', :class => "signup_button round" %></li>
   <% else %>
-    <li><%= link_to "Sign in", '/log_in'%></li>
-    <li><%= link_to "Sign up now!", signup_path, :class => "signup_button round" %></li>
+    <% if login_type == "C" %>
+      <li><%= link_to "Log in", '/log_in'%></li>
+      <li><%= link_to "Sign up now!", signup_path, :class => "signup_button round" %></li>
+    <% end %>
   <% end %>
 </ul>
 <% if cu %>
-  Logged in as <%= cu.name %>
+  Logged in as <%= link_to cu.name, "/users/" + cu.id.to_s, :class => "signup_button round" %>
 <% end %>
 
 

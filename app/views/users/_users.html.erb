@@ -1,0 +1,30 @@
+<div id="users_list">
+  <%= paginate @users %>
+  <table class="font50">
+    <tr>
+      <th class='sortable' width='15%'><%= sortable 'name', :sort_column%></th>
+      <th class='sortable' width='25%'><%= sortable 'created_at', :sort_column, 'Since' %></th>
+      <th class='sortable' width='25%'><%= sortable 'updated_at', :sort_column, 'Last Active' %></th>
+      <% if user_is_admin %>
+        <th class='sortable' width='25%'><%= sortable 'logins', :sort_column %></th>
+      <% end %>
+    </tr>
+
+    <% @users.each do |user| %>
+      <tr>
+        <td><%= link_to user.name, user %></td>
+        <!-- td>HIGHSCORE</th -->
+        <td><%= localTimeString(user.created_at) %></th>
+        <td><%= localTimeString(user.updated_at) %></th>
+        <% if user_is_admin %>
+          <td><%= user.logins %></th>
+          <td>
+            <%= link_to 'Destroy', '/logout_and_delete_user?did=' + user.id.to_s, :confirm => 'Are you sure?' %>
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </table>
+</div>
+
+

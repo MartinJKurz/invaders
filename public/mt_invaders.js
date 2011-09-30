@@ -81,6 +81,15 @@
 var constantFire = false;
 var userNameLength = 12;
 
+function getMetaContents(mn) {
+  var m = document.getElementsByTagName('meta');
+  for(var i in m){
+    if(m[i].name == mn){
+      return m[i].content;
+    }
+  }
+}
+
 function rr(f) {
 	return f*(Math.random()-0.5);
 }
@@ -104,10 +113,11 @@ var Colors = {
 	bg: 		'black',
 	commander:	'orange',
 	killer:		'#ccff00',
-	trooper:	'red',
+	trooper:	'#5588ff',
 	shot:		'white',
 	myself:		'#00ff00',
-	text:		'#6666ff'
+	text:		'#6666ff',
+	block:		'#999'
 };
 
 var State = {
@@ -246,6 +256,101 @@ function createMysteryGeo() {
 	return mysteryGeo;
 }
 
+var coyoteGeo = null;
+function createCoyoteGeo() {
+	if (coyoteGeo) {
+		return coyoteGeo;
+	}
+	var outlineOne = [
+		{x: 0,y: 4},
+		{x: 0,y: 8},
+		{x: 2,y: 8},
+		{x: 2,y: 6},
+		{x: 4,y: 6},
+		{x: 4,y: 8},
+		{x: 6,y: 8},
+		{x: 6,y: 6},
+		{x: 8,y: 6},
+		{x: 8,y: 8},
+		{x:10,y: 8},
+		{x:10,y: 6},
+		{x:12,y: 6},
+		{x:12,y: 8},
+		{x:14,y: 8},
+		{x:14,y: 6},
+		{x:16,y: 6},
+		{x:16,y:12},
+		{x:14,y:12},
+		{x:14,y:10},
+		{x:12,y:10},
+		{x:12,y:12},
+		{x:10,y:12},
+		{x:10,y:10},
+		{x: 8,y:10},
+		{x: 8,y:12},
+		{x: 6,y:12},
+		{x: 6,y:10},
+		{x: 4,y:10},
+		{x: 4,y:12},
+		{x: 2,y:12},
+		{x: 2,y:10},
+		{x: 0,y:10},
+		{x: 0,y:14},
+		{x:22,y:14},
+		{x:22,y:12},
+		{x:26,y:12},
+		{x:26,y:14},
+		{x:32,y:14},
+		{x:32,y: 2},
+		{x:26,y: 2},
+		{x:26,y: 0},
+		{x:16,y: 0},
+		{x:16,y: 4},
+	];
+	var outlineTwo = [
+		{x: 0,y: 6},
+		{x: 0,y:12},
+		{x:20,y:12},
+		{x:20,y:14},
+		{x:32,y:14},
+		{x:32,y: 2},
+		{x:26,y: 2},
+		{x:26,y: 0},
+		{x:16,y: 0},
+		{x:16,y: 6},
+	];
+	var holesOne = [
+		{x:18,y:2},
+		{x:18,y:4},
+		{x:20,y:2},
+		{x:20,y:4},
+		{x: 2,y:8},
+		{x: 6,y:8},
+		{x: 8,y:8},
+		{x:10,y:8},
+	];
+	var holesTwo = [
+		{x:18,y:2},
+		{x:18,y:4},
+		{x:20,y:2},
+		{x:20,y:4},
+		{x: 2,y:8},
+		{x: 6,y:8},
+		{x:10,y:8},
+		{x:14,y:8},
+	];
+	var one = new Geometry(outlineOne, holesOne);
+	var two = new Geometry(outlineTwo, holesTwo);
+    var outlineThree = mirror(outlineOne);
+    var outlineFour = mirror(outlineTwo);
+    var holesThree = mirror(holesOne, 32)
+    var holesFour = mirror(holesTwo, 32)
+	var three = new Geometry(outlineThree, holesThree);
+	var four = new Geometry(outlineFour, holesFour);
+	coyoteGeo = [one, two, three, four];
+	return coyoteGeo;
+}
+
 var commanderGeo = null;
 function createCommanderGeo() {
 	if (commanderGeo) {
@@ -348,7 +453,7 @@ function createCommanderGeo() {
 	];
 	var one = new Geometry(outlineOne, holesOne);
 	var two = new Geometry(outlineTwo, holesTwo);
-	commanderGeo = [one, two];
+	commanderGeo = [one, two, one, two];
 	return commanderGeo;
 }
 
@@ -478,6 +583,56 @@ function createMyGeo() {
 	}
 	var outlineOne = [
 		{x: 0, y: 8},
+		{x: 0, y:14},
+		{x: 2, y:14},
+		{x: 2, y:16},
+		{x:26, y:16},
+		{x:26, y:14},
+		{x:28, y:14},
+		{x:28, y: 8},
+		{x:24, y: 8},
+		{x:24, y: 6},
+		{x:20, y: 6},
+		{x:20, y: 4},
+		{x:18, y: 4},
+		{x:18, y: 6},
+		{x:16, y: 6},
+		{x:16, y: 2},
+		{x:15, y: 2},
+		{x:15, y: 0},
+		{x:13, y: 0},
+		{x:13, y: 2},
+		{x:12, y: 2},
+		{x:12, y: 6},
+		{x:10, y: 6},
+		{x:10, y: 4},
+		{x: 8, y: 4},
+		{x: 8, y: 6},
+		{x: 4, y: 6},
+		{x: 4, y: 8}
+	];
+	var holesOne = [
+      {x: 4, y:10},
+      {x: 4, y:12},
+      {x: 6, y:10},
+      {x: 6, y:12},
+      {x:20, y:10},
+      {x:20, y:12},
+      {x:22, y:10},
+      {x:22, y:12},
+	];
+	var one = new Geometry(outlineOne, holesOne);
+	var two = new Geometry(outlineOne, holesOne);
+	myGeo = [one, two];
+	return myGeo;
+}
+/*
+function createMyGeo() {
+	if (myGeo) {
+		return myGeo;
+	}
+	var outlineOne = [
+		{x: 0, y: 8},
 		{x: 0, y:16},
 		{x:28, y:16},
 		{x:28, y: 8},
@@ -501,7 +656,267 @@ function createMyGeo() {
 	myGeo = [one, two];
 	return myGeo;
 }
+*/
 
+
+function mirror(ol, width) {
+  var i, xm = 0, r = [];
+  if (width) {
+    xm = width;
+  } else {
+    for (i=0; i<ol.length; i++) {
+      if (ol[i].x > xm) {
+        xm = ol[i].x;
+      }
+    }
+  }
+  for (i=0; i<ol.length; i++) {
+    r.push({x:xm-ol[i].x, y:ol[i].y});
+  }
+  return r;
+}
+
+var duckGeo = null;
+function createDuckGeo() {
+	if (duckGeo) {
+		return duckGeo;
+	}
+	var outlineOne = [
+		{x: 0,y: 4},
+		{x: 0,y: 6},
+		{x: 6,y: 6},
+		{x: 6,y:12},
+		{x: 8,y:12},
+		{x: 8,y:14},
+		{ x:10,y:14},
+		{ x:10,y:16},
+		{ x:14,y:16},
+		{ x:14,y:14},
+		{x:18,y:14},
+		{x:18,y:12},
+		{x:20,y:12},
+		{x:20,y: 4},
+		{x:18,y: 4},
+		{x:18,y: 6},
+		{x:16,y: 6},
+		{x:16,y: 8},
+		{x:10,y: 8},
+		{x:10,y: 0},
+		{x: 4,y: 0},
+		{x: 4,y: 4}
+	];
+	var outlineTwo = [
+		{x: 0,y: 4},
+		{x: 0,y: 6},
+		{x: 6,y: 6},
+		{x: 6,y:12},
+		{x: 8,y:12},
+		{x: 8,y:14},
+		{ x:14,y:14},
+		{ x:14,y:16},
+		{ x:18,y:16},
+		{ x:18,y:14},
+		{x:18,y:14},
+		{x:18,y:12},
+		{x:20,y:12},
+		{x:20,y: 4},
+		{x:18,y: 4},
+		{x:18,y: 6},
+		{x:16,y: 6},
+		{x:16,y: 8},
+		{x:10,y: 8},
+		{x:10,y: 0},
+		{x: 4,y: 0},
+		{x: 4,y: 4}
+	];
+	var holesOne = [
+		{x: 6,y:2},
+	];
+	var holesTwo = [
+		{x:12,y:2},
+	];
+	var one = new Geometry(outlineOne, holesOne);
+	var two = new Geometry(outlineTwo, holesOne);
+    var outlineThree = mirror(outlineOne);
+    var outlineFour = mirror(outlineTwo);
+	var three = new Geometry(outlineThree, holesTwo);
+	var four = new Geometry(outlineFour, holesTwo);
+	duckGeo = [one, two, three, four];
+	return duckGeo;
+}
+
+
+var monkeyGeo = null;
+function createMonkeyGeo() {
+	if (monkeyGeo) {
+		return monkeyGeo;
+	}
+	var outlineOne = [
+		{x: 0,y: 4},
+		{x: 0,y:10},
+		{x: 2,y:10},
+		{x: 2,y:14},
+		{x: 4,y:14},
+		{x: 4,y:16},
+		{x:14,y:16},
+		{x:14,y:14},
+		{x:16,y:14},
+		{x:16,y:10},
+		{x:18,y:10},
+		{x:18,y: 4},
+		{x:16,y: 4},
+		{x:16,y: 2},
+		{x:14,y: 2},
+		{x:14,y: 0},
+		{x: 4,y: 0},
+		{x: 4,y: 2},
+		{x: 2,y: 2},
+		{x: 2,y: 4},
+	];
+	var holesOne = [
+		{x: 2,y: 4},
+		{x: 2,y: 4},
+		{x: 2,y: 6},
+		{x: 2,y: 6},
+		{x: 4,y: 4},
+		{x: 4,y: 4},
+		{x: 4,y: 6},
+		{x: 4,y: 6},
+		{x:12,y: 4},
+		{x:12,y: 4},
+		{x:12,y: 6},
+		{x:12,y: 6},
+		{x:14,y: 4},
+		{x:14,y: 4},
+		{x:14,y: 6},
+		{x:14,y: 6},
+
+		{x:8,y:2},
+		{x:8,y:4},
+
+		{x: 6,y:10},
+		{x: 6,y:12},
+		{x: 8,y:10},
+		{x: 8,y:12},
+		{x:10,y:10},
+		{x:10,y:12},
+	];
+	var holesTwo = [
+		{x: 2,y: 4},
+		{x: 2,y: 4},
+		{x: 2,y: 6},
+		{x: 2,y: 6},
+		{x: 4,y: 4},
+		{x: 4,y: 4},
+		{x: 4,y: 6},
+		{x: 4,y: 6},
+		{x:12,y: 4},
+		{x:12,y: 4},
+		{x:12,y: 6},
+		{x:12,y: 6},
+		{x:14,y: 4},
+		{x:14,y: 4},
+		{x:14,y: 6},
+		{x:14,y: 6},
+
+		{x:8,y:2},
+		{x:8,y:4},
+
+		{x: 8,y:10},
+	];
+	var one = new Geometry(outlineOne, holesOne);
+    var two = new Geometry(outlineOne, holesTwo);
+	monkeyGeo = [one, two, one, two];
+	return monkeyGeo;
+}
+
+var monkeyGeo2 = null;
+function createMonkeyGeo2() {
+	if (monkeyGeo2) {
+		return monkeyGeo2;
+	}
+	var outlineOne = [
+		{x: 0,y: 0},
+		{x: 0,y: 2},
+		{x: 2,y: 2},
+		{x: 2,y: 4},
+		{x: 0,y: 4},
+		{x: 0,y: 8},
+		{x: 2,y: 8},
+		{x: 2,y:14},
+		{x: 4,y:14},
+		{x: 4,y:16},
+		{x:14,y:16},
+		{x:14,y:14},
+		{x:16,y:14},
+		{x:16,y: 8},
+		{x:18,y: 8},
+		{x:18,y: 4},
+		{x:16,y: 4},
+		{x:16,y: 2},
+		{x:18,y: 2},
+		{x:18,y: 0},
+		{x:12,y: 0},
+		{x:12,y: 2},
+		{x: 6,y: 2},
+		{x: 6,y: 0},
+	];
+	var holesOne = [
+		{x: 2,y: 4},
+		{x: 2,y: 4},
+		{x: 2,y: 6},
+		{x: 2,y: 6},
+		{x: 4,y: 4},
+		{x: 4,y: 4},
+		{x: 4,y: 6},
+		{x: 4,y: 6},
+		{x:12,y: 4},
+		{x:12,y: 4},
+		{x:12,y: 6},
+		{x:12,y: 6},
+		{x:14,y: 4},
+		{x:14,y: 4},
+		{x:14,y: 6},
+		{x:14,y: 6},
+
+		{x:8,y:2},
+		{x:8,y:4},
+
+		{x: 6,y:10},
+		{x: 6,y:12},
+		{x: 8,y:10},
+		{x: 8,y:12},
+		{x:10,y:10},
+		{x:10,y:12},
+	];
+	var holesTwo = [
+		{x: 2,y: 4},
+		{x: 2,y: 4},
+		{x: 2,y: 6},
+		{x: 2,y: 6},
+		{x: 4,y: 4},
+		{x: 4,y: 4},
+		{x: 4,y: 6},
+		{x: 4,y: 6},
+		{x:12,y: 4},
+		{x:12,y: 4},
+		{x:12,y: 6},
+		{x:12,y: 6},
+		{x:14,y: 4},
+		{x:14,y: 4},
+		{x:14,y: 6},
+		{x:14,y: 6},
+
+		{x:8,y:2},
+		{x:8,y:4},
+
+		{x: 8,y:10},
+	];
+	var one = new Geometry(outlineOne, holesOne);
+    var two = new Geometry(outlineOne, holesTwo);
+	monkeyGeo2 = [one, two, one, two];
+	return monkeyGeo2;
+}
 var Ship = new Class({
 	initialize: function(x, y, geoi, value) {
 		this.x = x;
@@ -556,6 +971,42 @@ var Trooper = new Class({
 	}
 });
 
+var Monkey = new Class({
+	Extends: Ship,
+	initialize: function(x, y) {
+		geo = createMonkeyGeo();
+		this.parent(x, y, geo, 50);
+		this.color = Colors.commander;
+	}
+});
+
+var Monkey2 = new Class({
+	Extends: Ship,
+	initialize: function(x, y) {
+		geo = createMonkeyGeo2();
+		this.parent(x, y, geo, 50);
+		this.color = Colors.commander;
+	}
+});
+
+var Coyote = new Class({
+	Extends: Ship,
+	initialize: function(x, y) {
+		geo = createCoyoteGeo();
+		this.parent(x, y, geo, 50);
+		this.color = Colors.commander;
+	}
+});
+
+var Duck = new Class({
+	Extends: Ship,
+	initialize: function(x, y) {
+		geo = createDuckGeo();
+		this.parent(x, y, geo, 20);
+		this.color = Colors.trooper;
+	}
+});
+
 var MyShip = new Class({
 	Extends: Ship,
 	initialize: function(x, y) {
@@ -570,11 +1021,13 @@ var Fleet = new Class({
 		var i, j;
 		this.ships = [];
 		for (i=0; i<12; i++) {
-			this.ships.push(new Commander(i*26, 24));
+			this.ships.push(new Monkey2(i*26, 24));
+			//this.ships.push(new Commander(i*26, 24));
 		}
 		for (j=0; j<6; j++) {
 			for (i=0; i<12; i++) {
-				this.ships.push(new Trooper(i*26, 44 + j*20));
+				//this.ships.push(new Trooper(i*26, 44 + j*20));
+				this.ships.push(new Duck(i*26, 44 + j*20));
 			}
 		}
 		this.x = 0;
@@ -589,12 +1042,18 @@ var Fleet = new Class({
 		this.numShips = 12*7;
 		this.controller = controller;
 	},
-	march: function() {
-		this.x += this.hstep;
+    march_sound_org: function() {
 		this.controller.sounds.play('fastinvader1');
 		this.controller.sounds.play('fastinvader2');
 		this.controller.sounds.play('fastinvader3');
 		this.controller.sounds.play('fastinvader4');
+    },
+    march_sound: function() {
+		this.controller.sounds.play('march');
+    },
+	march: function() {
+		this.x += this.hstep;
+        this.march_sound();
 		if (K*(this.x + this.right) > this.controller.width || K*(this.x + this.left) < 0) {
 			this.hstep = -this.hstep;
 			this.x += this.hstep;
@@ -607,10 +1066,11 @@ var Fleet = new Class({
 	},
 	draw: function(ctx, idx) {
 		var i, ship;
+        var plus = this.hstep > 0 ? 2 : 0;
 		for (i=0; i<this.ships.length; i++) {
 			ship = this.ships[i];
 			if (ship.active) {
-				ship.draw(ctx, idx, this.x, this.y);
+				ship.draw(ctx, idx+plus, this.x, this.y);
 				if (Math.random() < 0.0025) {
 					this.controller.dropBomb(this.x + ship.x + ship.cx, this.y + ship.y + ship.height, 0, 2);
 				}
@@ -673,7 +1133,7 @@ var Table = new Class({
 			this.content.push([]);				// one column
 			this.colOpts.push(null);
 			for (r=0; r < rows; r++) {
-				this.content[c].push('X');
+				this.content[c].push(' ');
 			}
 		}
 		for (r=0; r<rows; r++) {
@@ -710,6 +1170,10 @@ var Controller = new Class({
 	initialize: function(parentDiv, full, width, height) {
 
 		this.sounds = new Sounds();
+        this.getUserFromServer();
+
+        // testing
+        this.getSessionInfo();
 
 		this.step = 300;
 
@@ -753,20 +1217,18 @@ var Controller = new Class({
         this.userName = null;
 	},
 
-    postScore: function() {
+    postScore_uu_not_working: function() {
 
       var url = 'pages/post_score';
       var ctrl = this;
+      var token = getMetaContents('csrf-token');
 
       var myAjax = new Request({
         url:url,
         method: 'post',
         data: 'message from client',
         headers: {
-          'X-Transaction': 'POST Example',
-          
-          'X-CSRF-Token': "OVY7GaorEWikDXJr68ie2E14886V/fFGJKHYuKwT3oM="
-          //'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+	      'X-CSRF-Token': token
         },
 
         onComplete: function(json) {
@@ -775,35 +1237,39 @@ var Controller = new Class({
         }
       });
 
-      //myAjax.send();
-      //myAjax.send('sending sdfjhlsfhklhas');
       myAjax.send('XXXX', 'YYYY');
-      //myAjax.send({XX: 'YYYY'});
     },
 
     postScoreJS : function() {
       var req = new XMLHttpRequest();
+      var ctrl = this;
 
       req.open('post', '/pages/post_score');
       function handleStateChange() {
-        // console.log("readyState = " + req.readyState + (req.readyState >= 3 ? " HTTP-Status = " + req.status : ''));
+        var i, entry;
         if (4 === req.readyState && 200 === req.status) {
           var json = req.responseText;
           var obj = JSON.decode(json);
           console.log('RES: ' + json);
+
+          if (obj.success) {
+            ctrl.highscores = [];
+            for (i=0; i<obj.highscores.length; i++) {
+              entry = obj.highscores[i];
+              ctrl.highscores.push({name: entry.name, score: entry.score});
+            }
+            ctrl.user_highscores = obj.user_highscores;
+          }
         }
       }
 
       req.onreadystatechange = handleStateChange;
-      //req.setRequestHeader('User-Agent','XMLHTTP/1.0');
       req.setRequestHeader('Content-type', 'application/json');
-      //req.setRequestHeader('Content-type', 'text/plain');
-      //req.setRequestHeader('X-CSRF-Token', 'OVY7GaorEWikDXJr68ie2E14886V/fFGJKHYuKwT3oM=');
 
+      var token = getMetaContents('csrf-token');
+      req.setRequestHeader("X-CSRF-Token", token);
 
-      //req.send(null);
-      //req.send("789");
-      var t = {score: this.points};
+      var t = {game_id: 1, score: this.points};
       var d = JSON.encode(t);
       console.log('sending: ' + d);
       req.send(d);
@@ -812,10 +1278,8 @@ var Controller = new Class({
     getUserFromServer: function() {
 
       console.log('get user');
-      // test
-      this.postScoreJS();
 
-      var url = 'pages/get_current_user.json';
+      var url = '/pages/get_current_user.json';
       var ctrl = this;
 
       var myAjax = new Request({
@@ -827,14 +1291,36 @@ var Controller = new Class({
           var logged_in = null !== obj;
           if (logged_in) {
             ctrl.userName = obj.name;
-            ctrl.addHighscore();
-            console.log('get user -> ' + ctrl.userName);
+            ctrl.sounds.on = obj.sound;
+            ctrl.sounds.setVolume(obj.volume);
+            //ctrl.addHighscore();
           } else {
             ctrl.userName = null;
-            console.log('get user -> null');
           }
-          ctrl.showNewGame(logged_in);
-          ctrl.state = State.gameOver;
+          //ctrl.showNewGame(logged_in);
+          //ctrl.state = State.gameOver;
+        }
+      });
+
+      myAjax.send();
+    },
+
+    // testing
+    getSessionInfo: function() {
+
+      console.log('get session info');
+
+      var url = '/pages/get_session_info.json';
+      var ctrl = this;
+
+      var myAjax = new Request({
+        url:url,
+        method: 'get',
+        onComplete: function(json) {
+          console.log('onComplete -> ' + json);
+          console.log(json);
+          var obj = JSON.decode(json);
+          console.log(obj);
         }
       });
 
@@ -936,7 +1422,8 @@ var Controller = new Class({
 
 		parentDiv.set('class', 'container');
         document.body.setStyle('margin', '0 0 0 0');
-        document.body.setStyle('background-image', 'url(background.png)');
+        document.body.setStyle('background-image', 'url(../assets/background.png)');
+        //document.body.setStyle('background-image', 'url(background.png)');
         //document.body.setStyle('background-image', 'url(assets/images/background.png)');
         //document.body.setStyle('background-image', 'url(images/background.png)');
 
@@ -977,33 +1464,38 @@ var Controller = new Class({
 
         this.fullResize();
 	},
-	loadSounds_ogg: function() {
-		if (!this.sounds.supported) {
-			return;
-		}
-		this.sounds.createSound('explosion', 'invader_sounds/explosion.ogg', 0.5, 10);
-		this.sounds.createSound('fastinvader1', 'invader_sounds/fastinvader1.ogg', 1.0, 10);
-		this.sounds.createSound('fastinvader2', 'invader_sounds/fastinvader2.ogg', 1.0, 10);
-		this.sounds.createSound('fastinvader3', 'invader_sounds/fastinvader3.ogg', 1.0, 10);
-		this.sounds.createSound('fastinvader4', 'invader_sounds/fastinvader4.ogg', 1.0, 10);
-		this.sounds.createSound('invaderkilled', 'invader_sounds/invaderkilled.ogg', 0.5, 10);
-		this.sounds.createSound('shoot', 'invader_sounds/shoot.ogg', 0.5, 10);
-		this.sounds.createSound('ufo_highpitch', 'invader_sounds/ufo_highpitch.ogg', 0.5, 10);
-		this.sounds.createSound('ufo_lowpitch', 'invader_sounds/ufo_lowpitch.ogg', 0.5, 10);
-	},
 	loadSounds: function() {
 		if (!this.sounds.supported) {
 			return;
 		}
-		this.sounds.createSound('explosion', 'invader_sounds/explosion.wav', 0.5, 10);
-		this.sounds.createSound('fastinvader1', 'invader_sounds/fastinvader1.wav', 1.0, 10);
-		this.sounds.createSound('fastinvader2', 'invader_sounds/fastinvader2.wav', 1.0, 10);
-		this.sounds.createSound('fastinvader3', 'invader_sounds/fastinvader3.wav', 1.0, 10);
-		this.sounds.createSound('fastinvader4', 'invader_sounds/fastinvader4.wav', 1.0, 10);
-		this.sounds.createSound('invaderkilled', 'invader_sounds/invaderkilled.wav', 0.5, 10);
-		this.sounds.createSound('shoot', 'invader_sounds/shoot.wav', 0.5, 10);
-		this.sounds.createSound('ufo_highpitch', 'invader_sounds/ufo_highpitch.wav', 0.5, 10);
-		this.sounds.createSound('ufo_lowpitch', 'invader_sounds/ufo_lowpitch.wav', 0.5, 10);
+		this.sounds.createSound('explosion', '/invader_sounds/ogg/explosion_2-short.ogg', 1, 10);
+		this.sounds.createSound('invaderkilled', '/invader_sounds/ogg/duck_1.ogg', 1, 10);
+		this.sounds.createSound('shoot', '/invader_sounds/ogg/gunshot.ogg', 1, 10);
+		this.sounds.createSound('ufo_highpitch', '/invader_sounds/ogg/chimpanzee_1_1.ogg', 1, 10);
+		this.sounds.createSound('ufo_lowpitch', '/invader_sounds/ogg/coyote-short.ogg', 1, 10);
+		this.sounds.createSound('march', '/invader_sounds/ogg/clock_single.ogg', 1.0, 10);
+		this.sounds.createSound('laughter', '/invader_sounds/ogg/laughter-2-short.ogg', 1.0, 10);
+		this.sounds.createSound('applause-4.0', '/invader_sounds/ogg/applause-3-4.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-3.0', '/invader_sounds/ogg/applause-3-3.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-2.0', '/invader_sounds/ogg/applause-3-2.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-1.5', '/invader_sounds/ogg/applause-3-1.5s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-1.0', '/invader_sounds/ogg/applause-3-1.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-0.5', '/invader_sounds/ogg/applause-3-0.5s.ogg', 1.0, 10);
+		this.sounds.createSound('doh', '/invader_sounds/ogg/doh.ogg', 1.0, 10);
+	},
+	loadSounds_org: function() {
+		if (!this.sounds.supported) {
+			return;
+		}
+		this.sounds.createSound('explosion', '/invader_sounds/explosion.ogg', 0.5, 10);
+		this.sounds.createSound('fastinvader1', '/invader_sounds/fastinvader1.ogg', 1.0, 10);
+		this.sounds.createSound('fastinvader2', '/invader_sounds/fastinvader2.ogg', 1.0, 10);
+		this.sounds.createSound('fastinvader3', '/invader_sounds/fastinvader3.ogg', 1.0, 10);
+		this.sounds.createSound('fastinvader4', '/invader_sounds/fastinvader4.ogg', 1.0, 10);
+		this.sounds.createSound('invaderkilled', '/invader_sounds/invaderkilled.ogg', 0.5, 10);
+		this.sounds.createSound('shoot', '/invader_sounds/shoot.ogg', 0.5, 10);
+		this.sounds.createSound('ufo_highpitch', '/invader_sounds/ufo_highpitch.ogg', 0.5, 10);
+		this.sounds.createSound('ufo_lowpitch', '/invader_sounds/ufo_lowpitch.ogg', 0.5, 10);
 	},
 	clearHighscores: function() {
 		//this.highscores = [{name:'dummy',score:1230}];
@@ -1096,6 +1588,34 @@ var Controller = new Class({
 		this.sounds.play('explosion');
 		if (0 === this.lives) {
 			this.state = State.gameOver;
+            if (this.points > 10000) {
+    		  this.sounds.play('applause-4.0');
+            } else if (this.points > 5000) {
+    		  this.sounds.play('applause-3.0');
+            } else if (this.points > 3000) {
+    		  this.sounds.play('applause-2.0');
+            } else if (this.points > 2000) {
+    		  this.sounds.play('applause-1.5');
+            } else if (this.points > 1000) {
+    		  this.sounds.play('applause-1.0');
+            } else if (this.points > 750) {
+    		  this.sounds.play('applause-0.5');
+            } else if (this.points > 500) {
+    		  this.sounds.play('laughter');
+            } else if (this.points > 300) {
+    		  this.sounds.play('laughter');
+            } else if (this.points > 200) {
+    		  this.sounds.play('laughter');
+            } else {
+    		  this.sounds.play('laughter');
+            }
+
+
+            if (this.points < 1000) {
+    		  this.sounds.play('laughter');
+            } else {
+    		  this.sounds.play('applause');
+            }
 		} else {
 			this.nextShip();
 		}
@@ -1148,22 +1668,33 @@ var Controller = new Class({
 		}
 	},
 	updateMysteries: function() {
-		var i, k, tbd = [], dx, dy, d;
+		var i, k, tbd = [], dx, dy, d, offset, idx;
 		if (Math.random() < 0.01 && this.mysteries.length < 3) {
-			k = new Mystery(300, 5);
-			this.sounds.play('ufo_highpitch');
+			//k = new Mystery(300, 5);
+			k = new Coyote(300, 5);
+            k.idx = 0;
+    		this.sounds.play('ufo_lowpitch');
 			k.vx = rr(5);
 			this.mysteries.push(k);
 		}
 		for (i=0; i<this.mysteries.length; i++) {
 			k = this.mysteries[i];
+
 			k.color = Colors.bg;
-			k.draw(this.ctx, 0, 0, 0);
+			// k.draw(this.ctx, 0, 0, 0);
+                offset = k.vx > 0 ? 2 : 0;
+                k.idx = (k.idx + 1) % M;
+                idx = k.idx < M2 ? 1 : 0;
+                idx += offset;
+				k.draw(this.ctx, idx, 0, 0);
+
 			k.vx += rr(1);
 			k.x += k.vx;
 			if (K*(k.x + k.width) < 0 || (K*k.x > this.width)) {
 				tbd.push(k);
 			} else {
+                var M = 20;
+                var M2 = M / 2;
 				dx = this.myShip.x + this.myShip.cx - (k.x + k.cx);
 				dy = this.myShip.y + this.myShip.cy - (k.y + k.cy);
 				d = Math.sqrt(dx*dx+dy*dy);
@@ -1173,7 +1704,11 @@ var Controller = new Class({
 					this.dropBomb(k.x + k.cx, k.y + k.height, dx, dy);
 				}
 				k.color = Colors.killer;
-				k.draw(this.ctx, 0, 0, 0);
+                offset = k.vx > 0 ? 2 : 0;
+                k.idx = (k.idx + 1) % M;
+                idx = k.idx < M2 ? 1 : 0;
+                idx += offset;
+				k.draw(this.ctx, idx, 0, 0);
 			}
 		}
 		for (i=0; i<tbd.length; i++) {
@@ -1211,7 +1746,12 @@ var Controller = new Class({
 						hit = this.fleet.checkHit(shot.x, shot.y);
 						if (-1 != hit) {
 							this.points += this.fleet.deleteShip(hit);
-							this.sounds.play('invaderkilled');
+                            if (hit < 12) {
+							  this.sounds.play('ufo_highpitch');
+                            } else {
+                              this.sounds.play('invaderkilled');
+                            }
+							//this.sounds.play('invaderkilled');
 							shot.active = false;
 							shot.draw(this.ctx, Colors.bg);
 							if (0 === this.fleet.numShips) {
@@ -1223,7 +1763,8 @@ var Controller = new Class({
 							if (-1 != hit) {
 								this.points += this.mysteries[hit].value;
 								this.mysteries.erase(this.mysteries[hit]);
-								this.sounds.play('explosion');
+								//this.sounds.play('explosion');
+								this.sounds.play('doh');
 								shot.active = false;
 								shot.draw(this.ctx, Colors.bg);
 							}
@@ -1272,7 +1813,7 @@ var Controller = new Class({
 		this.drawBlocks();
 
 		this.showLine(this.ctx, 5, 'score: ' + this.points, 20, 20, null);
-		this.showLine(this.ctx, 5, 'ships: ' + this.lives + '   ' + 'level: ' + this.level, 250, 20, null);
+		this.showLine(this.ctx, 5, 'lives: ' + this.lives + '   ' + 'wave: ' + this.level, 250, 20, null);
 
 
 		this.idx = (this.idx+1)%2;
@@ -1326,6 +1867,8 @@ var Controller = new Class({
 
 		var ls, n;
 
+        this.postScoreJS();
+
 		n = this.highscores.length;
 
 		ls = n === 0 ? null : this.highscores[this.highscores.length-1];
@@ -1334,7 +1877,7 @@ var Controller = new Class({
 				this.addHighscore();
 				this.showNewGame(this.userName !== null);
 			} else {
-                this.getUserFromServer();
+                //this.getUserFromServer();
 			}
 		} else {
 		  this.showNewGame(this.userName !== null);
@@ -1342,6 +1885,37 @@ var Controller = new Class({
 	},
 
 	showHighscore: function() {
+		var table;
+		var i, la, lu, l;
+
+        la = this.highscores.length;
+        lu = this.user_highscores.length;
+        l = Math.max(la, 1+lu);
+
+		table = new Table(l, 3);
+		table.setColumnOptions(1, {align:'right'});
+		table.setColumnOptions(2, {align:'right'});
+
+		table.setCell(0, 2, this.userName + ':');
+		for (i=0; i<l; i++) {
+            if (i < la) {
+  			  table.setCell(i, 0, this.highscores[i].name);
+			  table.setCell(i, 1, this.highscores[i].score);
+            }
+            if (i < lu) {
+			  table.setCell(i+1, 2, this.user_highscores[i].score);
+            }
+		}
+		this.clearOverlay();
+		this.showTable(this.overlayCtx, 4, table);
+		this.showOverlay();
+
+		// 
+		this.oldSel = -1;
+		this.setupSelection([], []);
+		this.showSelection();
+	},
+	showHighscore_old: function() {
 		var table = new Table(this.highscores.length, 2);
 		var i;
 
@@ -1412,7 +1986,9 @@ var Controller = new Class({
 		var w = 0;
 		for (i=0; i<text.length; i++) {
 			line = text[i];
-			w = Math.max(w, font.textWidth(line));
+            if (line) {
+              w = Math.max(w, font.textWidth(line));
+            }
 		}
 		w += 2*bd;
 		h = (text.length-1)*sz*7 + sz*5;
@@ -1484,9 +2060,11 @@ var Controller = new Class({
 			ar = opt && opt.align && opt.align === 'right';
 			for (r=0; r<table.numRows(); r++) {
 				line = table.getCell(r,c);
-				tx = ar ? x + colwidth[c] - font.textWidth(line) - 2*bd : x;
-				this.showLine(ctx, sz, line, tx, yp, null);
-				yp += 7*sz;
+                if (line) {
+    				tx = ar ? x + colwidth[c] - font.textWidth(line) - 2*bd : x;
+	    			this.showLine(ctx, sz, line, tx, yp, null);
+		    		yp += 7*sz;
+                }
 			}
 			x += colwidth[c];
 		}
@@ -1644,7 +2222,7 @@ var Controller = new Class({
 		top = bottom - 20;
 		var W = 25;
 		var H = 20;
-		this.ctx.fillStyle = 'red';
+		this.ctx.fillStyle = Colors.block;
 		for (i=0; i<4; i++) {
 			left = i*50 + 12;
 			right = left + 25;

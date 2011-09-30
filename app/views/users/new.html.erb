@@ -1,31 +1,6 @@
 <h1>Sign Up</h1>
 
-<%= form_for @user do |f| %>
-  <% if @user.errors.any?%>
-    <div class="error_messages">
-      <h2>Form is invalid</h2>
-      <ul>
-        <% for message in @user.errors.full_messages %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
-    </div>
-  <% end %>
-  <p>
-  <%= f.label :name %><br/>
-  <%= f.text_field :name, :id => 'focus' %><br/>
-  </p>
-  <p>
-  <%= f.label :password%><br/>
-  <%= f.password_field :password %><br/>
-  </p>
-  <p>
-  <%= f.label :password_confirmation %><br/>
-  <%= f.password_field :password_confirmation %><br/>
-  </p>
-
-  <p class="button"><%= f.submit%></p>
-<% end %>
+<%= render(:partial => "shared/user", :locals => {:create => true, :user => @user}) %>
 
 <script>
   document.getElementById('focus').focus();

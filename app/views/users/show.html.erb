@@ -1,2 +1,10 @@
-<%= @user.name %>
+<h1>User <%= @user.name %></h1>
+
+<h2 class="toggle_next_visibility_uu">Scores:</h2>  <!-- functionality disable, until more content -->
+<%= render 'scores' %>
+
+<% if user_is_logged_in(@user.id) %>
+  <%= link_to 'Edit Settings', "/users/" + @user.id.to_s + '/edit', :class => "signup_button round" %>
+  <%= link_to 'Delete Account', '/logout_and_delete_user?did=' + @user.id.to_s, :confirm => 'Are you sure?' %>
+<% end %>
 

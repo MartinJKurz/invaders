@@ -1,0 +1,19 @@
+
+development:
+  low_score: 1000
+  old_score: 100
+  old_user: 100
+  scores_per_user: 10
+
+test:
+  low_score: 1000
+  old_score: 100
+  old_user: 100
+  scores_per_user: 10
+
+production:
+  low_score: 1000
+  old_score: 100
+  old_user: 100
+  scores_per_user: 10
+

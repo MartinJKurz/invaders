@@ -43,6 +43,7 @@ Game model with these fields:
 Invaders::Application.routes.draw do
   get "log_in" => "sessions#new", :as => "log_in"
   get "log_out" => "sessions#destroy", :as => "log_out"
+  get "logout_and_delete_user" => "sessions#logout_and_delete_user", :as => "logout_and_delete_user"
 
   get "pages/home"
   get "pages/contact"
@@ -50,10 +51,20 @@ Invaders::Application.routes.draw do
   get "pages/news"
   get "pages/help"
   get "pages/comments"
+  get "pages/invaders"
   get "pages/get_current_user"
+  
+  # resources :scores
+  get "scores/index"
+  get "scores/destroy"
+  get "scores/destroy_low_scores"
+  get "scores/destroy_old_scores"
+
+  get "users/destroy_old_users"
 
   # TODO: move:
   post "pages/post_score"
+  get "pages/get_session_info"
 
   resources :users
   resources :sessions
@@ -64,8 +75,7 @@ Invaders::Application.routes.draw do
   root :to => 'pages#home'
 
   # last line:
-  #match ':action' => 'users#new'
-  match ':action' => 'static#:action'
+  # match ':action' => 'static#:action'
 
 
   # get "users/new"

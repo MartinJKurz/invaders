@@ -1,0 +1,18 @@
+
+<div id='user_scores'>
+  <%= paginate @scores %>
+  <table class="font50">
+    <tr>
+      <th class='sortable' width='40%'><%= sortable 'date', :sort_score_column %></th>
+      <th class='sortable' width='60%'><%= sortable 'score', :sort_score_column %></th>
+    </tr>
+
+    <% @scores.each do |score| %>
+      <tr>
+        <td><%= localTimeStringLong(score.created_at) %></th>
+        <td><%= score.score %></th>
+      </tr>
+    <% end %>
+  </table>
+</div>
+

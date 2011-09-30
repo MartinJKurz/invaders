@@ -1,12 +1,66 @@
-<p>
-</p>
 <p class="no_margin">
-You can just play.</br>
-Sign up, if you want, to get extra features:
+<!-- variant A: display sign n and log in on home -->
+<% if login_type == "A" %>
+  <% if !current_user %>
+    <h2> Create Account </h2>
+    <% user = User.new %>
+    <%= render(:partial => "shared/user", :locals => {:create => true, :user => user}) %>
+    <h2> Log in </h2>
+    <%= form_tag sessions_path, :class => 'simple_form' do %>
+      <p>
+      <%= label_tag :name %>
+      <%= text_field_tag :name, params[:name], :id => 'focus' %>
+      </p>
+      <p>
+      <%= label_tag :password %>
+      <%= password_field_tag :password %>
+      </p>
+      <p class="button"><%= submit_tag "Log in" %></p>
+    <% end %>
+  <% end %>
+<% end %>
+
+<!-- variant B: display LINKS to sign n and log in on home -->
+<% if login_type == "B" %>
+  <ul>
+    <% if current_user %>
+      <li><%= link_to 'Log out', '/log_out' %></li>
+    <% else %>
+      <li><%= link_to 'Log in', '/log_in' %></li>
+      <li><%= link_to 'Sign up', '/signup' %></li>
+    <% end %>
+  </ul>
+<% end %>
+
+  <% if current_user %>
 <ul class="no_margin">
-  <li>Write comments</li>
-  <li>Make your highscores publically visible</li>
-  <li>Store settings</li>
+  <li>
+    <%= link_to "Help", '/pages/help' %>
+  </li>
+  <li>
+    <%= link_to "Play", '/pages/invaders' %>
+  </li>
+  <li>
+    <%= link_to "Users", '/users' %>
+  </li>
+  <li>
+    <%= link_to "Scores", '/scores/index' %>
+  </li>
+</ul>
+  <% else %>
+<br/>
+    <h3 class='useful'>Play Space Invaders</h3>
+<h3>Play Alien Invasion!</h3>
+    Mutant creatures from outer space are threatening the earth!<br>
+      Your mission is to defend our peaceful planet from these space invaders.<br>
+        So, take your gun and go kill as many of these beasts as you can.<br>
+      
+You can play right away, or sign up, if you want to get extra features:
+<ul class="no_margin">
+  <!-- <li>Write comments</li> -->
+  <li>Make your highscores visible to others</li>
+  <li>Make and store settings</li>
 </ul>
 Signing up is easy. Just choose a nickname; no email required.
+  <% end %>
 </p>

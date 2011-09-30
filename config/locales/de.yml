@@ -1,0 +1,16 @@
+de:
+  hello: "Hallo Welt"
+
+  time:
+    formats:
+      default: "%d.%m.%Y"
+      short: "%b %d"
+      long: "%B %d, %Y"
+
+  datetime:
+    formats:
+      full: "%d.%m.%Y %H:%M:%S"
+      full_minute: "%d.%m.%Y %H:%M"
+      day: "%d.%m.%Y"
+
+
