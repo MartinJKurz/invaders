@@ -18,7 +18,7 @@ gem 'kaminari', '0.12.4'
 group :assets do
   #js gem 'sass-rails', "~> 3.1.0.rc"
   #js gem 'coffee-rails', "~> 3.1.0.rc"
-  js gem 'uglifier', '1.0.3'
+  gem 'uglifier', '1.0.3'
 end
 
 gem 'jquery-rails', '1.0.14'
