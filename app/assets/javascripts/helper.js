@@ -16,7 +16,6 @@ function toggleNextVisibility(ev) {
     return false;
 }
 
-
 // set hide following functionality for all elements with specific class
 $(function() {
   $('.toggle_next_visibility').click(toggleNextVisibility);
@@ -38,6 +37,4 @@ $(function() {
     return false;
   });
 });
-
-
 

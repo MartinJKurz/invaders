@@ -2,6 +2,8 @@
 
 <%= form_tag sessions_path, :class => 'simple_form' do %>
   <p>
+  <!-- input type="text" id="timezone" value='bla'></input -->
+  <input type="hidden" name='timezone' id="timezone" value=''></input>
   <%= label_tag :name %>
     <%= text_field_tag :name, params[:name], :id => 'focus' %>
   </p>
@@ -13,6 +15,16 @@
 <% end %>
 <script>
   document.getElementById('focus').focus();
+
+  var tz = jstz.determine_timezone();
+  var json = JSON.stringify({
+    offset: tz.offset(),
+    name: tz.name(),
+    dst: tz.dst()
+  });
+  var e = document.getElementById('timezone');
+  e.value = json;
+
 </script>
 
 

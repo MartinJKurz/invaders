@@ -1,7 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
-  before_filter :set_locale
+  before_filter :set_locale, :set_timezone
 
   helper_method :current_user, :login_type, :auto_logout
   helper_method :user_is_admin, :user_is_logged_in
@@ -17,6 +17,15 @@ class ApplicationController < ActionController::Base
     logger.debug "* Accept-Language: #{request.env['HTTP_ACCEPT_LANGUAGE']}"
     I18n.locale = extract_locale_from_accept_language_header
     logger.debug "* Locale set to '#{I18n.locale}'"
+  end
+
+  def set_timezone
+	if user_session && user_session.timezone
+	    Time.zone = user_session.timezone["name"]
+	    # flash.now.alert = "set TZ to " + user_session.timezone["name"]
+	else
+	    # flash.now.alert = "TZ is " + Time.zone.to_s
+	end
   end
 
 

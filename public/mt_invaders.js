@@ -2297,6 +2297,7 @@ function setupHiddenCursor(el) {
 	    myTimer = hideCursor.delay(3000);
 	});
 }
+
 function startApp() {
 
 	var parentDiv = $('app');

@@ -29,14 +29,20 @@ class UserSession
     @session[:user_id]
   end
 
+  def timezone=(tz)
+    @session[:timezone] = tz
+  end
+
+  def timezone
+    @session[:timezone]
+  end
+
   def session
     @session
   end
   
   def destroy
-	#??
 	@session.destroy
-	#??
     @session[:user_id] = nil
   end
 end
