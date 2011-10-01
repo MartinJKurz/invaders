@@ -14,6 +14,11 @@ gem 'kaminari', '0.12.4'
 # commenting out some with #js
 
 # Gems used only for assets and not required
+# IMPORTTANT
+# local use
+# bundle install --without production
+
+
 # in production environments by default.
 group :assets do
   #js gem 'sass-rails', "~> 3.1.0.rc"

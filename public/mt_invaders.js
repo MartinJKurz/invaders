@@ -1877,7 +1877,7 @@ var Controller = new Class({
 				this.addHighscore();
 				this.showNewGame(this.userName !== null);
 			} else {
-                //this.getUserFromServer();
+		        this.showNewGame(false);
 			}
 		} else {
 		  this.showNewGame(this.userName !== null);
