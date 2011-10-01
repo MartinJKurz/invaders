@@ -1233,7 +1233,6 @@ var Controller = new Class({
 
         onComplete: function(json) {
           var obj = JSON.decode(json);
-          console.log('result: ' + json);
         }
       });
 
@@ -1250,7 +1249,6 @@ var Controller = new Class({
         if (4 === req.readyState && 200 === req.status) {
           var json = req.responseText;
           var obj = JSON.decode(json);
-          console.log('RES: ' + json);
 
           if (obj.success) {
             ctrl.highscores = [];
@@ -1271,13 +1269,10 @@ var Controller = new Class({
 
       var t = {game_id: 1, score: this.points};
       var d = JSON.encode(t);
-      console.log('sending: ' + d);
       req.send(d);
     },
 
     getUserFromServer: function() {
-
-      console.log('get user');
 
       var url = '/pages/get_current_user.json';
       var ctrl = this;
@@ -1286,7 +1281,6 @@ var Controller = new Class({
         url:url,
         method: 'get',
         onComplete: function(json) {
-          console.log('onComplete -> ' + json);
           var obj = JSON.decode(json);
           var logged_in = null !== obj;
           if (logged_in) {
@@ -1308,8 +1302,6 @@ var Controller = new Class({
     // testing
     getSessionInfo: function() {
 
-      console.log('get session info');
-
       var url = '/pages/get_session_info.json';
       var ctrl = this;
 
@@ -1317,10 +1309,7 @@ var Controller = new Class({
         url:url,
         method: 'get',
         onComplete: function(json) {
-          console.log('onComplete -> ' + json);
-          console.log(json);
           var obj = JSON.decode(json);
-          console.log(obj);
         }
       });
 
@@ -1503,7 +1492,7 @@ var Controller = new Class({
 	},
 	readHighscores: function() {
 		if (!$defined(window.localStorage)) {
-			console.log('localStorage not supported');
+			// console.log('localStorage not supported');
 			return;
 		}
 		var json = localStorage['invaderhighscores'];
@@ -1525,7 +1514,6 @@ var Controller = new Class({
 	},
 	saveHighscores: function() {
 		if (!$defined(window.localStorage)) {
-			console.log('localStorage not supported');
 			return;
 		}
 		var json = JSON.encode(this.highscores);
@@ -2274,7 +2262,7 @@ var Controller = new Class({
 					return true;
 				}
 			} catch (e) {
-				console.log(e);
+				// console.log(e);
 			}
 		}
 		return false;
