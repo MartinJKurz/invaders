@@ -8,3 +8,13 @@
   <%= link_to 'Delete Account', '/logout_and_delete_user?did=' + @user.id.to_s, :confirm => 'Are you sure?' %>
 <% end %>
 
+<% if user_is_tester%>
+  <ul>
+    <li><%= link_to 'Open Test Page 1', '/pages/test_page1' %></li>
+    <li><%= link_to 'Open Test Page 2', '/pages/test_page2' %></li>
+    <!-- li>< %= link_to 'Open Test Page 3', '/pages/test_page3' %></li -->
+    <li>nothing yet</li>
+  </ul>
+<% end %>
+
+

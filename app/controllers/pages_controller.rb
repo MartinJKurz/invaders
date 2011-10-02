@@ -140,4 +140,57 @@ class PagesController < ApplicationController
     @title = "They're comming!!!"
     render :layout => false
   end
+
+  def test_page1
+    @title = 'Test Page 1'
+
+    @request = {
+      :host => request.host,
+      :domain => request.domain,
+      :format => request.format,
+      :method => request.method,
+      # :headers => request.headers,
+      :port => request.port,
+      :protocol => request.protocol,
+      :query_string => request.query_string,
+      :remote_ip => request.remote_ip,
+      :url => request.url,
+      :UA => request.user_agent,          # ok
+    }
+
+    @request_env = request.env
+
+    render :layout => false
+  end
+
+  def test_page2
+    @title = 'Test Page 2'
+
+    render :layout => false
+  end
+
+  def test_page3
+    @title = 'Canvas Drag'
+
+    render :layout => false
+  end
+
+  def test_post_browser_info
+    ua = request.env["HTTP_USER_AGENT"]   # send with every request
+    ssz = params['screenSize']            # send with special post request
+    isz = params['innerSize']             # send with special post request
+    render :json => {
+      :success => true
+    }
+=begin
+    render :json => {
+      :success => true,
+      :received => params,
+      :ssz => ssz,
+      :isz => isz,
+      :ua => ua
+    }
+=end
+  end
+
 end

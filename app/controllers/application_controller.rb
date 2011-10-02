@@ -1,10 +1,11 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
 
-  before_filter :set_locale, :set_timezone
+  before_filter :set_locale
+  before_filter :set_timezone #, :except => [:user_session]
 
   helper_method :current_user, :login_type, :auto_logout
-  helper_method :user_is_admin, :user_is_logged_in
+  helper_method :user_is_admin, :user_is_logged_in, :user_is_tester
   #helper_method :is_current_user
   #helper_method :set_focus_to_id
   helper_method :user_session
@@ -20,7 +21,7 @@ class ApplicationController < ActionController::Base
   end
 
   def set_timezone
-	if user_session && user_session.timezone
+	if user_session.timezone
 	    Time.zone = user_session.timezone["name"]
 	    # flash.now.alert = "set TZ to " + user_session.timezone["name"]
 	else
@@ -68,6 +69,10 @@ class ApplicationController < ActionController::Base
     current_user && current_user.name == 'admin'
   end
 
+  def user_is_tester
+    current_user && current_user.name == 'Tester'
+  end
+
   def user_is_logged_in (id)
     current_user && current_user.id.to_s == id.to_s
   end
@@ -76,6 +81,23 @@ class ApplicationController < ActionController::Base
     @user_session ||= UserSession.new(session)
   end
 
+  def user_session_yy
+    if nil == @user_session
+		flash.now.alert = 'create UserSession'
+	else
+		flash.now.alert = session['session_id'].to_s + ' ' + @user_session.session.to_s
+	end
+    @user_session ||= UserSession.new(session)
+  end
+
+  def user_session_xx
+	if @user_session
+		flash.now.alert = 'one'
+	else
+	    @user_session ||= UserSession.new(session)
+		#flash.now.alert = 'two'
+	end
+  end
 
 
 end

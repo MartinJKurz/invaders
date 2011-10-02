@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!--
+Test Page, containing some basic structure plus standard includes
+-->
+<html>
+  <head>
+    <title><%= title %></title>
+    <!-- %= javascript_include_tag "application" % -->
+    <!-- %= csrf_meta_tag % -->
+    <script src="/mootools-core-1.4.0-full-compat-yc.js" type="text/javascript"></script>
+    <script src="/test_page1.js" type="text/javascript"></script>
+  </head>
+  <body>
+
+    Request:
+    <% show = true %>
+    <% if show %>
+      <ul>
+        <% @request.each do |k,v| %>
+          <li><%= "#{k}: #{v}" %></li>
+        <% end %>
+      </ul>
+      <h2 id='mark1'> Request['env']:</h2>
+      <ul>
+        <% @request_env.each do |k,v| %>
+          <li><%= "#{k}: #{v}" %></li>
+        <% end %>
+      </ul>
+    <% end %>
+
+    <!-- button id='browser-info'>Browser Info</button -->
+
+  </body>
+</html>
+

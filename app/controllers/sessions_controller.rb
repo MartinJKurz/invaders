@@ -20,11 +20,7 @@ class SessionsController < ApplicationController
 	  if auto_logout && @current_user
 	      user_session.touch
 	  end
-
-
-      test1 = {:a => 'A', :b => 'B'}
 	  
-      # redirect_to '/users/' + user.id.to_s, :notice => "Logged in!" + " TZ: " + user_session.timezone['offset']
       redirect_to '/users/' + user.id.to_s, :notice => "Logged in!"
     else
       flash.now.alert = "Invalid name or password"

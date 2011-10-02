@@ -53,6 +53,7 @@ Invaders::Application.routes.draw do
   get "pages/comments"
   get "pages/invaders"
   get "pages/get_current_user"
+
   
   # resources :scores
   get "scores/index"
@@ -65,6 +66,12 @@ Invaders::Application.routes.draw do
   # TODO: move:
   post "pages/post_score"
   get "pages/get_session_info"
+
+
+  get "pages/test_page1"
+  get "pages/test_page2"
+  get "pages/test_page3"
+  post "pages/test_post_browser_info"
 
   resources :users
   resources :sessions
