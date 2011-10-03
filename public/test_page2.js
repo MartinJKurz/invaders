@@ -9,6 +9,8 @@ function randomColor() {
 var App = new Class({
   initialize: function() {
     $(document.body).setStyle('background-color', 'red');
+
+    this.firstTouch = true;
   },
   browserInfo: function() {
     var sizeInfo = this.browserSizeInfo();
@@ -57,13 +59,16 @@ var App = new Class({
                           events: {
 
                             //mousedown: this.mouseDown.bind(this),
-                            touchstart: this.touchStart.bind(this),
+                            //touchstart: this.touchStart.bind(this),
                           }
                         });
+        // does MooTools support??
+        e.addEvent('touchstart', this.touchStart.bind(this));
+
         document.body.appendChild(e);
       }
     }
-
+/*
     $(document.body).set({
       events: {
         touchEnd: this.mouseUp.bind(this),
@@ -72,10 +77,17 @@ var App = new Class({
         //mousemove: this.mouseMove.bind(this),
       }
     });
+*/
+    e.addEvent('touchend', this.touchEnd.bind(this));
+    e.addEvent('touchmove', this.touchMove.bind(this));
   },
 
   // uses only single touch
   touchStart: function(event) {
+    if (this.firstTouch) {
+      this.firstTouch = false;
+      alert('Touch: ' + event.targetTouches.length);
+    }
     if (event.targetTouches.length == 1) {
       var ev = event.targetTouches[0];
 
@@ -87,6 +99,7 @@ var App = new Class({
       this.target = ev.target;
       this.target.parentNode.appendChild(this.target);
     }
+    event.preventDefault();
   },
   touchEnd: function(event) {
     if (event.targetTouches.length == 1) {
@@ -101,6 +114,7 @@ var App = new Class({
       this.target.setStyle('left', px);
       this.target.setStyle('top', py);
     }
+    event.preventDefault();
   },
   touchMove: function(event) {
     if (event.targetTouches.length == 1) {
@@ -112,6 +126,7 @@ var App = new Class({
         this.target.setStyle('top', py);
       }
     }
+    event.preventDefault();
   },
   mouseDown: function(ev) {
     this.ox = ev.target.style.left.toFloat();
