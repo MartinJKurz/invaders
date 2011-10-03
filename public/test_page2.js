@@ -1,10 +1,3 @@
-function random(n) {
-  return Math.floor(Math.random()*n);
-}
-
-function randomColor() {
-  return '#' + random(16).toString(16) + random(16).toString(16) + random(16).toString(16);
-}
 
 var App = new Class({
   initialize: function() {
@@ -15,9 +8,13 @@ var App = new Class({
   browserInfo: function() {
     var sizeInfo = this.browserSizeInfo();
     var app = this;
+    var token = getMetaContents('csrf-token');
     var req = new Request({
       url: '/pages/test_post_browser_info',
       method: 'post',
+      headers: {
+	    'X-CSRF-Token': token
+      },
       onComplete: function(json_return) {
         if (!JSON.decode(json_return).success) {
           // ERROR
@@ -34,18 +31,49 @@ var App = new Class({
   showErrorScreen: function() {
     $(document.body).set('text', 'something went wrong');
   },
+  removeHandlers: function() {
+    var i;
+    for (i=0; i<this.el.length; i++) {
+      this.el[i].removeEvents('mousedown');
+      this.el[i].removeEvents('touchstart');
+    }
+    $(document.body).removeEvents('mousemove');
+    $(document.body).removeEvents('mouseup');
+    $(document.body).removeEvents('touchmove');
+    $(document.body).removeEvents('touchend');
+  },
+  setHandlers: function(mouse, touch) {
+    this.removeHandlers();
+    var i;
+    if (mouse)  {
+      for (i=0; i<this.el.length; i++) {
+        this.el[i].addEvent('mousedown', this.mouseDown.bind(this));
+      }
+      $(document.body).addEvent('mousemove', this.mouseMove.bind(this));
+      $(document.body).addEvent('mouseup', this.mouseUp.bind(this));
+    }
+    if (touch)  {
+      for (i=0; i<this.el.length; i++) {
+        this.el[i].addEvent('touchstart', this.touchStart.bind(this));
+      }
+      $(document.body).addEvent('touchmove', this.touchMove.bind(this));
+      $(document.body).addEvent('touchend', this.touchEnd.bind(this));
+    }
+  },
   showContentLocal: function() {
-    // $(document.body).set('text', 'all fine');
     // m x n colored d&d divs
     $(document.body).setStyle('margin', '0 0 0 0');
     this.n = this.m = 3;
-    var x, y, e;
+    var x, y, i;
     var innerSize = document.body.getSize();
-    this.w = innerSize.x / this.n;
-    this.h = innerSize.y / this.m;
-    for (j=0; j<this.n; j++) {
+    this.w = Math.floor(innerSize.x / this.n);
+    this.h = Math.floor(innerSize.y / this.m);
+    this.el = [];
+    this.container = new Element('div',{styles: {position: 'absolute'}});
+    document.body.appendChild(this.container);
+    for (j=1; j<this.n; j++) {
       for (i=0; i<this.m; i++) {
-        e = new Element('div',
+        this.el.push(new Element('div',
                         {
                           id: '_' + j + '_' + i,
                           styles: {
@@ -55,31 +83,25 @@ var App = new Class({
                             width: this.w+'px',
                             height: this.h+'px',
                             backgroundColor: randomColor()
-                          },
-                          events: {
-
-                            //mousedown: this.mouseDown.bind(this),
-                            //touchstart: this.touchStart.bind(this),
                           }
-                        });
-        // does MooTools support??
-        e.addEvent('touchstart', this.touchStart.bind(this));
-
-        document.body.appendChild(e);
+                        }));
       }
     }
-/*
-    $(document.body).set({
-      events: {
-        touchEnd: this.mouseUp.bind(this),
-        touchMove: this.touchMove.bind(this),
-        //mouseup: this.mouseUp.bind(this),
-        //mousemove: this.mouseMove.bind(this),
-      }
-    });
-*/
-    e.addEvent('touchend', this.touchEnd.bind(this));
-    e.addEvent('touchmove', this.touchMove.bind(this));
+    for (i=0; i<this.el.length; i++) {
+      this.container.appendChild(this.el[i]);
+    }
+
+    //this.setHandlers(true, false);
+    this.setHandlers(false, true);
+    
+    
+
+    var button1 = new Element('button', {text: 'Mouse'});
+    var button2 = new Element('button', {text: 'Touch'});
+    button1.addEvent('click', function(ev) {ev.preventDefault();this.setHandlers(true, false)}.bind(this));
+    button2.addEvent('click', function(ev) {ev.preventDefault();this.setHandlers(false, true)}.bind(this));
+    document.body.appendChild(button1);
+    document.body.appendChild(button2);
   },
 
   // uses only single touch
@@ -107,10 +129,8 @@ var App = new Class({
       this.drag = false;
       var px = ev.pageX - this.rx;
       var py = ev.pageY - this.ry;
-      console.log('drop 1 ' + px + '/' + py);
       px = this.w*Math.round(px/this.w);
       py = this.h*Math.round(py/this.h);
-      console.log('drop 2 ' + px + '/' + py);
       this.target.setStyle('left', px);
       this.target.setStyle('top', py);
     }
@@ -129,6 +149,10 @@ var App = new Class({
     event.preventDefault();
   },
   mouseDown: function(ev) {
+    if (this.firstTouch) {
+      this.firstTouch = false;
+      alert('DOWN');
+    }
     this.ox = ev.target.style.left.toFloat();
     this.oy = ev.target.style.top.toFloat();
     this.rx = ev.client.x - this.ox;
@@ -141,10 +165,8 @@ var App = new Class({
     this.drag = false;
     var px = ev.client.x - this.rx;
     var py = ev.client.y - this.ry;
-    console.log('drop 1 ' + px + '/' + py);
     px = this.w*Math.round(px/this.w);
     py = this.h*Math.round(py/this.h);
-    console.log('drop 2 ' + px + '/' + py);
     this.target.setStyle('left', px);
     this.target.setStyle('top', py);
   },
@@ -156,6 +178,7 @@ var App = new Class({
       this.target.setStyle('top', py);
     }
   },
+  
   browserSizeInfo: function() {
     return {
       screenSize: {

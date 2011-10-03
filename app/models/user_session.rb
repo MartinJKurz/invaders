@@ -1,3 +1,5 @@
+=begin
+
 class UserSession
   def initialize(session)
     @session = session
@@ -47,3 +49,4 @@ class UserSession
   end
 end
 
+=end

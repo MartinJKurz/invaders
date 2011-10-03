@@ -8,7 +8,7 @@ class ApplicationController < ActionController::Base
   helper_method :user_is_admin, :user_is_logged_in, :user_is_tester
   #helper_method :is_current_user
   #helper_method :set_focus_to_id
-  helper_method :user_session
+  #helper_method :user_session
 
   def set_locale
     I18n.locale = 'en'
@@ -20,6 +20,7 @@ class ApplicationController < ActionController::Base
     logger.debug "* Locale set to '#{I18n.locale}'"
   end
 
+=begin
   def set_timezone
 	if user_session.timezone
 	    Time.zone = user_session.timezone["name"]
@@ -28,7 +29,15 @@ class ApplicationController < ActionController::Base
 	    # flash.now.alert = "TZ is " + Time.zone.to_s
 	end
   end
-
+=end
+  def set_timezone
+    if session[:timezone]
+	    Time.zone = session[:timezone]["name"]
+	    # flash.now.alert = "set TZ to " + session[:timezone]["name"]
+	else
+	    # flash.now.alert = "TZ is " + Time.zone.to_s
+	end
+  end
 
   private
   
@@ -44,20 +53,24 @@ class ApplicationController < ActionController::Base
     begin
 		
 	  if auto_logout
-		if user_session.expired
+		if Time.now - session[:last_seen] > 3.hours
+		# if user_session.expired
 	   		return nil
 		end
 	  end
 	  
-      @current_user = user_session.user
-      
+      #@current_user = user_session.user
+      @current_user ||= User.find(session[:user_id]) if session[:user_id]
+
 	  if auto_logout && @current_user
-		user_session.touch
+		# user_session.touch
+	    session[:last_seen] = Time.now
       end
       
-    rescue
-      nil
+    #rescue
+    #  nil
     end
+    
     @current_user
   end
   
@@ -77,29 +90,11 @@ class ApplicationController < ActionController::Base
     current_user && current_user.id.to_s == id.to_s
   end
 
+=begin
   def user_session
     @user_session ||= UserSession.new(session)
   end
-
-  def user_session_yy
-    if nil == @user_session
-		flash.now.alert = 'create UserSession'
-	else
-		flash.now.alert = session['session_id'].to_s + ' ' + @user_session.session.to_s
-	end
-    @user_session ||= UserSession.new(session)
-  end
-
-  def user_session_xx
-	if @user_session
-		flash.now.alert = 'one'
-	else
-	    @user_session ||= UserSession.new(session)
-		#flash.now.alert = 'two'
-	end
-  end
-
-
+=end
 end
 
 

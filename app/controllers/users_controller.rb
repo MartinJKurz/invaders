@@ -49,8 +49,8 @@ class UsersController < ApplicationController
     if @user.save
       redirect_to '/users/' + @user.id.to_s, :notice => "Signed up!"
       # log in
-      #session[:user_id] = @user.id
-      user_session.user_id = @user.id
+      session[:user_id] = @user.id
+      #user_session.user_id = @user.id
     else
       render "new"
     end
@@ -79,8 +79,8 @@ class UsersController < ApplicationController
     ###
     # current_user = User.find(session[:user_id]) if session[:user_id]
     if current_user && current_user.id == params[:id]
-      #session.destroy :user_id => params[:id]
-      user_session.destroy
+      session.destroy :user_id => params[:id]
+      #user_session.destroy
     end
     ###
 

@@ -9,9 +9,13 @@ var App = new Class({
     // test:
     //console.log('Sending: ' + sizeInfo);
     // -> to server
+    var token = getMetaContents('csrf-token');
     var req = new Request({
       url: '/pages/test_post_browser_info',
       method: 'post',
+      headers: {
+	    'X-CSRF-Token': token
+      },
       //data: json,
       onComplete: function(json_return) {
         if (!JSON.decode(json_return).success) {

@@ -24,8 +24,8 @@ class PagesController < ApplicationController
     respond_to do |format|  
       format.json {
         if current_user
-          #render :json => {:session => session}
-          render :json => {:session => user_session.session}
+          render :json => {:session => session}
+          #render :json => {:session => user_session.session}
         else
           render :json => nil
         end
@@ -164,14 +164,12 @@ class PagesController < ApplicationController
   end
 
   def test_page2
-    @title = 'Test Page 2'
-
+    @title = 'Test Page 2 - Drag'
     render :layout => false
   end
 
   def test_page3
-    @title = 'Canvas Drag'
-
+    @title = 'Test Page 3 - Canvas Drag'
     render :layout => false
   end
 
