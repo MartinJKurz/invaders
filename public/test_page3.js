@@ -1,3 +1,16 @@
+/*
+
+Audio:
+ogg: no
+mp3: maybe
+mp4: maybe
+wav: maybe
+pcm/vorbis: no
+
+Problem:
+- button not working after one click - canvas consuming the event?
+- full screen mode? - get wohl nicht
+*/
 
 var Circle = new Class({
   initialize: function(radius, color, borderWidth, borderColor, x, y) {
@@ -8,9 +21,10 @@ var Circle = new Class({
     this.x = x;
     this.y = y;
   },
-  draw: function(ctx) {
+  draw: function(ctx, highlighted) {
     ctx.fillStyle = this.color;
-    ctx.strokeStyle = this.borderColor;
+    ctx.strokeStyle = highlighted ? 'red' : this.borderColor;
+    ctx.lineWidth = highlighted ? 7 : this.borderWidth;
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, 2*Math.PI, true);
@@ -27,6 +41,7 @@ var App = new Class({
     this.text = 'all fine';
     this.hit = -1;
     this.mouse = true;
+    this.topSpace = 56;
   },
   browserInfo: function() {
     var sizeInfo = this.browserSizeInfo();
@@ -64,24 +79,24 @@ var App = new Class({
     $(document.body).set('text', 'something went wrong');
   },
   removeHandlers: function() {
-    $(document.body).removeEvents('mousedown');
-    $(document.body).removeEvents('touchstart');
-    $(document.body).removeEvents('mousemove');
-    $(document.body).removeEvents('mouseup');
-    $(document.body).removeEvents('touchmove');
-    $(document.body).removeEvents('touchend');
+    $(this.canvas).removeEvents('mousedown');
+    $(this.canvas).removeEvents('touchstart');
+    $(this.canvas).removeEvents('mousemove');
+    $(this.canvas).removeEvents('mouseup');
+    $(this.canvas).removeEvents('touchmove');
+    $(this.canvas).removeEvents('touchend');
   },
   setHandlers: function(mouse, touch) {
     this.removeHandlers();
     if (mouse)  {
-      $(document.body).addEvent('mousedown', this.mouseDown.bind(this));
-      $(document.body).addEvent('mousemove', this.mouseMove.bind(this));
-      $(document.body).addEvent('mouseup', this.mouseUp.bind(this));
+      $(this.canvas).addEvent('mousedown', this.mouseDown.bind(this));
+      $(this.canvas).addEvent('mousemove', this.mouseMove.bind(this));
+      $(this.canvas).addEvent('mouseup', this.mouseUp.bind(this));
     }
     if (touch)  {
-      $(document.body).addEvent('touchstart', this.touchStart.bind(this));
-      $(document.body).addEvent('touchmove', this.touchMove.bind(this));
-      $(document.body).addEvent('touchend', this.touchEnd.bind(this));
+      $(this.canvas).addEvent('touchstart', this.touchStart.bind(this));
+      $(this.canvas).addEvent('touchmove', this.touchMove.bind(this));
+      $(this.canvas).addEvent('touchend', this.touchEnd.bind(this));
     }
   },
   showContentLocal: function() {
@@ -93,9 +108,9 @@ var App = new Class({
     var innerSize = document.body.getSize();
     this.radius = Math.min(innerSize.x, innerSize.y) / 7;
     this.circles = [];
-    this.canvas = new Element('canvas',{styles: {position: 'absolute'}});
+    this.canvas = new Element('canvas',{styles: {position: 'absolute', top:this.topSpace}});
     this.canvas.width = innerSize.x;
-    this.canvas.height = innerSize.y;
+    this.canvas.height = innerSize.y-this.topSpace;
     this.ctx = this.canvas.getContext('2d');
     document.body.appendChild(this.canvas);
 
@@ -105,16 +120,16 @@ var App = new Class({
     this.setHandlers(true, false);
     toggle = new Element('button',
       {
-        text: 'Mouse / Touch',
+        text: 'Mouse -> Touch',
         styles: {
           position: 'absolute',
           right: '0px',
           fontSize: '25px',
           borderRadius: '10px',
           borderStyle: 'solid',
-          borderColor: 'red',
+          borderColor: 'blue',
           borderWidth: '3px',
-          backgroundColor: 'rgba(255,255,255,0.5)',
+          backgroundColor: 'rgba(255,255,255,1)',
           padding: '10px'
         }
       }
@@ -136,29 +151,34 @@ var App = new Class({
     this.ctx.fillStyle = '#666';
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     for (i=0; i<this.n; i++) {
-      this.circles[i].draw(this.ctx);
+      this.circles[i].draw(this.ctx, this.hit === i);
     }
+    this.ctx.lineWidth = 1;
     this.showText();
   },
 
+  touchToCanvas: function(ev) {
+    return {x:ev.pageX, y:ev.pageY - this.topSpace};
+  },
+  mouseToCanvas: function(obj) {
+    return {x:obj.x, y:obj.y - this.topSpace};
+  },
   // uses only single touch
   touchStart: function(event) {
     this.text = 'Touch: ' + event.targetTouches.length;
     
     if (event.targetTouches.length == 1) {
       var ev = event.targetTouches[0];
-
-      var x = ev.pageX;
-      var y = ev.pageY;
-      this.select(x, y);
+      var xy = this.touchToCanvas(ev);
+      this.select(xy.x, xy.y);
+      this.draw();
     }
     event.preventDefault();
   },
   touchEnd: function(event) {
     this.text = 'UP ' + event.targetTouches.length;
-    this.draw();
-
     this.hit = -1;
+    this.draw();
 
     event.preventDefault();
   },
@@ -168,10 +188,9 @@ var App = new Class({
     if (event.targetTouches.length == 1) {
       if (this.hit !== -1) {
         ev = event.targetTouches[0];
-        px = ev.pageX;
-        py = ev.pageY;
-        this.circles[this.hit].x = px;
-        this.circles[this.hit].y = py;
+        var xy = this.touchToCanvas(ev);
+        this.circles[this.hit].x = xy.x;
+        this.circles[this.hit].y = xy.y;
         this.draw();
       }
     }
@@ -201,30 +220,27 @@ var App = new Class({
   },
   mouseDown: function(ev) {
     this.text = 'DOWN';
-    var x = ev.client.x;
-    var y = ev.client.y;
-    this.select(x, y);
-    
+    var xy = this.mouseToCanvas(ev.client);
+    this.select(xy.x, xy.y);
     this.draw();
+    ev.preventDefault();
   },
   mouseUp: function(ev) {
     this.text = 'UP';
-    this.draw();
-    if (this.hit === -1) {
-      return;
-    }
     this.hit = -1;
+    this.draw();
+    ev.preventDefault();
   },
   mouseMove: function(ev) {
     if (this.hit === -1) {
       return;
     }
     this.text = 'MOVE';
-    var px = ev.client.x;
-    var py = ev.client.y;
-    this.circles[this.hit].x = px;
-    this.circles[this.hit].y = py;
+    var xy = this.mouseToCanvas(ev.client);
+    this.circles[this.hit].x = xy.x;
+    this.circles[this.hit].y = xy.y;
     this.draw();
+    ev.preventDefault();
   },
   
   browserSizeInfo: function() {

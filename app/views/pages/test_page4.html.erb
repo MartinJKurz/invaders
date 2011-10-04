@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Touch Tracker Marker</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <style type="text/css">
+      body { margin: 0px; padding: 0; overflow: hidden; }
+      canvas { border: 1px solid black; }
+      /*button { border: 1px solid red; padding: 0; margin: 0;} */
+    </style>
+
+    <!--
+    magigtouch:
+    https://github.com/borismus/MagicTouch/tree/2a3e7d47a59e3c46541a9f8895460a198f4c38c4
+    Helper to develop html web apps, to be installed on desktop pc
+    NOT installed here, because
+    - unclear what it does - especially how the multi touch events are generated
+    - needs 2 extra plugins
+    -> too much for now
+    <script type="text/javascript" src="/magictouch.js"></script>
+
+    the code should run on a web device without the emulation
+    -->
+
+    <script type="text/javascript">
+
+      var canvas;
+      var ctx;
+      var w = 0;
+      var h = 0;
+      var outputText1 = '';
+      var outputText2 = '';
+      var mouse = true;
+      var tim = 0;
+      var buttonHeight = 25;
+
+      var timer;
+      var updateStarted = false;
+      var touches = [];
+
+
+      function deb_top(text) {
+        outputText1 = text;
+      }
+      function deb_bot(text) {
+        outputText2 = text;
+      }
+      function showText(text, y) {
+        if (text !== '') {
+          this.ctx.font = 'bold 20pt Arial';
+          this.ctx.fillStyle = 'red';
+          this.ctx.fillText(text, 5, y);
+          ctx.lineWidth = 1.0;
+          this.ctx.strokeStyle = 'black';
+          this.ctx.strokeText(text, 5, y);
+        }
+      }
+
+
+      function update() {
+        if (updateStarted) return;
+
+        updateStarted = true;
+
+        var nw = window.innerWidth;
+        var nh = window.innerHeight - buttonHeight;
+
+        if ((w != nw) || (h != nh)) {
+          w = nw;
+          h = nh;
+          canvas.style.width = w+'px';
+          canvas.style.height = h+'px';
+          canvas.width = w;
+          canvas.height = h;
+        }
+
+        ctx.fillStyle = '#777';
+        ctx.fillRect(0, 0, w, h);
+        showText(outputText1, 25);
+        showText(outputText2, 50);
+
+        // ALL touches - could be optimized
+        var i, len = touches.length, msg="";
+        for (i=0; i<len; i++) {
+          var touch = touches[i];
+          var px = touch.pageX;
+          var py = touch.pageY;
+
+          ctx.beginPath();
+          ctx.arc(px, py, 20, 0, 2*Math.PI, true);
+
+          ctx.fillStyle = "rgba(200, 0, 0, 0.2)";
+          ctx.fill();
+
+          ctx.lineWidth = 2.0;
+          ctx.strokeStyle = "rgba(0, 0, 200, 0.8)";
+          ctx.stroke();
+          if (msg != '') {
+            msg += ', '
+          }
+          msg += px + '/' + py;
+          //deb_top('drawn circle at ' + px +',' + py);
+        }
+        deb_top(msg);
+
+        updateStarted = false;
+      }
+
+      function ol() {
+        canvas = document.getElementById('canvas');
+        ctx = canvas.getContext('2d');
+        timer = setInterval(update, 15);
+
+        canvas.addEventListener('touchend', function() {
+          ctx.clearRect(0, 0, w, h);
+        });
+
+        canvas.addEventListener('touchmove', function(event) {
+          event.preventDefault();
+          touches = event.touches;
+        });
+
+        canvas.addEventListener('touchstart', function(event) {
+          deb_top('start');
+          dblCheck();
+        });
+
+        if (mouse) {
+          addMouseEventHandler();
+        }
+
+        // buttons
+        var b1 = document.createElement('button');
+        b1.style.height = buttonHeight;
+        b1.style.position = 'absolute';
+        b1.style.bottom = '0px';
+        var t = document.createTextNode('Mouse + Touch / Touch only');
+        b1.appendChild(t);
+        b1.addEventListener('click', toggle);
+        document.body.appendChild(b1);
+      }
+
+      function mu() {
+          ctx.clearRect(0, 0, w, h);
+      }
+      function toggle() {
+          mouse = !mouse;
+          if (mouse) {
+            addMouseEventHandler();
+          } else {
+            removeMouseEventHandler();
+          }
+      }
+      function dblCheck() {
+        var nt = (new Date).getTime();
+        if (nt - tim < 200) {
+          toggle();
+        }
+        tim = nt;
+      }
+      function md() {
+        deb_top('start');
+        dblCheck();
+      }
+      function mm(event) {
+          event.preventDefault();
+          // touches = event.touches;
+          touches = [{pageX: event.clientX, pageY: event.clientY}];
+      }
+      function addMouseEventHandler() {
+        canvas.addEventListener('mousedown', md);
+        canvas.addEventListener('mousemove', mm);
+        canvas.addEventListener('mouseup', mu);
+        deb_bot('Mouse and Touch');
+      }
+      function removeMouseEventHandler() {
+        canvas.removeEventListener('mousedown', md);
+        canvas.removeEventListener('mousemove', mm);
+        canvas.removeEventListener('mouseup', mu);
+        deb_bot('Touch only');
+      }
+
+    </script>
+  </head>
+  <body onload="ol()">
+
+    <canvas id="canvas" width="300" height="300" style="top:0px; left:0px; width: 300px; height: 300px;"></canvas>
+
+    <!--
+    <object id="tuio" type="application/x-tuio">Plugin FAILED to load</object>
+    -->
+
+  </body>
+</html>
+

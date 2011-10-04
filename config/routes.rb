@@ -71,6 +71,7 @@ Invaders::Application.routes.draw do
   get "pages/test_page1"
   get "pages/test_page2"
   get "pages/test_page3"
+  get "pages/test_page4"
   post "pages/test_post_browser_info"
 
   resources :users

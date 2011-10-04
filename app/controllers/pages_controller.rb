@@ -173,6 +173,11 @@ class PagesController < ApplicationController
     render :layout => false
   end
 
+  def test_page4
+    @title = '4 - Multi Touch Canvas Drag'
+    render :layout => false
+  end
+
   def test_post_browser_info
     ua = request.env["HTTP_USER_AGENT"]   # send with every request
     ssz = params['screenSize']            # send with special post request
