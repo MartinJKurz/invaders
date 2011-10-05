@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Puzzle</title>
+    <script src="/mootools-core-1.4.0-full-compat-yc.js" type="text/javascript"></script>
+    <script src='/public_helpers.js' type='text/javascript'></script>
+    <script src="/test_page5.js" type="text/javascript"></script>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <style type="text/css">
+      body {
+        margin: 0px; padding: 0; overflow: hidden;
+      }
+      html {
+        height: 100%;
+      }
+      body {
+        height: 100%;
+        margin: 0;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background: red;  /* testing - this value must be overridden */
+        background: -o-linear-gradient(left, #444, #fff, #444);
+        /*
+        background: -o-radial-gradient( 50% 50%, circle, #fff 0px, #444 600px );
+        background: -o-linear-gradient(top, #c8482c, #fff);
+        background: -o-radial-gradient(center, #fff, #adf);
+        */
+
+        /* background: -webkit-gradient( radial, 50% 50%, 0, 50% 50%, 600, from(#fff), to(#444) ); */
+        /* background: -moz-radial-gradient( 50% 50%, circle, #fff 0px, #444 600px ); */
+      }
+
+      /* canvas { border: 1px solid black; } */
+      /*button { border: 1px solid red; padding: 0; margin: 0;} */
+    </style>
+
+  </head>
+  <body onload="onLoad()">
+    <canvas style="position: absolute" id="canvas"></canvas>
+  </body>
+</html>
+
