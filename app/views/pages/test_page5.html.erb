@@ -29,6 +29,30 @@
         /* background: -webkit-gradient( radial, 50% 50%, 0, 50% 50%, 600, from(#fff), to(#444) ); */
         /* background: -moz-radial-gradient( 50% 50%, circle, #fff 0px, #444 600px ); */
       }
+      .menu-button {
+        border: none;
+        background-color: rgba(0,0,0,0);
+        width: 100%;
+      }
+      .menu-button:hover {
+        background-color: rgba(255,0,0,0.5);
+      }
+      .menu-button:focus {
+        background-color: rgba(0,128,255,0.5);
+      }
+      .menu-button:active {
+        background-color: rgba(255,128,0,0.5);
+      }
+      /*
+      button::-moz-focus-inner {
+        border: 0;
+      }
+      */
+      input[type="submit"]::-moz-focus-inner, input[type="button"]::-moz-focus-inner {
+        border : 0px;
+      }
+
+
 
       /* canvas { border: 1px solid black; } */
       /*button { border: 1px solid red; padding: 0; margin: 0;} */

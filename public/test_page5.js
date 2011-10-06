@@ -56,8 +56,8 @@ var Image = new Class({
     //this.image.src = '/P8200264.JPG';
     //this.image.src = '/P8200257.JPG';
     //this.image.src = '/P1010015.JPG';
-    this.image.src = '/P1010015_s.JPG';
-
+    //this.image.src = '/P1010015_s.JPG';
+    this.image.src = '/P8180198_s.JPG';
     if (this.image.complete) {
       this.loaded({target: this.image});
     }
@@ -199,8 +199,103 @@ var App = new Class({
       setTimeout(this.hideInfo.bind(this), timeout);
     }
   },
+  showMenu: function(items, opts) {
+    var i,t,tr,td,b,px,py;
+    this.infoCtx.clearRect(0, 0, this.infoCanvas.width, this.infoCanvas.height);
+    this.infoCtx.fillStyle = 'rgba(255,255,255,0.5)';
+    this.infoCtx.fillRect(0, 0, this.infoCanvas.width, this.infoCanvas.height);
+
+    function cancel() {
+      this.hideInfo();
+      //this.hideInfo.bind(this);
+    }
+
+    if (opts.cancel) {
+      items.push({text:'cancel', cb: cancel});
+    }
+
+    if (!this.menuDiv) {
+      this.menuDiv = new Element('div');
+      //this.menuDiv.setStyle('background', 'red');
+      this.menuDiv.setStyle('position', 'absolute');
+      document.body.appendChild(this.menuDiv);
+    }
+    this.menuDiv.innerHTML = '';
+
+    t = new Element('table');
+    this.menuDiv.appendChild(t);
+    for (i=0; i<items.length; i++) {
+      tr = new Element('tr');
+      t.appendChild(tr);
+      b = new Element('input');
+      b.type = 'button';
+      b.setAttribute('class', 'menu-button');
+      b.setStyle('font-size', 70);
+      /*
+      b.setStyle('width', '100%');
+      b.setStyle('background-color', 'rgba(255,255,255,0.5)');
+      */
+      //b.innerHTML = items[i].text;
+      b.value = items[i].text;
+      tr.appendChild(b);
+
+      if (items[i].cb) {
+        b.addEventListener('click', items[i].cb.bind(this));
+      }
+    }
+
+    this.menuDiv.setStyle('display', '');
+
+    console.log('WH: ' + this.menuDiv.offsetWidth + ' ' + this.menuDiv.offsetHeight);
+    px = (window.innerWidth - this.menuDiv.offsetWidth)*0.5;
+    py = (window.innerHeight - this.menuDiv.offsetHeight)*0.5;
+    this.menuDiv.setStyle('left', px);
+    this.menuDiv.setStyle('top', py);
+
+
+    this.infoCanvas.setStyle('display', '');
+    // tbr:
+    //setTimeout(this.hideInfo.bind(this), 8000);
+  },
+  /*
+  showMenu: function(items) {
+    this.infoCtx.clearRect(0, 0, this.infoCanvas.width, this.infoCanvas.height);
+    this.infoCtx.fillStyle = 'rgba(255,255,255,0.5)';
+    this.infoCtx.fillRect(0, 0, this.infoCanvas.width, this.infoCanvas.height);
+    this.infoCtx.fillStyle = 'black';
+    this.infoCtx.textAlign = 'center';
+    var i, font, fs=1000, font;
+    var px = this.infoCanvas.width / 2;
+    var attr = 'bold';
+    var family = 'Arial';
+    for (i=0; i<items.length; i++) {
+      font = this.fontForWidth(this.infoCtx, items[i].text, 20, this.infoCanvas.width, attr, family);
+      if (font.size < fs) {
+        fs = font.size;
+      }
+    }
+    while (items.length * fs * 1.5 > this.infoCanvas.height) {
+      fs *= 0.9;
+    }
+    font = attr + ' ' + fs + 'pt ' + family;
+    this.infoCtx.font = font;
+    for (i=0; i<items.length; i++) {
+      py = fs + i*fs*1.5;
+      this.infoCtx.fillText(items[i].text, px, py);
+    }
+    this.infoCanvas.setStyle('display', '');
+
+
+
+    // tbr:
+    setTimeout(this.hideInfo.bind(this), 8000);
+  },
+  */
   hideInfo: function() {
     this.infoCanvas.setStyle('display', 'none');
+    if (this.menuDiv) {
+      this.menuDiv.setStyle('display', 'none');
+    }
   },
   initialize2: function(image) {
     this.hideInfo();
@@ -372,7 +467,7 @@ var App = new Class({
       if (this.to) {
         clearTimeout(this.to);
       }
-      this.to = setTimeout(this.menu.bind(this), 4000);
+      this.to = setTimeout(this.menu.bind(this), 3000);
     }
   },
   tm: function(event) {
@@ -404,7 +499,7 @@ var App = new Class({
       clearTimeout(this.to);
     }
     this.startSelect = true;
-    this.to = setTimeout(this.menu.bind(this), 4000);
+    this.to = setTimeout(this.menu.bind(this), 2000);
   },
   mm: function(event) {
     if (!this.enabled) {
@@ -427,7 +522,8 @@ var App = new Class({
   menu: function() {
     if (this.startSelect) {
       this.startSelect = false;
-      this.showInfo('Menu - not yet implemented', 3000);
+      //this.showInfo('Menu - not yet implemented', 3000);
+      this.showMenu([{text:'Menu - not yet implemented'}, {text: 'but soon'}], {cancel:true});
     }
   },
 /*
@@ -563,8 +659,8 @@ var App = new Class({
     if (window.innerWidth !== this.infoCanvas.width || window.innerHeight != this.infoCanvas.height) {
       this.infoCanvas.style.width = window.innerWidth+'px';
       this.infoCanvas.style.height = window.innerHeight+'px';
-      this.infoCanvas.width = window.innerWidth;
-      this.infoCanvas.height = window.innerHeight;
+      this.infoCanvas.width = Math.floor(window.innerWidth*0.5);
+      this.infoCanvas.height = Math.floor(window.innerHeight*0.5);
       this.infoCanvas.style.position = 'absolute';
     }
 
