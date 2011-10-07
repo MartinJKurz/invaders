@@ -117,6 +117,21 @@ var App = new Class({
     // this.loadImage(0);
     this.doCreateDrawing();
     this.imageIdx = -1;
+
+    this.prevDef = true;
+
+
+
+    ///
+    if (Log) {
+      this.logger = new Log();
+      this.logger.log('start logging');
+    }
+  },
+
+  togglePrevDef: function() {
+    this.prevDef = !this.prevDef;
+    this.log('PrevDev: ' + this.prevDef);
   },
 
   loadImage: function(idx) {
@@ -233,8 +248,13 @@ var App = new Class({
   },
 
   ts: function(event) {
+    this.log('ts c ' + event.clientX + '/' + event.clientY);
+    this.log('ts p ' + event.pageX + '/' + event.pageY);
+    if (this.prevDef) {
       event.preventDefault();
+    }
     if (!this.enabled) {
+      this.log('ERROR: ts return');
       return;
     }
     var t;
@@ -244,32 +264,60 @@ var App = new Class({
         clearTimeout(this.to);
       }
       this.to = setTimeout(this.longTouch.bind(this), 1000, event);
+    } else {
+      this.log('ERROR: ts L = ' + event.touches.length);
     }
   },
   tm: function(event) {
+    if (this.prevDef) {
       event.preventDefault();
+    }
     if (!this.enabled) {
       return;
     }
   },
   te: function(event) {
+    if (this.prevDef) {
       event.preventDefault();
+    }
     if (!this.enabled) {
+      this.log('ERROR: te return');
       return;
     }
     if (!this.startSelect) {
+      this.log('ERROR: mu ss inactive');
       return;
     }
     this.startSelect = false;
     if (event.touches.length == 1) {
       t = event.touches[1];
+      this.log('te start select');
       this.select(t.pageX, t.pageY);
+    } else {
+      this.log('ERROR: te L = ' + event.touches.length);
     }
     this.draw();
   },
 
+  log: function(line) {
+    if (this.logger) {
+      this.logger.log(line);
+    }
+  },
+  toggleLog: function(line) {
+    if (this.logger) {
+      this.logger.toggle();
+      this.info.hide();
+    }
+  },
+
   md: function(event) {
+    this.log('md ' + event.clientX + '/' + event.clientY);
+    if (this.prevDef) {
+      event.preventDefault();
+    }
     if (!this.enabled) {
+      this.log('ERROR: md return');
       return;
     }
     if (this.to) {
@@ -279,32 +327,42 @@ var App = new Class({
     this.to = setTimeout(this.longClick.bind(this), 1000, event);
   },
   mm: function(event) {
+    if (this.prevDef) {
+      event.preventDefault();
+    }
     if (!this.enabled) {
       return;
     }
-    event.preventDefault();
   },
   mu: function(event) {
+    if (this.prevDef) {
+      event.preventDefault();
+    }
     if (!this.enabled) {
+      this.log('ERROR: mu return');
       return;
     }
     if (!this.startSelect) {
+      this.log('ERROR: mu ss inactive');
       return;
     }
     this.startSelect = false;
+    this.log('mu start select');
     this.select(event.clientX, event.clientY);
     this.draw();
   },
 
   longFunction: function() {
-      this.info.showMenu(
-        [
-          {text: 'shuffle', cb: function() {this.shuffle2(11);}.bind(this)},
-          {text: 'image', cb: function(){this.loadNextImage();}.bind(this)},
-          {text: 'create graphic', cb: function(){this.doCreateDrawing();}.bind(this)}
-        ],
-        {cancel:true}
-      );
+    this.info.showMenu(
+      [
+        {text: 'shuffle', cb: function() {this.shuffle2(11);}.bind(this)},
+        {text: 'image', cb: function(){this.loadNextImage();}.bind(this)},
+        {text: 'create graphic', cb: function(){this.doCreateDrawing();}.bind(this)},
+        {text: 'log', cb: function(){this.toggleLog();}.bind(this)},
+        {text: 'toggle PD', cb: function(){this.togglePrevDef();}.bind(this)},
+      ],
+      {cancel:true}
+    );
   },
 
   longClick: function(event) {
@@ -321,50 +379,72 @@ var App = new Class({
   },
 
   select: function(x, y) {
-    x -= Opts.ox;
-    y -= Opts.oy;
-    x = Math.floor(x/Opts.kx);
-    y = Math.floor(y/Opts.ky);
-    this.selectXY(x, y);
+    var xn = x - Opts.ox;
+    var yn = y - Opts.oy;
+    xn = Math.floor(xn/Opts.kx);
+    yn = Math.floor(yn/Opts.ky);
+    this.log('sel: ' + x + '/' + y + ' -> ' + xn + '/' + yn);
+    this.selectXY(xn, yn);
   },
   selectXY: function(x, y) {
     this.currentX = x;
     this.currentY = y;
-    if (x >= 0 && x <= Opts.nx && y >= 0 && y <= Opts.ny) {
-      if (this.field[y][x]) {
-        this.field[y][x].draw(x, y, this.ctx, true);
-      }
-    }
 
-    var i, X=-1, Y=-1;
-    for (i=0; i<Opts.nx; i++) {
-      if (this.field[y][i] === null) {
-        X = i;
-        break;
-      }
-    }
-    for (i=0; i<Opts.ny; i++) {
-      if (this.field[i][x] === null) {
-        Y = i;
-        break;
-      }
-    }
-    var d;
-    if ((X === -1 && Y !== -1) || (X !== -1 && Y === -1)) {
-      if (X===-1) {
-        d = y > Y ? 1:-1;
-        for (i=Y; i != y; i+=d) {
-          this.field[i][x] = this.field[i+d][x];
+    try {
+      if (x >= 0 && x <= Opts.nx && y >= 0 && y <= Opts.ny) {
+        if (this.field[y][x]) {
+          this.field[y][x].draw(x, y, this.ctx, true);
         }
       } else {
-        d = x > X ? 1:-1;
-        for (i=X; i != x; i+=d) {
-          this.field[y][i] = this.field[y][i+d];
+        this.log('sxy: outside');
+        return;
+      }
+    } catch (e) {
+      this.log('catch 1\n' + e);
+      return;
+    }
+
+    try {
+      var i, X=-1, Y=-1;
+      for (i=0; i<Opts.nx; i++) {
+        if (this.field[y][i] === null) {
+          X = i;
+          break;
         }
       }
-      this.field[y][x] = null;
-      this.draw();
+      for (i=0; i<Opts.ny; i++) {
+        if (this.field[i][x] === null) {
+          Y = i;
+          break;
+        }
+      }
+    } catch (e) {
+      this.log('catch 2\n' + e);
+      return;
     }
+
+    var d;
+    try {
+      if ((X === -1 && Y !== -1) || (X !== -1 && Y === -1)) {
+        if (X===-1) {
+          d = y > Y ? 1:-1;
+          for (i=Y; i != y; i+=d) {
+            this.field[i][x] = this.field[i+d][x];
+          }
+        } else {
+          d = x > X ? 1:-1;
+          for (i=X; i != x; i+=d) {
+            this.field[y][i] = this.field[y][i+d];
+          }
+        }
+        this.field[y][x] = null;
+        this.draw();
+      }
+    } catch (e) {
+      this.log('catch 3\n' + e);
+      return;
+    }
+      
   },
   onResize: function() {
     this.resize();
