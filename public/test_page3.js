@@ -215,7 +215,7 @@ var App = new Class({
       this.circles.push(c);
 
       this.hit = this.n - 1;
-      this.text = 'HIT';
+      //this.text = 'HIT';
     }
   },
   mouseDown: function(ev) {

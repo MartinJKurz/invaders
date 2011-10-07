@@ -1,55 +1,6 @@
 /*
 
-Corrected issues listed below.
-test_page6:
-  touch only
-test_page7:
-  mouse only
-
-when prevent default is enabled (at start):
-  ts p 0/0
-  ERROR: te L = 0
-  -> touch events WRONG, no mouse events
-when PD is disabled:
-  ts p 0/0
-  ERROR: te L = 0
-  md: 268/97
-  mu: start select
-  sel: 268/97 -> 2/0
-  -> touch ev wrong, continue with mouse events
-
--->
-2 Fehler:
-1. TS liefert 0/0
-2. TE: touches list ist leer - ist wohl kein Bug
-
-ts c undefined/undefined
-ts p 0/0
-ERR: te L = 0
-
-pd: false -> WORKING!!
-ts: 0 0
-ERROR: te L = 0
-md 222/453
-mu start select
-sel: 222/453 -> 2/1
-
-
-
-
-test_page3:
-
-desktop:
-M -> T ok
-T -> M NOK
-
-android:
-M -> T NOK
-T -> M ok
-
-MOVE: 1
-UP: 0
-
+  TOUCH ONLY
 
 */
 
@@ -254,7 +205,6 @@ var App = new Class({
     this.currentY = Opts.ny - 1;
 
     this.field[Opts.ny-1].push(null);
-    this.mouse = true;
     this.lastTime = 0;
     this.touches = [];
 
@@ -263,14 +213,6 @@ var App = new Class({
     this.canvas.addEventListener('touchstart', this.ts.bind(this));
 
     window.addEventListener('resize', this.onResize.bind(this));
-
-    this.bound_md = this.md.bind(this);
-    this.bound_mm = this.mm.bind(this);
-    this.bound_mu = this.mu.bind(this);
-
-    if (this.mouse) {
-      this.addMouseEventHandler();
-    }
 
     this.ih = -1;
     this.iw = -1;
@@ -366,47 +308,6 @@ var App = new Class({
       this.logger.toggle();
       this.info.hide();
     }
-  },
-
-  md: function(event) {
-    this.log('md ' + event.clientX + '/' + event.clientY);
-    if (this.prevDef) {
-      event.preventDefault();
-    }
-    if (!this.enabled) {
-      this.log('ERROR: md return');
-      return;
-    }
-    if (this.to) {
-      clearTimeout(this.to);
-    }
-    this.startSelect = true;
-    this.to = setTimeout(this.longClick.bind(this), 1000, event);
-  },
-  mm: function(event) {
-    if (this.prevDef) {
-      event.preventDefault();
-    }
-    if (!this.enabled) {
-      return;
-    }
-  },
-  mu: function(event) {
-    if (this.prevDef) {
-      event.preventDefault();
-    }
-    if (!this.enabled) {
-      this.log('ERROR: mu return');
-      return;
-    }
-    if (!this.startSelect) {
-      this.log('ERROR: mu ss inactive');
-      return;
-    }
-    this.startSelect = false;
-    this.log('mu start select');
-    this.select(event.clientX, event.clientY);
-    this.draw();
   },
 
   longFunction: function() {
@@ -572,25 +473,6 @@ var App = new Class({
           this.field[j][i].draw(i, j, this.ctx, false);
         }
       }
-    }
-  },
-  addMouseEventHandler: function() {
-    this.canvas.addEventListener('mousedown', this.bound_md);
-    this.canvas.addEventListener('mousemove', this.bound_mm);
-    this.canvas.addEventListener('mouseup', this.bound_mu);
-  },
-  removeMouseEventHandler: function() {
-    this.canvas.removeEventListener('mousedown', this.bound_md);
-    this.canvas.removeEventListener('mousemove', this.bound_mm);
-    this.canvas.removeEventListener('mouseup', this.bound_mu);
-  },
-
-  toggle: function() {
-    this.mouse = !this.mouse;
-    if (this.mouse) {
-      this.addMouseEventHandler();
-    } else {
-      this.removeMouseEventHandler();
     }
   },
   dblCheck: function() {
