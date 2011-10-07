@@ -347,8 +347,8 @@ var App = new Class({
     this.startSelect = false;
     // if (event.touches.length == 1) {   // this list does NOT contain the touch
     if (event.changedTouches.length == 1) {  // CHANGED !
-      t = event.changedTouches[1];
-      this.log('te start select');
+      t = event.changedTouches[0];
+      this.log('te start select ' + t.pageX + '/' + t.pageY);
       this.select(t.pageX, t.pageY);
     } else {
       this.log('ERROR: te L = ' + event.changedTouches.length);
