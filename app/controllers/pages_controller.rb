@@ -183,13 +183,13 @@ class PagesController < ApplicationController
     render :layout => false
   end
 
-  def test_page6
-    @title = '6 - Touch'
+  def menu_test
+    @title = '6 - Menu'
     render :layout => false
   end
 
-  def test_page7
-    @title = '7 - Mouse'
+  def dragable_test
+    @title = '7 - Dragable'
     render :layout => false
   end
 

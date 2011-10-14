@@ -1,10 +1,15 @@
 /*
 
-  TOUCH ONLY
+page5 ok now
 
 */
 
+/*
+JS source for random flickr images:
+src="http://api.flickr.com/services/rest/?format=json&sort=random&method=flickr.photos.search&tags=japan,food&tag_mode=all&api_key=66c61b93c4723c7c3a3c519728eac252">
+*/
 
+debug = false;
 
 var Opts = {
   tw: 40,
@@ -52,7 +57,7 @@ var imageSources = [
   '/P8200264.JPG',
   '/P8200257.JPG',
   '/P1010015_s.JPG',
-  '/P8180198_s.JPG'
+  '/P8180198_s.JPG',
 ];
 
 var Image = new Class({
@@ -65,32 +70,46 @@ var Image = new Class({
     this.image = new Element('img');
     this.image.addEventListener('load', this.loaded.bind(this));
 
+    this.image.initialized = false;
+
     this.image.src = imageSources[idx];
-    if (this.image.complete) {
+    if (this.image.complete && !this.image.initialized) {
       this.loaded({target: this.image});
     }
   },
 
   loaded: function(ev) {
-    ImageOpts.imageW = ev.target.width;
-    ImageOpts.imageH = ev.target.height;
+    if (ev.target.initialized) {
+      return;
+    }
+    ev.target.initialized = true;
+
+    var r1 = window.innerWidth / window.innerHeight;
+    var r2 = ev.target.width / ev.target.height;
+    if ((r1 >= 1 && r2 < 1) || (r1 < 1 && r2 >= 1)) {
+      var image = CH.rotateImage90(ev.target, 1);
+    } else {
+      image = ev.target;
+    }
+    ImageOpts.imageW = image.width;
+    ImageOpts.imageH = image.height;
+
     ImageOpts.kx = ImageOpts.imageW / Opts.nx;
     ImageOpts.ky = ImageOpts.imageH / Opts.ny;
     ImageOpts.tw = ImageOpts.imageW / Opts.nx - Opts.gap;
     ImageOpts.th = ImageOpts.imageH / Opts.ny - Opts.gap;
 
-    this.f(ev.target, true);
+    this.f(image, true);
   },
 });
 
 var Rect = new Class({
-  initialize: function(color, x, y, image) {
+  initialize: function(color, x, y) {
     this.color = color;
     this.x = x;
     this.y = y;
-    this.image = image;
   },
-  draw: function(x, y, ctx, highlighted) {
+  draw: function(x, y, ctx, image, highlighted) {
     var X = x*Opts.kx;
     var Y = y*Opts.ky;
     var W = Opts.tw;
@@ -100,7 +119,7 @@ var Rect = new Class({
     var SW = ImageOpts.tw;
     var SH = ImageOpts.th;
 
-    ctx.drawImage(this.image, SX, SY, SW, SH, X, Y, W, H);
+    ctx.drawImage(image, SX, SY, SW, SH, X, Y, W, H);
 
     ctx.strokeStyle = highlighted ? 'red' : 'black';
     ctx.lineWidth = highlighted ? 2 : 1;
@@ -112,29 +131,84 @@ var Rect = new Class({
 var App = new Class({
   initialize: function() {
 
+    if (debug && Log) {
+      this.logger = new Log();
+      this.logger.log('start logging');
+    }
+ 
     this.info = new InfoCanvas({
       fontWeight: 'bold',
       fontSize: 20,
     });
     this.info.resize();
-
-    this.info.showLines('Loading image');
+    this.info.hide();
     
     this.enable(false);
 
-    // this.loadImage(0);
-    this.doCreateDrawing();
-    this.imageIdx = -1;
+    this.canvas = document.getElementById('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.w = 100;
+    this.h = 100;
+    this.canvas.addEventListener('touchend', this.te.bind(this));
+    this.canvas.addEventListener('touchmove', this.tm.bind(this));
+    this.canvas.addEventListener('touchstart', this.ts.bind(this));
+
+    this.bound_md = this.md.bind(this);
+    this.bound_mm = this.mm.bind(this);
+    this.bound_mu = this.mu.bind(this);
+
+    this.mouse = true;
+    if (this.mouse) {
+      this.addMouseEventHandler();
+    }
+
+    window.addEventListener('resize', this.onResize.bind(this));
+
+
+  
+    this.loadImage(0);
+    //this.doCreateDrawing();
 
     this.prevDef = true;
+  },
+  initialize2: function(image, reuse) {
 
+    this.ih = -1;
+    this.iw = -1;
 
-
-    ///
-    if (Log) {
-      this.logger = new Log();
-      this.logger.log('start logging');
+    if (reuse) {
+      this.images[this.imageIdx] = image;
     }
+
+    this.image = image;
+
+    this.currentX = Opts.nx - 1;
+    this.currentY = Opts.ny - 1;
+
+    this.lastTime = 0;
+
+    this.createFields();
+    this.correct = Opts.nx*Opts.ny -1;
+    this.info.showLines(['shuffling','image']);
+
+    this.draw();
+    this.shuffle(20);
+  },
+  createFields: function() {
+    this.field = [];
+    var i, j, t;
+    for (j=0; j<Opts.ny; j++) {
+      this.field.push([]);
+      for (i=0; i<Opts.nx; i++) {
+        t = new Rect(randomColor(), i, j);
+        if (i!==Opts.nx-1 || j!==Opts.ny-1) {
+          this.field[j].push(t);
+        } else {
+          this.lastField = t;
+        }
+      }
+    }
+    this.field[Opts.ny-1].push(null);
   },
 
   togglePrevDef: function() {
@@ -143,10 +217,12 @@ var App = new Class({
   },
 
   loadImage: function(idx) {
+    this.info.showLines('loading image ...');
     if (!this.images) {
       this.images = [];
     }
     this.imageIdx = idx;
+
     if (this.images[idx]) {
       this.initialize2(this.images[idx]);
     } else {
@@ -162,11 +238,12 @@ var App = new Class({
   },
 
   doCreateDrawing: function(f) {
+    this.info.showLines('creating drawing ...');
     this.createDrawing(this.initialize2.bind(this));
   },
   createDrawing: function(f) {
-    ImageOpts.imageW = 800;
-    ImageOpts.imageH = 800;
+    ImageOpts.imageW = window.innerWidth;
+    ImageOpts.imageH = window.innerHeight;
     ImageOpts.kx = ImageOpts.imageW / Opts.nx;
     ImageOpts.ky = ImageOpts.imageH / Opts.ny;
     ImageOpts.tw = ImageOpts.imageW / Opts.nx - Opts.gap;
@@ -175,58 +252,13 @@ var App = new Class({
     f(image, false);
   },
 
-  initialize2: function(image, reuse) {
-
-    if (reuse) {
-      this.images[this.imageIdx] = image;
+  shuffle: function(n) {
+    if (n > 0) {
+      this.single_shuffle();
+      setTimeout(this.shuffle.bind(this, n-1), 100);
+    } else {
+      setTimeout(this.enable.bind(this), 200, true);
     }
-
-    this.info.hide();
-    this.image = image;
-
-    this.canvas = document.getElementById('canvas');
-    this.ctx = this.canvas.getContext('2d');
-    this.w = 100;
-    this.h = 100;
-
-    this.field = [];
-    var i, j, t;
-    for (j=0; j<Opts.ny; j++) {
-      this.field.push([]);
-      for (i=0; i<Opts.nx; i++) {
-        if (i!==Opts.nx-1 || j!==Opts.ny-1) {
-          t = new Rect(randomColor(), i, j, this.image);
-          this.field[j].push(t);
-        }
-      }
-    }
-
-    this.currentX = Opts.nx - 1;
-    this.currentY = Opts.ny - 1;
-
-    this.field[Opts.ny-1].push(null);
-    this.lastTime = 0;
-    this.touches = [];
-
-    this.canvas.addEventListener('touchend', this.te.bind(this));
-    this.canvas.addEventListener('touchmove', this.tm.bind(this));
-    this.canvas.addEventListener('touchstart', this.ts.bind(this));
-
-    window.addEventListener('resize', this.onResize.bind(this));
-
-    this.ih = -1;
-    this.iw = -1;
-    this.draw();
-    
-    this.shuffle2(10);
-  },
-  shuffle2: function(n) {
-    var i;
-    this.info.showLines(['shuffling','image']);
-    for (i=0; i<n; i++) {
-      setTimeout(this.single_shuffle.bind(this), 300+i*100);
-    }
-    setTimeout(this.enable.bind(this), 400+n*100, true);
   },
   enable: function(val) {
     this.enabled = val;
@@ -243,7 +275,7 @@ var App = new Class({
       while (this.currentX === (x = irand(Opts.nx)))
         ;
     }
-    this.selectXY(x, y);
+    this.selectXY(x, y, false);
   },
 
   ts: function(event) {
@@ -283,7 +315,7 @@ var App = new Class({
       return;
     }
     if (!this.startSelect) {
-      this.log('ERROR: mu ss inactive');
+      this.log('ERROR: te ss inactive');
       return;
     }
     this.startSelect = false;
@@ -310,17 +342,60 @@ var App = new Class({
     }
   },
 
+  md: function(event) {
+    this.log('md ' + event.clientX + '/' + event.clientY);
+    if (this.prevDef) {
+      event.preventDefault();
+    }
+    if (!this.enabled) {
+      this.log('ERROR: md return');
+      return;
+    }
+    if (this.to) {
+      clearTimeout(this.to);
+    }
+    this.startSelect = true;
+    this.to = setTimeout(this.longClick.bind(this), 1000, event);
+  },
+  mm: function(event) {
+    if (this.prevDef) {
+      event.preventDefault();
+    }
+    if (!this.enabled) {
+      return;
+    }
+  },
+  mu: function(event) {
+    this.log('mu');
+    if (this.prevDef) {
+      event.preventDefault();
+    }
+    if (!this.enabled) {
+      this.log('ERROR: mu return');
+      return;
+    }
+    if (!this.startSelect) {
+      this.log('ERROR: mu ss inactive');
+      return;
+    }
+    this.startSelect = false;
+    this.log('mu start select');
+    this.select(event.clientX, event.clientY);
+    this.draw();
+  },
+
   longFunction: function() {
-    this.info.showMenu(
-      [
-        {text: 'shuffle', cb: function() {this.shuffle2(11);}.bind(this)},
-        {text: 'image', cb: function(){this.loadNextImage();}.bind(this)},
-        {text: 'create graphic', cb: function(){this.doCreateDrawing();}.bind(this)},
-        {text: 'log', cb: function(){this.toggleLog();}.bind(this)},
-        {text: 'toggle PD', cb: function(){this.togglePrevDef();}.bind(this)},
-      ],
-      {cancel:true}
-    );
+    var items = [];
+    if (!this.solved) {
+      items.push({text: 'shuffle', cb: function() {this.shuffle(11);}.bind(this)});
+    }
+    items.push({text: 'new image', cb: function(){this.loadNextImage();}.bind(this)});
+    items.push({text: 'new graphic', cb: function(){this.doCreateDrawing();}.bind(this)});
+    if (debug) {
+      items.push({text: 'log', cb: function(){this.toggleLog();}.bind(this)});
+      items.push({text: 'toggle PD', cb: function(){this.togglePrevDef();}.bind(this)});
+    }
+    this.info.showMenu(items, {cancel:true});
   },
 
   longClick: function(event) {
@@ -342,67 +417,76 @@ var App = new Class({
     xn = Math.floor(xn/Opts.kx);
     yn = Math.floor(yn/Opts.ky);
     this.log('sel: ' + x + '/' + y + ' -> ' + xn + '/' + yn);
-    this.selectXY(xn, yn);
+    this.selectXY(xn, yn, true);
   },
-  selectXY: function(x, y) {
+  selectXY: function(x, y, user) {
+    var i, X=-1, Y=-1, d;
+
+    if (x >= 0 && x <= Opts.nx && y >= 0 && y <= Opts.ny) {
+    } else {
+      this.log('sxy: outside');
+      return;
+    }
+
     this.currentX = x;
     this.currentY = y;
 
-    try {
-      if (x >= 0 && x <= Opts.nx && y >= 0 && y <= Opts.ny) {
-        if (this.field[y][x]) {
-          this.field[y][x].draw(x, y, this.ctx, true);
+    for (i=0; i<Opts.nx; i++) {
+      if (this.field[y][i] === null) {
+        X = i;
+        break;
+      }
+    }
+    for (i=0; i<Opts.ny; i++) {
+      if (this.field[i][x] === null) {
+        Y = i;
+        break;
+      }
+    }
+
+    function setField(tx, ty, sx, sy) {
+      var plus = 0;
+      var f = this.field[sy][sx];
+      if (f && f.x === sx && f.y === sy) {
+        plus--;
+      }
+      this.field[ty][tx] = this.field[sy][sx];
+      f = this.field[ty][tx];
+      if (f && f.x === tx && f.y === ty) {
+        plus++;
+      }
+      this.correct += plus;
+    }
+
+    if ((X === -1 && Y !== -1) || (X !== -1 && Y === -1)) {
+      if (X===-1) {
+        d = y > Y ? 1:-1;
+        for (i=Y; i != y; i+=d) {
+          setField.bind(this, [x, i, x, i+d])();
         }
       } else {
-        this.log('sxy: outside');
-        return;
-      }
-    } catch (e) {
-      this.log('catch 1\n' + e);
-      return;
-    }
-
-    try {
-      var i, X=-1, Y=-1;
-      for (i=0; i<Opts.nx; i++) {
-        if (this.field[y][i] === null) {
-          X = i;
-          break;
+        d = x > X ? 1:-1;
+        for (i=X; i != x; i+=d) {
+          setField.bind(this, [i, y, i+d, y])();
         }
       }
-      for (i=0; i<Opts.ny; i++) {
-        if (this.field[i][x] === null) {
-          Y = i;
-          break;
-        }
-      }
-    } catch (e) {
-      this.log('catch 2\n' + e);
-      return;
+      this.field[y][x] = null;
+      //this.draw();
     }
-
-    var d;
-    try {
-      if ((X === -1 && Y !== -1) || (X !== -1 && Y === -1)) {
-        if (X===-1) {
-          d = y > Y ? 1:-1;
-          for (i=Y; i != y; i+=d) {
-            this.field[i][x] = this.field[i+d][x];
-          }
-        } else {
-          d = x > X ? 1:-1;
-          for (i=X; i != x; i+=d) {
-            this.field[y][i] = this.field[y][i+d];
-          }
-        }
-        this.field[y][x] = null;
-        this.draw();
+    this.draw();
+    if (user) {
+      if (Opts.nx * Opts.ny - 1 === this.correct) {
+        this.solved();
+      } else {
+        this.log('Correct: ' + this.correct);
       }
-    } catch (e) {
-      this.log('catch 3\n' + e);
-      return;
     }
-      
+  },
+  solved: function() {
+    this.log('solved');
+    this.field[Opts.nx-1][Opts.ny-1] = this.lastField;
+    this.draw();
+    this.info.showLines(['solved!'], {timeout:2000});
   },
   onResize: function() {
     this.resize();
@@ -418,6 +502,8 @@ var App = new Class({
 
     this.ih = window.innerHeight;
     this.iw = window.innerWidth;
+
+    this.log('resized: ' + this.iw + 'x' + this.ih);
 
     var nw = window.innerWidth;
     var nh = window.innerHeight;
@@ -470,18 +556,21 @@ var App = new Class({
     for (j=0; j<Opts.ny; j++) {
       for (i=0; i<Opts.nx; i++) {
         if (this.field[j][i]) {
-          this.field[j][i].draw(i, j, this.ctx, false);
+          this.field[j][i].draw(i, j, this.ctx, this.image, false);
         }
       }
     }
   },
-  dblCheck: function() {
-    var nt = (new Date).getTime();
-    if (nt - this.lastTime < 200) {
-      this.toggle();
-    }
-    this.lastTime = nt;
-  }
+  addMouseEventHandler: function() {
+    this.canvas.addEventListener('mousedown', this.bound_md);
+    this.canvas.addEventListener('mousemove', this.bound_mm);
+    this.canvas.addEventListener('mouseup', this.bound_mu);
+  },
+  removeMouseEventHandler: function() {
+    this.canvas.removeEventListener('mousedown', this.bound_md);
+    this.canvas.removeEventListener('mousemove', this.bound_mm);
+    this.canvas.removeEventListener('mouseup', this.bound_mu);
+  },
 });
 
 function onLoad() {

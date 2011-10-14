@@ -1,57 +1,55 @@
 <!DOCTYPE html>
 
 <html>
-<head>
-<title><%= title %></title>
-<%= csrf_meta_tag %>
-  <script src='/mootools-core-1.4.0-full-compat-yc.js' type='text/javascript'></script>
-  <script src='/lib/mt_sound.js' type='text/javascript'></script>
-  <script src='/lib/mt_blockfont.js' type='text/javascript'></script>
-  <script src='/public_helpers.js' type='text/javascript'></script>
-  <script src='/mt_invaders.js' type='text/javascript'></script>
-  <style type="text/css">
+  <head>
+    <title><%= title %></title>
+    <%= javascript_include_tag "mt_invaders_content" %>
+    <%= csrf_meta_tag %>
 
-    .app {
-      box-shadow: 5px 5px 35px rgba(0,0,0,0.5);
-      border: solid red 2px;
-    }
-    .app_full {
-    }
-    .container {
-      background: #888;
-      margin: auto;
-      width: 100%;
-    }
-    #game_nav {
-      position: absolute;
-      left: 0;
-      top: 0;
-    }
-    .home_button {
-      background-color: green;
-      color: red;
-      font-weight: bold;
-      font-size: 200%;
-      padding: 5px;
-      font-family:"Helvetica Neue", Arial, Helvetica, sans-serif;
-    }
 
-  </style>
+    <style type="text/css">
 
-</head>
+      .app {
+        box-shadow: 5px 5px 35px rgba(0,0,0,0.5);
+        border: solid red 2px;
+      }
+      .app_full {
+      }
+      .container {
+        background: #888;
+        margin: auto;
+        width: 100%;
+      }
+      #game_nav {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      .home_button {
+        background-color: green;
+        color: red;
+        font-weight: bold;
+        font-size: 200%;
+        padding: 5px;
+        font-family:"Helvetica Neue", Arial, Helvetica, sans-serif;
+      }
 
-<body onload='startApp()'>
-  <div id='game_nav'>
-    <% if current_user %>
-      <%= link_to 'Home', '/users/' + current_user.id.to_s, :class => 'home_button' %>
-    <% else %>
-      <%= link_to 'Home', '/' %>
-    <% end %>
-  </div>
-  <div id='app'>
-    The app will be placed here
-  </div>
-</body>
+    </style>
+
+  </head>
+
+  <body onload='startApp()'>
+    <div id='game_nav'>
+      <% if current_user %>
+        <%= link_to 'Home', '/users/' + current_user.id.to_s, :class => 'home_button' %>
+      <% else %>
+        <%= link_to 'Home', '/' %>
+      <% end %>
+    </div>
+    <div id='app'>
+      The app will be placed here
+    </div>
+  </body>
 </html>
 
 
