@@ -21,6 +21,7 @@ var Log = new Class({
     }
 
     this.div = new Element('div');
+    this.div.id = 'logger';
     if (parentEl) {
       parentEl.appendChild(this.div);
     } else {
@@ -142,3 +143,11 @@ var Log = new Class({
     }
   },
 });
+
+var Logger;
+window.addEvent('domready', function() {
+  Logger = new Log();
+});
+
+
+

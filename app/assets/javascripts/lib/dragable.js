@@ -44,10 +44,16 @@ window.addEvent('domready', function() {
     }
   }
 
-  document.body.addEventListener('mousemove', gmm);
-  document.body.addEventListener('mouseup', gmu);
-  document.body.addEventListener('touchmove', gtm);
-  document.body.addEventListener('touchend', gte);
+  touch = "ontouchstart" in window;
+  Logger.log('Touch device: ' + touch);
+  
+  if (touch) {
+    document.body.addEventListener('touchmove', gtm);
+    document.body.addEventListener('touchend', gte);
+  } else {
+    document.body.addEventListener('mousemove', gmm);
+    document.body.addEventListener('mouseup', gmu);
+  }
 });
 
 var Dragable = new Class({

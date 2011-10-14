@@ -205,7 +205,7 @@ var Logger;
 window.addEvent('domready', function() {
   app = new App();
   app.browserInfo();
-  Logger = new Log();
+  //Logger = new Log();
   Logger.show('right');
   Logger.log('hi');
 });

@@ -3,7 +3,7 @@ var Logger = null;
 var App = new Class({
   initialize: function() {
 
-    Logger = new Log();
+    // Logger = new Log();
 
     var thing1 = new Dragable('label');
     thing1.setPosition(200, 50);

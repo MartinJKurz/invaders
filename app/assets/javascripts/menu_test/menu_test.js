@@ -1,8 +1,10 @@
-var Logger;
+// var Logger;
+//
+// Logger is auto created
 
 var App = new Class({
   initialize: function() {
-    Logger = new Log();
+    // Logger = new Log();
     var items = [
       {text: 'one', cb: this.cb1.bind(this)},
       {text: 'two', cb: this.cb2.bind(this)},

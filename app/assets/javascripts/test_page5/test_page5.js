@@ -131,9 +131,9 @@ var Rect = new Class({
 var App = new Class({
   initialize: function() {
 
-    if (debug && Log) {
-      this.logger = new Log();
-      this.logger.log('start logging');
+    if (Logger) {
+      //this.logger = new Log();
+      Logger.log('start logging');
     }
  
     this.info = new InfoCanvas({
@@ -331,13 +331,13 @@ var App = new Class({
   },
 
   log: function(line) {
-    if (this.logger) {
-      this.logger.log(line);
+    if (Logger) {
+      Logger.log(line);
     }
   },
   toggleLog: function(line) {
-    if (this.logger) {
-      this.logger.toggle();
+    if (Logger) {
+      Logger.toggle();
       this.info.hide();
     }
   },
