@@ -12,9 +12,35 @@ window.addEvent('domready', function() {
       global_dragable.mu(ev);
     }
   }
+  function gtm(event) {
+    if (global_dragable) {
+      if (event.targetTouches.length == 1) {
+        touch = event.targetTouches[0];
+        var ev = {};
+        ev.clientX = touch.pageX;
+        ev.clientY = touch.pageY;
+        global_dragable.mm(ev, true);
+      }
+      event.preventDefault();
+    }
+  }
+  function gte(event) {
+    if (global_dragable) {
+      if (event.changedTouches.length == 1) {
+        touch = event.changedTouches[0];
+        var ev = {};
+        ev.clientX = touch.pageX;
+        ev.clientY = touch.pageY;
+        global_dragable.mu(ev, true);
+      }
+      event.preventDefault();
+    }
+  }
 
   document.body.addEventListener('mousemove', gmm);
   document.body.addEventListener('mouseup', gmu);
+  document.body.addEventListener('touchmove', gtm);
+  document.body.addEventListener('touchend', gte);
 });
 
 var Dragable = new Class({
@@ -33,6 +59,7 @@ var Dragable = new Class({
     this.el.style.position = 'absolute';
 
     this.el.addEventListener('mousedown', this.md.bind(this));
+    this.el.addEventListener('touchstart', this.ts.bind(this));
   },
 
   setPosition: function(px, py) {
@@ -44,7 +71,7 @@ var Dragable = new Class({
     this.targetPositions = tp;
   },
 
-  md: function(ev) {
+  md: function(ev, ignore) {
     global_dragable = this;
 
     var px = parseFloat(this.el.style.left);
@@ -72,10 +99,23 @@ var Dragable = new Class({
     this.hor = false;
     this.ver = false;
 
-    ev.preventDefault();
+    if (!ignore) {
+      ev.preventDefault();
+    }
+  },
+  ts: function(event) {
+    if (event.targetTouches.length == 1) {
+      var touch = event.targetTouches[0];
+
+      var ev = {};
+      ev.clientX = touch.pageX;
+      ev.clientY = touch.pageY;
+      this.md(ev, true);
+    }
+    event.preventDefault();
   },
 
-  mm: function(ev) {
+  mm: function(ev, ignore) {
     var x, y, dx, dy, d, started;
     if (-1 !== this.startX) {
       x = ev.clientX;
@@ -119,6 +159,9 @@ var Dragable = new Class({
         this.el.setStyle ('top', this.el.cpy + dy);
       }
     }
+    if (!ignore) {
+      ev.preventDefault();
+    }
   },
 
   // timer target needs a cb
@@ -139,7 +182,7 @@ var Dragable = new Class({
     }
   },
 
-  mu: function(ev) {
+  mu: function(ev, ignore) {
     global_dragable = null;
 
     this.startX = -1;

@@ -13,28 +13,32 @@ var App = new Class({
     document.body.appendChild(thing1.el);
 
     var thing2 = new Dragable('img');
-    thing2.el.style.width = 250;
-    thing2.el.style.height= 200;
-    thing2.setPosition(250, 300);
+    thing2.el.style.width = 150;
+    thing2.el.style.height= 100;
+    thing2.setPosition(150, 0);
     thing2.setTargetPositions(
       [
-        [0,  0],[250,  0],[500,  0],[750,  0],[1000,  0],
-        [0,200],[250,200],[500,200],[750,200],[1000,200],
-        [0,400],[250,400],[500,400],[750,400],[1000,400]
+        [0,  0],[150,  0],[300,  0],[450,  0],
+        [0,100],[150,100],[300,100],[450,100],
+        [0,200],[150,200],[300,200],[450,200],
+        [0,300],[150,300],[300,300],[450,300],
+        [0,400],[150,400],[300,400],[450,400]
       ]
     );
     thing2.el.src = '/P8180198_s.JPG';
     document.body.appendChild(thing2.el);
 
     var thing3 = new Dragable('img');
-    thing3.el.style.width = 250;
-    thing3.el.style.height= 200;
-    thing3.setPosition(500, 300);
+    thing3.el.style.width = 150;
+    thing3.el.style.height= 100;
+    thing3.setPosition(150, 200);
     thing3.setTargetPositions(
       [
-        [0,  0],[250,  0],[500,  0],[750,  0],[1000,  0],
-        [0,200],[250,200],[500,200],[750,200],[1000,200],
-        [0,400],[250,400],[500,400],[750,400],[1000,400]
+        [0,  0],[150,  0],[300,  0],[450,  0],
+        [0,100],[150,100],[300,100],[450,100],
+        [0,200],[150,200],[300,200],[450,200],
+        [0,300],[150,300],[300,300],[450,300],
+        [0,400],[150,400],[300,400],[450,400]
       ]
     );
     thing3.el.src = '/P1010015_s.JPG';
