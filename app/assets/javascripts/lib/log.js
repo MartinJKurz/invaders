@@ -81,6 +81,13 @@ var Log = new Class({
     this.div.setStyle('display', 'none');
     this.visible = false;
   },
+  show: function(where) {
+    this.div.setStyle('display', '');
+    this.visible = false;
+    if (where) {
+      this.div.setStyle(where, '0px');
+    }
+  },
   toggle: function() {
     if (this.visible) {
       this.div.setStyle('display', 'none');

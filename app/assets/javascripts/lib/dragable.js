@@ -21,7 +21,7 @@ window.addEvent('domready', function() {
         ev.clientY = touch.pageY;
         global_dragable.mm(ev, true);
       }
-      event.preventDefault();
+      event.preventDefault();   // can't cause a click not to be fired ??
     }
   }
   function gte(event) {
@@ -33,7 +33,9 @@ window.addEvent('domready', function() {
         ev.clientY = touch.pageY;
         global_dragable.mu(ev, true);
       }
-      event.preventDefault();
+      // no click event,
+      // maybe because preventDefault is called -> disable
+      // event.preventDefault();
     }
   }
 
@@ -101,7 +103,9 @@ var Dragable = new Class({
 
     if (!ignore) {
       ev.preventDefault();
+      return false;
     }
+    return true;
   },
   ts: function(event) {
     if (event.targetTouches.length == 1) {
@@ -112,7 +116,12 @@ var Dragable = new Class({
       ev.clientY = touch.pageY;
       this.md(ev, true);
     }
-    event.preventDefault();
+    // no click event,
+    // maybe because preventDefault is called -> disable
+    // event.preventDefault();
+
+    // return false; // same as preventDefault ?
+    return true;  // go on with event - could be part one of a click
   },
 
   mm: function(ev, ignore) {

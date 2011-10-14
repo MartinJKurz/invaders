@@ -43,6 +43,7 @@ var App = new Class({
     $(document.body).removeEvents('touchend');
   },
   setHandlers: function(mouse, touch) {
+    Logger.log('M: ' + mouse + ' T: ' + touch);
     this.removeHandlers();
     var i;
     if (mouse)  {
@@ -98,8 +99,16 @@ var App = new Class({
 
     var button1 = new Element('button', {text: 'Mouse'});
     var button2 = new Element('button', {text: 'Touch'});
-    button1.addEvent('click', function(ev) {ev.preventDefault();this.setHandlers(true, false)}.bind(this));
-    button2.addEvent('click', function(ev) {ev.preventDefault();this.setHandlers(false, true)}.bind(this));
+    button1.addEvent('click', function(ev) {
+      ev.preventDefault();
+      this.setHandlers(true, false);
+    }.bind(this));
+
+    button2.addEvent('click', function(ev) {
+      ev.preventDefault();
+      this.setHandlers(false, true)
+    }.bind(this));
+
     document.body.appendChild(button1);
     document.body.appendChild(button2);
   },
@@ -190,9 +199,14 @@ var App = new Class({
   },
 });
 
+var Logger;
+
 // executed after page load:
 window.addEvent('domready', function() {
   app = new App();
   app.browserInfo();
+  Logger = new Log();
+  Logger.show('right');
+  Logger.log('hi');
 });
 

@@ -39,9 +39,16 @@ var App = new Class({
   },
 });
 
+var Logger;
+
 // executed after page load:
 window.addEvent('domready', function() {
   app = new App();
-  app.browserInfo();
+  //var info = app.browserInfo();
+  var info = app.browserSizeInfo();
+  Logger = new Log();
+  Logger.show();
+  Logger.log('screen: ' + info.screenSize.x + ' ' + info.screenSize.y);
+  Logger.log('inner: ' + info.innerSize.x + ' ' + info.innerSize.y);
 });
 
