@@ -2,6 +2,7 @@ var Logger;
 
 var App = new Class({
   initialize: function() {
+    Logger = new Log();
     var items = [
       {text: 'one', cb: this.cb1.bind(this)},
       {text: 'two', cb: this.cb2.bind(this)},
@@ -29,10 +30,7 @@ var App = new Class({
     options = {};
     this.secondMenu = Menus.createSplashMenu(items, options);
 
-
     Menus.showSplashMenu(this.mainMenu);
-
-    Logger = new Log();
   },
 
   cb1: function() {

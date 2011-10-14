@@ -211,6 +211,9 @@ var MenusClass = new Class({
       pos.push([px, -i*H]);
     }
     this.menuDiv.setTargetPositions(pos);
+    Logger.log('setTPX: ' + px);
+    Logger.log('iw was: ' + window.innerWidth);
+    Logger.log('ow was: ' + this.menuDiv.el.offsetWidth);
 
     this.menuDiv.setPosition(px, py);
   },

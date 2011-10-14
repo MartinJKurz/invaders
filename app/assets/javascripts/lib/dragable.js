@@ -4,29 +4,34 @@ var global_dragable = null;
 window.addEvent('domready', function() {
   function gmm(ev) {
     if (global_dragable) {
+      Logger.log('gmm --- ', true);
       global_dragable.mm(ev);
     }
   }
   function gmu(ev) {
     if (global_dragable) {
+      Logger.log('gmu --- ', true);
       global_dragable.mu(ev);
     }
   }
   function gtm(event) {
     if (global_dragable) {
       if (event.targetTouches.length == 1) {
+        Logger.log('gtm --- ', true);
         touch = event.targetTouches[0];
         var ev = {};
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
         global_dragable.mm(ev, true);
       }
-      event.preventDefault();   // can't cause a click not to be fired ??
+      // app crashing occasionaly -> disabled
+      // event.preventDefault();   // can't cause a click not to be fired ??
     }
   }
   function gte(event) {
     if (global_dragable) {
       if (event.changedTouches.length == 1) {
+        Logger.log('gte --- ', true);
         touch = event.changedTouches[0];
         var ev = {};
         ev.clientX = touch.pageX;
@@ -75,6 +80,7 @@ var Dragable = new Class({
 
   md: function(ev, ignore) {
     global_dragable = this;
+    Logger.log('md');
 
     var px = parseFloat(this.el.style.left);
     if (isNaN(px)) {
@@ -109,6 +115,7 @@ var Dragable = new Class({
   },
   ts: function(event) {
     if (event.targetTouches.length == 1) {
+      Logger.log('ts');
       var touch = event.targetTouches[0];
 
       var ev = {};
@@ -127,6 +134,7 @@ var Dragable = new Class({
   mm: function(ev, ignore) {
     var x, y, dx, dy, d, started;
     if (-1 !== this.startX) {
+    Logger.log('mm');
       x = ev.clientX;
       y = ev.clientY;
       
@@ -193,6 +201,7 @@ var Dragable = new Class({
 
   mu: function(ev, ignore) {
     global_dragable = null;
+    Logger.log('mu');
 
     this.startX = -1;
     this.el.cpx = parseFloat(this.el.getStyle('left'));

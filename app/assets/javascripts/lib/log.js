@@ -3,6 +3,9 @@
  * on page log output
  */
 var Log = new Class({
+  last: '',
+  lastN: 0,
+
   initialize: function(parentEl) {
 
     function makeTextSelectable(els) {
@@ -97,8 +100,45 @@ var Log = new Class({
       this.visible = true;
     }
   },
+  /*
   log: function(line) {
-    this.text.value += line + '\n';
+    var i;
+    for (i=0; i<this.lastN; i++) {
+      if (this.last[i] === line) {
+      }
+    }
+    if (line === this.last) {
+      this.text.value += ; 
+    } else {
+      this.last = line;
+      this.text.value += line + '\n';
+      this.text.scrollTop = this.text.scrollHeight - this.text.clientHeight;
+    }
+  },
+  */
+  N: 0,
+
+  log: function(line, nnl) {
+    if (nnl) {
+      this.text.value += line;
+      this.last += line;
+    } else {
+      this.text.value += line + '\n';
+      this.last = line;
+    }
     this.text.scrollTop = this.text.scrollHeight - this.text.clientHeight;
+  },
+  log_2: function(line) {
+    this.N++;
+    if (line === this.last) {
+      this.text.value = this.text.value.replace(/(\n.*$)/g, "");
+      this.text.value += '\n[' + this.lastN + '] ' + this.last + '\n';
+      this.lastN++;
+    } else {
+      this.lastN = 1;
+      this.last = line;
+      this.text.value += this.N + ' ' + line + '\n';
+      this.text.scrollTop = this.text.scrollHeight - this.text.clientHeight;
+    }
   },
 });
