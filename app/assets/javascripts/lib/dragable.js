@@ -1,65 +1,78 @@
-var global_dragable = null;
-var global_touchDevice = false;
 
+// plan B
+// one DragManager, auto instanciated
 
-window.addEvent('domready', function() {
-  function gmm(ev) {
-    if (global_dragable) {
-      Logger.log('gmm --- ', true);
-      global_dragable.mm(ev);
+var DragManagerClass = new Class({
+  isTouchDevice: false,
+  dragElement: null,
+  dragLimit: 30,
+
+  initialize: function() {
+    this.isTouchDevice = "ontouchstart" in window;
+    Logger.log('Touch device: ' + this.isTouchDevice);
+
+    if (this.isTouchDevice) {
+      document.body.addEventListener('touchmove', this.gtm.bind(this));
+      document.body.addEventListener('touchend', this.gte.bind(this));
+    } else {
+      document.body.addEventListener('mousemove', this.gmm.bind(this));
+      document.body.addEventListener('mouseup', this.gmu.bind(this));
     }
-  }
-  function gmu(ev) {
-    if (global_dragable) {
+    document.body.addEventListener('click', function(ev) {
+        if (this.dragElement) {
+          this.dragElement.dragging = false;
+        }
+      }.bind(this));
+  },
+
+  gmm: function(ev) {
+    if (this.dragElement) {
+      //Logger.log('gmm --- ', true);
+      this.dragElement.mm(ev);
+    }
+  },
+  gmu: function(ev) {
+    if (this.dragElement) {
       Logger.log('gmu --- ', true);
-      global_dragable.mu(ev);
+      this.dragElement.mu(ev);
+      this.dragElement = null;
     }
-  }
-  function gtm(event) {
-    if (global_dragable) {
+  },
+  gtm: function(event) {
+    if (this.dragElement) {
       if (event.targetTouches.length == 1) {
-        Logger.log('gtm --- ', true);
+        // Logger.log('gtm --- ', true);
         touch = event.targetTouches[0];
         var ev = {};
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
-        global_dragable.mm(ev, true);
+        this.dragElement.mm(ev);
       }
-      // app crashing occasionaly -> disabled
-      // event.preventDefault();   // can't cause a click not to be fired ??
     }
-  }
-  function gte(event) {
-    if (global_dragable) {
+  },
+  gte: function(event) {
+    if (this.dragElement) {
       if (event.changedTouches.length == 1) {
         Logger.log('gte --- ', true);
         touch = event.changedTouches[0];
         var ev = {};
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
-        global_dragable.mu(ev, true);
+        this.dragElement.mu(ev);
       }
-      // no click event,
-      // maybe because preventDefault is called -> disable
-      // event.preventDefault();
     }
-  }
-
-  global_touchDevice = "ontouchstart" in window;
-  Logger.log('Touch device: ' + global_touchDevice);
-  
-  if (global_touchDevice) {
-    document.body.addEventListener('touchmove', gtm);
-    document.body.addEventListener('touchend', gte);
-  } else {
-    document.body.addEventListener('mousemove', gmm);
-    document.body.addEventListener('mouseup', gmu);
   }
 });
 
+var DragManager = null;
+window.addEvent('domready', function() {
+  DragManager = new DragManagerClass();
+});
+
+
+
 var Dragable = new Class({
   Extends: Emitter,
-  DRAGSTART: 100,
   startX: -1,
   startY: -1,
   el: null,
@@ -72,7 +85,7 @@ var Dragable = new Class({
     this.el = new Element(elType);
     this.el.style.position = 'absolute';
 
-    if (global_touchDevice) {
+    if (DragManager.isTouchDevice) {
       Logger.log('using touchstart');
       this.el.addEventListener('touchstart', this.ts.bind(this));
     } else {
@@ -90,8 +103,8 @@ var Dragable = new Class({
     this.targetPositions = tp;
   },
 
-  md: function(ev, ignore) {
-    global_dragable = this;
+  md: function(ev) {
+    DragManager.dragElement = this;
     Logger.log('md');
 
     var px = parseFloat(this.el.style.left);
@@ -118,12 +131,6 @@ var Dragable = new Class({
 
     this.hor = false;
     this.ver = false;
-
-    if (!ignore) {
-      ev.preventDefault();
-      return false;
-    }
-    return true;
   },
   ts: function(event) {
     if (event.targetTouches.length == 1) {
@@ -133,20 +140,14 @@ var Dragable = new Class({
       var ev = {};
       ev.clientX = touch.pageX;
       ev.clientY = touch.pageY;
-      this.md(ev, true);
+      this.md(ev);
     }
-    // no click event,
-    // maybe because preventDefault is called -> disable
-    // event.preventDefault();
-
-    // return false; // same as preventDefault ?
-    return true;  // go on with event - could be part one of a click
   },
 
-  mm: function(ev, ignore) {
+  mm: function(ev) {
     var x, y, dx, dy, d, started;
     if (-1 !== this.startX) {
-    Logger.log('mm');
+      // Logger.log('mm');
       x = ev.clientX;
       y = ev.clientY;
       
@@ -162,9 +163,9 @@ var Dragable = new Class({
         dx = 0;
       }
 
-      d = dx*dx+dy*dy;
+      d = Math.sqrt(dx*dx+dy*dy);
       started = false;
-      if (d > this.DRAGSTART && !this.dragging) {
+      if (d > DragManager.dragLimit && !this.dragging) {
         this.dragging = true;
         started = true;
         switch (this.motion) {
@@ -181,15 +182,12 @@ var Dragable = new Class({
               this.hor = true;
             }
         }
-
       }
+
       if (this.dragging) {
         this.el.setStyle ('left', this.el.cpx + dx); 
         this.el.setStyle ('top', this.el.cpy + dy);
       }
-    }
-    if (!ignore) {
-      ev.preventDefault();
     }
   },
 
@@ -211,8 +209,8 @@ var Dragable = new Class({
     }
   },
 
-  mu: function(ev, ignore) {
-    global_dragable = null;
+  mu: function(ev) {
+    DragManager.dragElement = null;
     Logger.log('mu');
 
     this.startX = -1;

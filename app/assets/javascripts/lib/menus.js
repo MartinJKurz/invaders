@@ -7,9 +7,6 @@
  *
  */
 
-_MENU_OPTS_ = {
-  dragStart: 100
-};
 var SplashMenu = new Class({
   table: null,
   initialize: function(items, options) {
@@ -37,9 +34,15 @@ var SplashMenu = new Class({
     for (i=0; i<items.length; i++) {
       tr = new Element('tr');
       this.table.appendChild(tr);
+      /*
       b = new Element('input');
-      this.elements.push(b);
       b.type = 'button';
+      b.value = items[i].text;
+      */
+      b = new Element('button', {text: items[i].text});
+
+      this.elements.push(b);
+
       b.setAttribute('class', 'menu-button');
       b.setStyle('font-family', this.opts.fontFamily);
       b.setStyle('font-style', this.opts.fontStyle);
@@ -47,7 +50,6 @@ var SplashMenu = new Class({
       b.setStyle('font-weight', this.opts.fontWeight);
       b.id = i;
 
-      b.value = items[i].text;
       tr.appendChild(b);
 
       // possible cause of trouble:

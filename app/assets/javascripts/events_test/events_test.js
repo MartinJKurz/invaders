@@ -22,11 +22,11 @@
 // -> not useful in scenario
 
 
-var global_touchDevice = false;
-var global_drag = null;
-var global_drag_min = 30;
-
 var App = new Class({
+  isTouchDevice: false,
+  dragElement: null,
+  dragElement_min: 30,
+
   initialize: function() {
     Logger.show('right');
     Logger.log('events tests');
@@ -45,11 +45,11 @@ var App = new Class({
     this.addButtons(this.dragDiv2, 'div2_');
     document.body.appendChild(this.dragDiv2);
 
-    global_touchDevice = "ontouchstart" in window;
-    Logger.log('Touch device: ' + global_touchDevice);
+    this.isTouchDevice = "ontouchstart" in window;
+    Logger.log('Touch device: ' + this.isTouchDevice);
 
     // for dragging:
-    if (global_touchDevice) {
+    if (this.isTouchDevice) {
       document.body.addEventListener('touchmove', this.div_tm.bind(this));
       document.body.addEventListener('touchend', this.div_te.bind(this));
     } else {
@@ -66,7 +66,7 @@ var App = new Class({
   },
   
   makeDragable: function(el) {
-    if (global_touchDevice) {
+    if (this.isTouchDevice) {
       el.addEventListener('touchstart', this.div_ts.bind(this));
     } else {
       el.addEventListener('mousedown', this.div_md.bind(this));
@@ -82,16 +82,18 @@ var App = new Class({
     //Logger.log('div::md ' + ev.target.id);
     this.divDown = true;
     this.dragging = false;
-    global_drag = ev.target;
-    while (!global_drag.hasClass('dragable')) {
-      global_drag = global_drag.parentNode;
+
+    this.dragElement = ev.target;
+
+    while (!this.dragElement.hasClass('dragable')) {
+      this.dragElement = this.dragElement.parentNode;
     }
 
     //Logger.log('  dragging false');
     this.dragStartX = parseFloat(ev.clientX);
     this.dragStartY = parseFloat(ev.clientY);
-    this.posStartX = parseFloat(global_drag.style.left);
-    this.posStartY = parseFloat(global_drag.style.top);
+    this.posStartX = parseFloat(this.dragElement.style.left);
+    this.posStartY = parseFloat(this.dragElement.style.top);
   },
   div_mm: function(ev) {
     if (this.divDown) {
@@ -100,15 +102,15 @@ var App = new Class({
       var px = this.posStartX + dx;
       var py = this.posStartY + dy;
       var d = Math.sqrt(dx*dx+dy*dy);
-      if (!this.dragging && (d > global_drag_min)) {
+      if (!this.dragging && (d > this.dragElement_min)) {
         Logger.log('div::mm ' + px + ' ' + py + ' ' + d);
         this.dragging = true;
         // Logger.log('  dragging true');
       }
 
       if (this.dragging) {
-        global_drag.style.left = px;
-        global_drag.style.top = py;
+        this.dragElement.style.left = px;
+        this.dragElement.style.top = py;
       }
     }
   },
