@@ -126,7 +126,7 @@ var App = new Class({
   touchStart: function(event) {
     if (this.firstTouch) {
       this.firstTouch = false;
-      alert('Touch: ' + event.targetTouches.length);
+      //alert('Touch: ' + event.targetTouches.length);
     }
     if (event.targetTouches.length == 1) {
       var ev = event.targetTouches[0];
@@ -142,8 +142,10 @@ var App = new Class({
     event.preventDefault();
   },
   touchEnd: function(event) {
-    if (event.targetTouches.length == 1) {
-      var ev = event.targetTouches[0];
+    //if (event.targetTouches.length == 1) {
+    //  var ev = event.targetTouches[0];
+    if (event.changedTouches.length == 1) {
+      var ev = event.changedTouches[0];
       this.drag = false;
       var px = ev.pageX - this.rx;
       var py = ev.pageY - this.ry;
@@ -169,7 +171,7 @@ var App = new Class({
   mouseDown: function(ev) {
     if (this.firstTouch) {
       this.firstTouch = false;
-      alert('DOWN');
+      //alert('DOWN');
     }
     this.ox = ev.target.style.left.toFloat();
     this.oy = ev.target.style.top.toFloat();

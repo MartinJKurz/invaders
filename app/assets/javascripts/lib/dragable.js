@@ -49,6 +49,7 @@ var DragManagerClass = new Class({
         this.dragElement.mm(ev);
       }
     }
+    event.preventDefault();
   },
   gte: function(event) {
     if (this.dragElement) {
@@ -61,6 +62,7 @@ var DragManagerClass = new Class({
         this.dragElement.mu(ev);
       }
     }
+    event.preventDefault();
   }
 });
 
@@ -142,6 +144,8 @@ var Dragable = new Class({
       ev.clientY = touch.pageY;
       this.md(ev);
     }
+    // testing:
+    event.preventDefault();
   },
 
   mm: function(ev) {
