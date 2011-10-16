@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <title><%= @title %></title>
+    <!-- PRODUCTION -->
+    <!-- %= javascript_include_tag "events_test_content" % -->
+
+    <!-- DEVELOPMENT -->
+    <script src="/assets/lib/mootools-core-1.4.0-full-compat.js" type="text/javascript"></script>
+    <script src='/assets/lib/log.js' type='text/javascript'></script>
+    <script src='/assets/lib/public_helpers.js' type='text/javascript'></script>
+    <script src='/assets/events_test/events_test.js' type='text/javascript'></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+    <%= stylesheet_link_tag 'menus', :media => 'screen' %>
+
+    <%= csrf_meta_tag %>
+  </head>
+  <body>
+  </body>
+</html>
+
+

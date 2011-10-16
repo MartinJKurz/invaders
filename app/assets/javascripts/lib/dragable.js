@@ -1,4 +1,5 @@
 var global_dragable = null;
+var global_touchDevice = false;
 
 
 window.addEvent('domready', function() {
@@ -44,10 +45,10 @@ window.addEvent('domready', function() {
     }
   }
 
-  touch = "ontouchstart" in window;
-  Logger.log('Touch device: ' + touch);
+  global_touchDevice = "ontouchstart" in window;
+  Logger.log('Touch device: ' + global_touchDevice);
   
-  if (touch) {
+  if (global_touchDevice) {
     document.body.addEventListener('touchmove', gtm);
     document.body.addEventListener('touchend', gte);
   } else {
@@ -71,8 +72,13 @@ var Dragable = new Class({
     this.el = new Element(elType);
     this.el.style.position = 'absolute';
 
-    this.el.addEventListener('mousedown', this.md.bind(this));
-    this.el.addEventListener('touchstart', this.ts.bind(this));
+    if (global_touchDevice) {
+      Logger.log('using touchstart');
+      this.el.addEventListener('touchstart', this.ts.bind(this));
+    } else {
+      Logger.log('using mousedown');
+      this.el.addEventListener('mousedown', this.md.bind(this));
+    }
   },
 
   setPosition: function(px, py) {

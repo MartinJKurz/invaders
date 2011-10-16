@@ -50,9 +50,17 @@ var SplashMenu = new Class({
       b.value = items[i].text;
       tr.appendChild(b);
 
+      // possible cause of trouble:
+      // the 
       if (items[i].cb) {
         b.addEventListener('click', localClick.bind(this));
       }
+      // html
+      //  body                    touchmove/touchend mousemove/mouseup
+      //    div .splash-menu      touchstart mousedown
+      //      table
+      //        tr
+      //          input button    click
     }
 
     this.resize();

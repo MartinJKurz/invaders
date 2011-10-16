@@ -75,6 +75,7 @@ Invaders::Application.routes.draw do
   get "pages/test_page5"
   get "pages/menu_test"
   get "pages/dragable_test"
+  get "pages/events_test"
   post "pages/test_post_browser_info"
 
   resources :users
