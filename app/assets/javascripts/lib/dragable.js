@@ -185,6 +185,7 @@ var Dragable = new Class({
       }
 
       if (this.dragging) {
+        Logger.log('.', true);
         this.el.setStyle ('left', this.el.cpx + dx); 
         this.el.setStyle ('top', this.el.cpy + dy);
       }

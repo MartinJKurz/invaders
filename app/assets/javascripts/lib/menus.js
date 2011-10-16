@@ -244,6 +244,7 @@ var MenusClass = new Class({
   cb: function(type, dragable) {
     if ('finished' === type) {
       Logger.log('Menus: dropped ' + dragable.targetIdx);
+      Logger.log('W/H; ' +window.innerWidth + '/' + window.innerHeight);
     }
   },
 

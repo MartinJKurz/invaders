@@ -91,6 +91,15 @@ var App = new Class({
     for (i=0; i<this.el.length; i++) {
       this.container.appendChild(this.el[i]);
     }
+    this.el[0].innerHTML = 'bla';
+    this.el[1].innerHTML = '  \
+    <h1>Headline</h1>         \
+    <button>A Button</button> \
+    <button>B Button</button> \
+    <button>C Button</button> \
+    <button>D Button</button> \
+    <button>E Button</button> \
+    ';
 
     //this.setHandlers(true, false);
     this.setHandlers(false, true);
