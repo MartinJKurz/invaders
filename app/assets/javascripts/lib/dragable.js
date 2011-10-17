@@ -47,7 +47,11 @@ var DragManagerClass = new Class({
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
         this.dragElement.mm(ev);
+      } else {
+        Logger.log('TTL: ' + event.targetTouches.length);
       }
+    } else {
+      Logger.log('no drag element');
     }
     // needed: to draw while dragging
     event.preventDefault();
@@ -178,6 +182,7 @@ var Dragable = new Class({
       started = false;
       if (d > DragManager.dragLimit && !this.dragging) {
         this.dragging = true;
+        Logger.log('START DRAGGING');
         started = true;
         switch (this.motion) {
           case 0:
@@ -212,6 +217,8 @@ var Dragable = new Class({
           Logger.log(msg);
         }
         Logger.log(']');
+      } else {
+        // Logger.log('NOT DRAGGING');
       }
       /*
       if (this.dragging) {
@@ -226,6 +233,8 @@ var Dragable = new Class({
         Logger.log('|', true);    // not reached
       }
       */
+    } else {
+      Logger.log('startX = -1');
     }
   },
 
