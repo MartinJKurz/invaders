@@ -151,7 +151,8 @@ var App = new Class({
       this.target = ev.target;
       this.target.parentNode.appendChild(this.target);
     }
-    event.preventDefault();
+    // preventDefault must NOT called here, to allow click for child elements
+    // event.preventDefault();
   },
   touchEnd: function(event) {
     //if (event.targetTouches.length == 1) {
@@ -166,7 +167,8 @@ var App = new Class({
       this.target.setStyle('left', px);
       this.target.setStyle('top', py);
     }
-    event.preventDefault();
+    // preventDefault must NOT called here, to allow click for child elements
+    // event.preventDefault();
   },
   touchMove: function(event) {
     if (event.targetTouches.length == 1) {
@@ -178,6 +180,7 @@ var App = new Class({
         this.target.setStyle('top', py);
       }
     }
+    // preventDefault must called here, to allow draw while dragging
     event.preventDefault();
   },
   mouseDown: function(ev) {
