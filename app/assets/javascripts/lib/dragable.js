@@ -147,7 +147,7 @@ var Dragable = new Class({
       this.md(ev);
     }
     // testing:
-    event.preventDefault();
+    // event.preventDefault();
   },
 
   mm: function(ev) {
