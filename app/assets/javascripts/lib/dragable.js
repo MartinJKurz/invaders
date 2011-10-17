@@ -49,6 +49,7 @@ var DragManagerClass = new Class({
         this.dragElement.mm(ev);
       }
     }
+    // needed: to draw while dragging
     event.preventDefault();
   },
   gte: function(event) {
@@ -62,7 +63,8 @@ var DragManagerClass = new Class({
         this.dragElement.mu(ev);
       }
     }
-    event.preventDefault();
+    // forbidden, to allow click event on child element
+    // event.preventDefault();
   }
 });
 

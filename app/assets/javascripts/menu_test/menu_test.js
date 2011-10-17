@@ -69,6 +69,7 @@ window.addEvent('domready', function() {
 });
 
 function onLoad() {
-  var app = new App();
+  // var app = new App();
+  setTimeout(function(){new App();}, 2000);
 }
 
