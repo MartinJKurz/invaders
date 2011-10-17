@@ -92,6 +92,7 @@ var App = new Class({
       this.container.appendChild(this.el[i]);
     }
     this.el[0].innerHTML = 'bla';
+    /*
     this.el[1].innerHTML = '  \
     <h1>Headline</h1>         \
     <button>A Button</button> \
@@ -100,6 +101,17 @@ var App = new Class({
     <button>D Button</button> \
     <button>E Button</button> \
     ';
+    */
+    function buttonClick(ev) {
+      Logger.log('button: ' + ev.target.id);
+    }
+    this.el[1].appendChild(new Element('h1', {text: 'Headline'}));
+    for (i=0; i<4; i++) {
+      var bu = new Element('button', {text: 'Button ' + i});
+      bu.id = i;
+      bu.addEventListener('click', buttonClick);
+      this.el[1].appendChild(bu);
+    }
 
     //this.setHandlers(true, false);
     this.setHandlers(false, true);

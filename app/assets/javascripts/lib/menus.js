@@ -18,10 +18,13 @@ var SplashMenu = new Class({
     this.elements = [];
 
     localClick = function(ev) {
+      Logger.log('localClick');
       if (!Menus.menuDiv.dragging) {
         var idx = ev.target.id.toInt();
+        Logger.log(' -> handler ' + idx);
         items[idx].cb();
       } else {
+        Logger.log(' -> dragging ');
       }
     }
 
