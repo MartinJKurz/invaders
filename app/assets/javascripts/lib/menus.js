@@ -18,13 +18,13 @@ var SplashMenu = new Class({
     this.elements = [];
 
     localClick = function(ev) {
-      Logger.log('localClick');
+      //Logger.log('localClick');
       if (!Menus.menuDiv.dragging) {
         var idx = ev.target.id.toInt();
-        Logger.log(' -> handler ' + idx);
+        //Logger.log(' -> handler ' + idx);
         items[idx].cb();
       } else {
-        Logger.log(' -> dragging ');
+        //Logger.log(' -> dragging ');
       }
     }
 
@@ -143,6 +143,9 @@ var MenusClass = new Class({
     this.bgCtx.fillText('back', 0, ch*0.7);
 
     this.menuDiv = new Dragable('div');
+    this.menuDiv.motion = Drag.M_VER;
+    //this.menuDiv.motionTarget = Drag.TARGET_NEAREST;
+    this.menuDiv.motionTarget = Drag.TARGET_COAST;
     this.menuDiv.addReceiver(this, 'finished');
     this.menuDiv.el.set('class', 'splash-menu');
     document.body.appendChild(this.menuDiv.el);
@@ -219,26 +222,37 @@ var MenusClass = new Class({
     if (py < 0) {
       py = 0;
     }
-    var i;
-    var pos = [];
-    // var n = this.menuDiv.el.items.length;
+
     var n = menu.items.length;
     var H = this.menuDiv.el.offsetHeight/n;
+    // old
+    /*
+    var i;
+    var pos = [];
     for (i=0; i<n; i++) {
       pos.push([px, -i*H]);
     }
     this.menuDiv.setTargetPositions(pos);
+    */
+
+    // new
+    // this.menuDiv.setLimits([[0,0],[0,-this.menuDiv.el.offsetHeight]]);
+    this.menuDiv.setLimits([[0,0],[0,-(this.menuDiv.el.offsetHeight - H)]]);
+
+
     Logger.log('setTPX: ' + px);
-    Logger.log('iw was: ' + window.innerWidth);
+    Logger.log('W/H; ' +window.innerWidth + '/' + window.innerHeight);
     Logger.log('ow was: ' + this.menuDiv.el.offsetWidth);
 
     this.menuDiv.setPosition(px, py);
+    DragManager.oneDragElement = this.menuDiv;
   },
 
   hideSplashMenu: function() {
     if (this.currentSplashMenu < 0) {
       return;
     }
+    DragManager.oneDragElement = null;
     this.hideBGCanvas();
     this.menuDiv.el.innerHTML = '';
     this.currentSplashMenu = -1;
@@ -250,8 +264,8 @@ var MenusClass = new Class({
 
   cb: function(type, dragable) {
     if ('finished' === type) {
-      Logger.log('Menus: dropped ' + dragable.targetIdx);
-      Logger.log('W/H; ' +window.innerWidth + '/' + window.innerHeight);
+      //Logger.log('Menus: dropped ' + dragable.targetIdx);
+      //Logger.log('W/H; ' +window.innerWidth + '/' + window.innerHeight);
     }
   },
 

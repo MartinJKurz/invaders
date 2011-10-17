@@ -120,14 +120,16 @@ var Log = new Class({
   N: 0,
 
   log: function(line, nnl) {
-    if (nnl) {
-      this.text.value += line;
-      this.last += line;
-    } else {
-      this.text.value += line + '\n';
-      this.last = line;
+    if (this.visible) {
+      if (nnl) {
+        this.text.value += line;
+        this.last += line;
+      } else {
+        this.text.value += line + '\n';
+        this.last = line;
+      }
+      this.text.scrollTop = this.text.scrollHeight - this.text.clientHeight;
     }
-    this.text.scrollTop = this.text.scrollHeight - this.text.clientHeight;
   },
   log_2: function(line) {
     this.N++;

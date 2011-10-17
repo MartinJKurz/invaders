@@ -39,6 +39,7 @@ var OneTimer = new Class({
     this._handle = setTimeout(this.finishedCB.bind(this), this._delay);
   },
   stop: function() {
+    console.log('STOP TIMER');
     clearTimeout(this._handle);
     this._handle = 0;
     this.notify('stopped');
@@ -138,7 +139,7 @@ var IntervalTimer = new Class({
     this.notify('interval started');
     this._handle = setInterval(this._tickCB.bind(this), this._interval);
     if (this._duration > 0) {
-      setTimeout(this._stopInterval.bind(this), this._duration);
+      this._killTimer = setTimeout(this._stopInterval.bind(this), this._duration);
     }
   },
   _stopInterval: function() {
@@ -155,8 +156,10 @@ var IntervalTimer = new Class({
   },
   stop: function() {
     clearInterval(this._handle);
+    clearTimeout(this._killTimer);
     this.notify('stopped');
     this._handle = 0;
+    this._killTimer = 0;
     this._ticks = 0;
   },
   pause: function() {
