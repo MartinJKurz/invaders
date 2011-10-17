@@ -72,6 +72,7 @@ var SplashMenu = new Class({
   },
 
   resize: function() {
+    Logger.log('SplashM: ' + window.innerWidth + ' ' + window.innerHeight);
     if (this.used_width === window.innerWidth && this.used_height === window.innerHeight) {
       return;
     }
@@ -93,6 +94,8 @@ var SplashMenu = new Class({
         font = tfont;
       }
     }
+
+    Logger.log('Font: ' + font.size);
 
     for (i=0; i<this.items.length; i++) {
       b = this.elements[i];
@@ -153,6 +156,7 @@ var MenusClass = new Class({
   },
 
   resize: function() {
+    Logger.log('MenuClass: ' + window.innerWidth + ' ' + window.innerHeight);
     this.resizeBGCanvas();
     var m = this.currentMenu();
     if (m) {

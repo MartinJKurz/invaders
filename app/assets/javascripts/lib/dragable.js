@@ -119,6 +119,11 @@ var Dragable = new Class({
     if (isNaN(py)) {
       py = 0;
     }
+    Logger.log('L:' + this.el.style.left);
+    Logger.log('px:' + px);
+    Logger.log('T:' + this.el.style.top);
+    Logger.log('py:' + py);
+
     this.el.opx = px;  // original position
     this.el.opy = py;
     this.el.cpx = px;  // current position
@@ -190,17 +195,37 @@ var Dragable = new Class({
         }
       }
 
+      // android browser hangs sometimes
+      //
       if (this.dragging) {
-        Logger.log('.', true);
+        Logger.log('[', true);
         try {
+          Logger.log('this: ' + $type(this));
+          Logger.log('this.el: ' + $type(this.el));
+          Logger.log('style pos ' + this.el.getStyle('left') + ' ' + this.el.getStyle('top'));
+          Logger.log('cpx/cpy: ' + this.el.cpx + ' ' + this.el.cpy);
+          Logger.log('dx/dy: ' + dx + ' ' + dy);
           this.el.setStyle ('left', this.el.cpx + dx); 
           this.el.setStyle ('top', this.el.cpy + dy);
         } catch (msg) {
           Logger.log('\nERROR');
           Logger.log(msg);
         }
-        Logger.log('|', true);
+        Logger.log(']');
       }
+      /*
+      if (this.dragging) {
+        Logger.log('.', true);    // ok
+        try {
+          this.el.setStyle ('left', this.el.cpx + dx); 
+          this.el.setStyle ('top', this.el.cpy + dy);
+        } catch (msg) {
+          Logger.log('\nERROR');  // not reached
+          Logger.log(msg);
+        }
+        Logger.log('|', true);    // not reached
+      }
+      */
     }
   },
 
