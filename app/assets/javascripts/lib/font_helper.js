@@ -52,6 +52,11 @@ var TMClass = new Class({
       m = this.measure(text);
     }
 
+    if (opts && opts.fontMinSize && opts.fontMinSize > fs) {
+      fs = opts.fontMinSize;
+      this.setFontSize(fs);
+    }
+
     return {
       font: this.test.style.font,
       size: fs

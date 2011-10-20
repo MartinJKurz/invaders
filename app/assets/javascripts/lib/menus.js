@@ -74,7 +74,8 @@ var SplashMenu = new Class({
 
     this.opts = {
       fontFamily: 'Arial',
-      fontSize: 20,
+      fontSize: 30,       // starting point for font size search
+      fontMinSize: 30,    // lower limit: no smaller font
       fontWeight: 'bold'
     }
 
@@ -114,7 +115,7 @@ var SplashMenu = new Class({
       // w : 0.8*window.innerWidth,
       w : 0.95*window.innerWidth,
       // h : 0.8*window.innerHeight / this.items.length
-      h: 40
+      h: 50   // upper limit -> max px tall
     };
 
     for (i=0; i<this.items.length; i++) {
@@ -128,6 +129,8 @@ var SplashMenu = new Class({
       b = this.elements[i];
       b.setStyle('font-size', font.size);
     }
+
+    Logger.log('Menu-FS: ' + font.size);
 
     this.table.style.minHeight = Menus.menuDiv.el.offsetHeight;
   },

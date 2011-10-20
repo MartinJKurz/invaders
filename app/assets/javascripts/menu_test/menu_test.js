@@ -17,7 +17,7 @@ var App = new Class({
       {text: 'A'},
       {text: 'B'},
       {text: 'C'},
-      {text: 'D'},
+      {text: 'testing long texts with this entry. should be visible on a mobile device. the line must be tall enough to be selectable'},
       {text: 'E'},
       {text: 'F'},
       {text: 'G'},
