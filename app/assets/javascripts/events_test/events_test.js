@@ -46,11 +46,11 @@ var App = new Class({
 
     // for dragging:
     if (this.isTouchDevice) {
-      document.body.addEventListener('touchmove', this.div_tm.bind(this));
-      document.body.addEventListener('touchend', this.div_te.bind(this));
+      document.body.addEventListener('touchmove', this.body_tm.bind(this));
+      document.body.addEventListener('touchend', this.body_te.bind(this));
     } else {
-      document.body.addEventListener('mousemove', this.div_mm.bind(this));
-      document.body.addEventListener('mouseup', this.div_mu.bind(this));
+      document.body.addEventListener('mousemove', this.body_mm.bind(this));
+      document.body.addEventListener('mouseup', this.body_mu.bind(this));
     }
     document.body.addEventListener('click', function(ev) {
         this.dragging = false;
@@ -91,7 +91,7 @@ var App = new Class({
     this.posStartX = parseFloat(this.dragElement.style.left);
     this.posStartY = parseFloat(this.dragElement.style.top);
   },
-  div_mm: function(ev) {
+  body_mm: function(ev) {
     if (this.divDown) {
       var dx = ev.clientX - this.dragStartX;
       var dy = ev.clientY - this.dragStartY;
@@ -110,7 +110,7 @@ var App = new Class({
       }
     }
   },
-  div_mu: function(ev) {
+  body_mu: function(ev) {
     // Logger.log('div::mu ' + ev.target.id);
     this.divDown = false;
     //this.dragging = false;
@@ -127,7 +127,8 @@ var App = new Class({
       this.div_md(ev);
     }
   },
-  div_tm: function(ev) {
+  body_tm: function(event) {
+    event.preventDefault();
     if (this.divDown) {
       if (event.touches.length == 1) {
         var touch = event.touches[0];
@@ -136,11 +137,11 @@ var App = new Class({
           clientX: touch.pageX,
           clientY: touch.pageY
         };
-        this.div_mm(ev);
+        this.body_mm(ev);
       }
     }
   },
-  div_te: function(ev) {
+  body_te: function(ev) {
     if (event.changedTouches.length == 1) {
       var touch = event.changedTouches[0];
       var ev = {
@@ -148,7 +149,7 @@ var App = new Class({
         clientX: touch.pageX,
         clientY: touch.pageY
       };
-      this.div_mu(ev);
+      this.body_mu(ev);
     }
   },
 

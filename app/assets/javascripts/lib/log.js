@@ -87,7 +87,7 @@ var Log = new Class({
   },
   show: function(where) {
     this.div.setStyle('display', '');
-    this.visible = false;
+    this.visible = true;
     if (where) {
       this.div.setStyle(where, '0px');
     }
