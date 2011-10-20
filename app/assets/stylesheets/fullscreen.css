@@ -1,0 +1,37 @@
+/* disable text selection */
+* {
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
+/* no extra spaces */
+body {
+  margin: 0px; padding: 0; overflow: hidden;
+}
+
+/* height is page height - child elements can take parts of page height - div.style.height = '33%' */
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;                   /* full page */
+  margin: 0;                      /* no sissy spaces */
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background: red;                /* testing - this value must be overridden */
+  background: -o-linear-gradient(left, #444, #fff, #444); /* opera doesn't like radial gradients */
+  /*
+  background: -o-radial-gradient( 50% 50%, circle, #fff 0px, #444 600px );
+  background: -o-linear-gradient(top, #c8482c, #fff);
+  background: -o-radial-gradient(center, #fff, #adf);
+   */
+
+  /* radial gradients for moz and webkit */
+  background: -webkit-gradient( radial, 50% 50%, 0, 50% 50%, 600, from(#fff), to(#444) );
+  background: -moz-radial-gradient( 50% 50%, circle, #fff 0px, #444 600px );
+}
+

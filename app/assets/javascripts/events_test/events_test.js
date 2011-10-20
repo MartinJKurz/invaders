@@ -1,7 +1,3 @@
-// var Logger;
-//
-// Logger is auto created
-//
 // scenario:
 //  parent div, with
 //    mousedown, mousemove, mouseup
@@ -171,7 +167,8 @@ var App = new Class({
       Logger.log('dragging ' + ev.target.id);
     } else {
       Logger.log('click ' + ev.target.id);
-      document.body.style.backgroundColor = randomColor();
+      // document.body.style.backgroundColor = randomColor();
+      document.body.style.background = randomColor();
     }
   },
 });

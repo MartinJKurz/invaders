@@ -1,6 +1,118 @@
 // requires Emitter
 // requires Receiver
 
+window.setTimeoutOrg = window.setTimeout;
+window.setIntervalOrg = window.setInterval;
+window.clearTimeoutOrg = window.clearTimeout;
+window.clearIntervalOrg = window.clearInterval;
+
+
+window.setTimeout = function(func, delay, params) {
+  var handle = window.setTimeoutOrg(func, delay, params);
+  TimerObserver.addTimeout(handle);
+  return handle;
+}
+
+/*
+// setTimeout will call the attached function and do NOTHING more
+// -> nobody else will be notified about the finish
+window.setTimeout = function(func, delay, params) {
+  obj = {
+    external: func,
+    internal: function() {
+      console.log('timeout: calling attached function');
+      this.external();
+    }
+  };
+  var handle = window.setTimeoutOrg(obj.internal.bind(obj), delay, params);
+  TimerObserver.addTimeout(handle);
+  return handle;
+}
+*/
+
+window.setInterval = function(func, inter, params) {
+  var handle = window.setIntervalOrg(func, inter, params);
+  TimerObserver.addInterval(handle);
+  return handle;
+}
+window.clearTimeout = function(handle) {
+  TimerObserver.removeTimeout(handle);
+  return window.clearTimeoutOrg(handle);
+}
+window.clearInterval = function(handle) {
+  TimerObserver.removeInterval(handle);
+  return window.clearIntervalOrg(handle);
+}
+
+var TimerObserver = {
+  timeouts: [],
+  intervals: [],
+  debug : false,
+
+  show: function() {
+    if (!this.debug) {
+      return;
+    }
+    //console.log('TO: ' + this.timeouts.length + ' INTER: ' + this.intervals.length);
+    console.log('TO: ' + this.timeouts.length + ': [' + this.timeouts.join(' ') + ']');
+    console.log('INTER: ' + this.intervals.length + ': [' + this.intervals.join(' ') + ']');
+  },
+
+  addTimeout: function(t) {
+    if (this.timeouts.contains(t)) {
+      if (this.debug) {
+        console.log('TimerObserver.addTimeout: already registered: ' + t);
+      }
+      return;
+    }
+    this.timeouts.push(t);
+    if (this.debug) {
+      console.log('added timeout ' + t);
+      this.show();
+    }
+  },
+  removeTimeout: function(t) {
+    if (!this.timeouts.contains(t)) {
+      if (this.debug) {
+        console.log('TimerObserver.removeTimeout: not registered: ' + t);
+      }
+      return;
+    }
+    this.timeouts.erase(t);
+    if (this.debug) {
+      console.log('removed timeout ' + t);
+      this.show();
+    }
+  },
+  addInterval: function(t) {
+    if (this.intervals.contains(t)) {
+      if (this.debug) {
+        console.log('removed timeout ' + t);
+        console.log('TimerObserver.addInterval: already registered: ' + t);
+      }
+      return;
+    }
+    this.intervals.push(t);
+    if (this.debug) {
+      console.log('added interval ' + t);
+      this.show();
+    }
+  },
+  removeInterval: function(t) {
+    if (!this.intervals.contains(t)) {
+      if (this.debug) {
+        console.log('TimerObserver.removeInterval: not registered: ' + t);
+      }
+      return;
+    }
+    this.intervals.erase(t);
+    if (this.debug) {
+      console.log('removed interval ' + t);
+      this.show();
+    }
+  },
+};
+
 var Timer = new Class({
   Extends: Emitter,
   _handle: 0,
@@ -29,6 +141,7 @@ var OneTimer = new Class({
   finishedCB: function() {
     this._finished = Date.now();
     this.notify('finished');
+    TimerObserver.removeTimeout(this._handle);
   },
   start: function() {
     if (this._handle) {
@@ -40,16 +153,21 @@ var OneTimer = new Class({
   },
   stop: function() {
     console.log('STOP TIMER');
-    clearTimeout(this._handle);
-    this._handle = 0;
-    this.notify('stopped');
+
+    if ($defined(this._handle) && 0 !== this._handle) {
+      clearTimeout(this._handle);
+      this._handle = 0;
+      this.notify('stopped');
+    }
   },
   pause: function() {
-    clearTimeout(this._handle);
-    this._elapsed = Date.now() - this._started;
-    this._remaining = this._duration - this._elapsed;
-    this._handle = 0;
-    this.notify('stopped');
+    if ($defined(this._handle) && 0 !== this._handle) {
+      clearTimeout(this._handle);
+      this._elapsed = Date.now() - this._started;
+      this._remaining = this._duration - this._elapsed;
+      this._handle = 0;
+      this.notify('stopped');
+    }
   },
   cont: function() {
     if (this._handle) {
@@ -145,7 +263,11 @@ var IntervalTimer = new Class({
   _stopInterval: function() {
     this._endTimes();
     this.notify('finished');
-    clearInterval(this._handle);
+    // clearTimeout(this._killTimer);
+    TimerObserver.removeTimeout(this._killTimer);
+    if ($defined(this._handle) && 0 !== this._handle) {
+      clearInterval(this._handle);
+    }
   },
   cont: function() {
     if (this._handle) {
@@ -155,16 +277,22 @@ var IntervalTimer = new Class({
     this._handle = setInterval(this._tickCB.bind(this), this._interval);
   },
   stop: function() {
-    clearInterval(this._handle);
-    clearTimeout(this._killTimer);
+    if ($defined(this._handle) && 0 !== this._handle) {
+      clearInterval(this._handle);
+    }
+    if ($defined(this._killTimer) && 0 !== this._killTimer) {
+      clearTimeout(this._killTimer);
+    }
     this.notify('stopped');
     this._handle = 0;
     this._killTimer = 0;
     this._ticks = 0;
   },
   pause: function() {
-    clearInterval(this._handle);
-    this._handle = 0;
+    if ($defined(this._handle) && 0 !== this._handle) {
+      clearInterval(this._handle);
+      this._handle = 0;
+    }
   },
   restart: function() {
     this.stop();

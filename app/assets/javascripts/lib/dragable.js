@@ -1,6 +1,14 @@
 
 // plan B
 // one DragManager, auto instanciated
+//
+
+// code has worked without this ugly hack:
+window.ondragstart = function() { return false; }    // -> ok
+// but why? and how?
+
+
+// $('img').addEvent('dragstart:function() {return false;}');   // $('img') is null
 
 var Drag = {
   M_VER: 0,           // drag only in vertical direction
@@ -39,21 +47,22 @@ var DragManagerClass = new Class({
   },
 
   gmd: function(ev) {
+    Logger.log(ev.target);
     if (this.oneDragElement) {
-      //this.dragElement = this.oneDragElement;
-      //this.dragElement.md(ev);
       this.oneDragElement.md(ev);
+    } else {
     }
   },
   gts: function(event) {
     if (this.oneDragElement) {
       if (event.targetTouches.length == 1) {
-        // Logger.log('gtm --- ', true);
         touch = event.targetTouches[0];
         var ev = {};
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
-        ev.target = this.oneDragElement;
+        //ev.target = this.oneDragElement;
+        ev.target = this.touch.target;
+        Logger.log('TS');
         this.gmd(ev);
       } else {
         Logger.log('gts: ' + event.targetTouches.length);
@@ -63,7 +72,6 @@ var DragManagerClass = new Class({
 
   gmm: function(ev) {
     if (this.dragElement) {
-      //Logger.log('gmm --- ', true);
       this.dragElement.mm(ev);
     }
   },
@@ -86,8 +94,6 @@ var DragManagerClass = new Class({
       } else {
         Logger.log('TTL: ' + event.targetTouches.length);
       }
-    } else {
-      Logger.log('no drag element');
     }
     // needed: to draw while dragging
     event.preventDefault();
@@ -101,6 +107,7 @@ var DragManagerClass = new Class({
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
         this.dragElement.mu(ev);
+        this.dragElement = null;
       }
     }
     // forbidden, to allow click event on child element
@@ -129,13 +136,19 @@ var Dragable = new Class({
                     // to start drag a point on the page can be used to start drag
                     // if full is false (the default), the Dragable itself must
                     // be hit (receive the touchstart/mousedown event)
+  move: null,
 
   initialize: function(elType, full) {
     this.el = new Element(elType);
+    
+    // does not work:
+    // this.el.addEventListener('dragstart', function(){Logger.log('DS');return false;});
+
     this.el.style.position = 'absolute';
     this.full = $defined(full) ? full : false;
+   
 
-    if (this.full) {
+    if (!this.full) {
       if (DragManager.isTouchDevice) {
         this.el.addEventListener('touchstart', this.ts.bind(this));
       } else {
@@ -144,11 +157,15 @@ var Dragable = new Class({
     } else {
       // handler already set in DragManager class
     }
+
   },
 
   setPosition: function(px, py) {
     this.el.style.left = px;
     this.el.style.top = py;
+
+    this.el.cpx = px;
+    this.el.cpy = py;
   },
 
   // arbitrary number of positions
@@ -161,19 +178,22 @@ var Dragable = new Class({
   // [[x0,y0],[x1,y1]]
   setLimits: function(limits) {
     this.limits = limits;
+    // console.log(limits);
   },
   
   stopAnimation: function() {
     if (this.timer) {
       this.timer.stop();
     }
+    if (this.move) {
+      this.move.stop();
+      this.move = null;
+    }
   },
 
   md: function(ev) {
     this.stopAnimation();
     DragManager.dragElement = this;
-    //Logger.log('md');
-      
     var px = parseFloat(this.el.style.left);
     if (isNaN(px)) {
       px = 0;
@@ -182,18 +202,11 @@ var Dragable = new Class({
     if (isNaN(py)) {
       py = 0;
     }
-    /*
-    Logger.log('L:' + this.el.style.left);
-    Logger.log('px:' + px);
-    Logger.log('T:' + this.el.style.top);
-    Logger.log('py:' + py);
-    */
 
     this.el.opx = px;  // original position
     this.el.opy = py;
     this.el.cpx = px;  // current position
     this.el.cpy = py;
-
 
     var x = ev.clientX;
     var y = ev.clientY;
@@ -211,11 +224,10 @@ var Dragable = new Class({
     } else if (this.motion === Drag.M_VER) {
       this.hor = true;
     }
-
   },
+
   ts: function(event) {
     if (event.targetTouches.length == 1) {
-      //Logger.log('ts');
       var touch = event.targetTouches[0];
 
       var ev = {};
@@ -228,9 +240,9 @@ var Dragable = new Class({
   },
 
   mm: function(ev) {
+
     var x, y, dx, dy, d, started;
     if (-1 !== this.startX) {
-      // Logger.log('mm');
       x = ev.clientX;
       y = ev.clientY;
       
@@ -239,30 +251,16 @@ var Dragable = new Class({
       dx = x - this.startX;
       dy = y - this.startY;
 
-      /*
-      if (this.motion === Drag.M_VER) {
-        this.ver = true;
-      } else if (this.motion === Drag.M_VER) {
-        this.hor = true;
-      }
-      */
-
-
       if (this.ver) {
         dx = 0;
       } else if (this.hor) {
         dy = 0;
       }
 
-      if (dx !== 0) {
-        Logger.log('ERROR: dx = ' + dx);
-      }
-
       d = Math.sqrt(dx*dx+dy*dy);
       started = false;
       if (d > DragManager.dragLimit && !this.dragging) {
         this.dragging = true;
-        //Logger.log('START DRAGGING');
         started = true;
         switch (this.motion) {
           case Drag.M_HOR:
@@ -287,38 +285,15 @@ var Dragable = new Class({
       // android browser hangs sometimes
       //
       if (this.dragging) {
-        //Logger.log('[', true);
         try {
-          /*
-          Logger.log('this: ' + $type(this));
-          Logger.log('this.el: ' + $type(this.el));
-          Logger.log('style pos ' + this.el.getStyle('left') + ' ' + this.el.getStyle('top'));
-          Logger.log('cpx/cpy: ' + this.el.cpx + ' ' + this.el.cpy);
-          Logger.log('dx/dy: ' + dx + ' ' + dy);
-          */
           this.el.setStyle ('left', this.el.cpx + dx); 
           this.el.setStyle ('top', this.el.cpy + dy);
         } catch (msg) {
           Logger.log('\nERROR');
           Logger.log(msg);
         }
-        //Logger.log(']');
       } else {
-        // Logger.log('NOT DRAGGING');
       }
-      /*
-      if (this.dragging) {
-        Logger.log('.', true);    // ok
-        try {
-          this.el.setStyle ('left', this.el.cpx + dx); 
-          this.el.setStyle ('top', this.el.cpy + dy);
-        } catch (msg) {
-          Logger.log('\nERROR');  // not reached
-          Logger.log(msg);
-        }
-        Logger.log('|', true);    // not reached
-      }
-      */
     } else {
       Logger.log('startX = -1');
     }
@@ -352,7 +327,7 @@ var Dragable = new Class({
         positions[0] = [startX, startY];
         positions.push([endX, endY]);
         T = 10;
-        Logger.log('ERROR corrected');
+        // Logger.log('ERROR corrected');
         break;
       case 1:
         times[0] = 0;
@@ -360,7 +335,7 @@ var Dragable = new Class({
         positions[0] = [startX, startY];
         positions.push([endX, endY]);
         T = 10;
-        Logger.log('corrected');
+        // Logger.log('corrected');
         break;
       default:
         break;
@@ -509,6 +484,28 @@ var Dragable = new Class({
   },
 
   _mu_coast: function() {
+
+    vx = this.vx;
+    vy = this.vy;
+    var tx, ty;
+
+    if (this.ver) {
+      vx = 0;
+      this.limits[0][0] = px;
+      this.limits[1][0] = px;
+    } else if (this.hor) {
+      vy = 0;
+      this.limits[0][1] = py;
+      this.limits[1][1] = py;
+    }
+    tx = this.limits[0][0];
+    ty = this.limits[0][1];
+    // var move = new Move(this.el, tx, ty, vx, vy);
+    this.move = new Move(this.el, vx, vy, this.limits[0][0], this.limits[0][1], this.limits[1][0], this.limits[1][1]);
+    this.move.start();
+  },
+  /*
+  _mu_coast: function() {
     // 
     var dt, T, times, positions, px, py, vx, vy, v, dx, dy, tx, ty;
 
@@ -552,7 +549,7 @@ var Dragable = new Class({
       positions.push([tx,ty]);
       tx += dt*v*dx;
       ty += dt*v*dy;
-      v -= 0.05;
+      v -= 0.01;
     }
 
     if (-1 !== check) {
@@ -572,6 +569,7 @@ var Dragable = new Class({
 
     this.timer.start();
   },
+  */
 
   mu: function(ev) {
     DragManager.dragElement = null;
@@ -609,128 +607,6 @@ var Dragable = new Class({
     delete this.vx;
     delete this.vy;
   },
-  /*
-  mu: function(ev) {
-    DragManager.dragElement = null;
-    Logger.log('mu');
-
-    this.startX = -1;
-    this.el.cpx = parseFloat(this.el.getStyle('left'));
-    if (isNaN(this.el.cpx)) {
-      this.el.cpx = 0;
-    }
-    this.el.cpy = parseFloat(this.el.getStyle('top'));
-    if (isNaN(this.el.cpy)) {
-      this.el.cpy = 0;
-    }
-    if (this.dragging) {
-      var dt = 1000/60;
-
-      var vx, vy, minD, tx, ty, px, py, a, fx, fy, use_x,
-          i, dx, dy, d, times, positions, T, k, done, inter, timer;
-
-      px = this.el.cpx;
-      py = this.el.cpy;
-
-      tx = this.el.opx;
-      ty = this.el.opy;
-
-      this.targetIdx = -1;
-      if (this.targetPositions) {
-        minD = 1000000;
-        for (i=0; i<this.targetPositions.length; i++) {
-          dx = px-this.targetPositions[i][0];
-          dy = py-this.targetPositions[i][1];
-          d = dx*dx + dy*dy;
-          if (d < minD) {
-            this.targetIdx = i;
-            minD = d;
-            tx = this.targetPositions[i][0];
-            ty = this.targetPositions[i][1];
-          }
-        }
-      }
-
-      a = Math.atan2(ty-py, tx-px);
-      fx = Math.cos(a);
-      fy = Math.sin(a);
-      fx *= 0.03;
-      fy *= 0.03;
-
-      use_x = Math.abs(fx) > Math.abs(fy);
-
-
-
-      // TODO: for all targets, find the one which is nearest in time - not distance
-      // -> no
-      times = [];
-      positions = [];
-
-      T = 0, k;
-      done = false;
-      vx = this.vx;
-      vy = this.vy;
-      while (!done) {
-        times.push(T);
-        if (this.hor) {
-          py = ty;
-        } else if (this.ver) {
-          px = tx;
-        }
-        positions.push([px, py]);
-        T += dt;
-        px += vx*dt;
-        vx += fx*dt;
-        py += vy*dt;
-        vy += fy*dt;
-        if (use_x) {
-          done = fx > 0 ? px > tx : px < tx;
-        } else {
-          done = fy > 0 ? py > ty : py < ty;
-        }
-      }
-      T -= dt;
-
-
-      // check
-      if (1 === times.length) {
-        times = [];
-        times.push(0);
-        times.push(1);
-        positions = [];
-        positions.push([px,py]);
-        positions.push([tx,ty]);
-        T = 10;
-        // Logger.log('corrected');
-      }
-
-
-      k = 1/T;
-      for (i=0; i<times.length; i++) {
-        times[i] *= k;
-      }
-      times[0] = 0;
-      times[times.length-1] = 1;
-      positions[times.length-1][0] = tx;
-      positions[times.length-1][1] = ty;
-
-      inter = new VectorInterpolator(times, positions);
-      timer = new IntervalTimer(Math.round(dt), {duration: T, delay: 0});
-      timer.addReceiver(inter, ['tick', 'finished']);
-      inter.addReceiver(this, ['value_changed', 'finished']);
-
-      timer.start();
-    }
-    delete this.hor;
-    delete this.ver;
-    delete this.positions;
-    delete this.posIdx;
-    delete this.startX;
-    delete this.startY;
-    delete this.vx;
-    delete this.vy;
-  },
-  */
 
   addPosition: function(x, y) {
     var SAMPLES = 5;
