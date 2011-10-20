@@ -47,13 +47,14 @@ var DragManagerClass = new Class({
   },
 
   gmd: function(ev) {
-    Logger.log(ev.target);
+    //Logger.log(ev.target);
     if (this.oneDragElement) {
       this.oneDragElement.md(ev);
     } else {
     }
   },
   gts: function(event) {
+    Logger.log('GTS: ');
     if (this.oneDragElement) {
       if (event.targetTouches.length == 1) {
         touch = event.targetTouches[0];
@@ -61,12 +62,15 @@ var DragManagerClass = new Class({
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
         //ev.target = this.oneDragElement;
-        ev.target = this.touch.target;
-        Logger.log('TS');
+        ev.target = touch.target;
+        Logger.log('GTS 2');
         this.gmd(ev);
+        Logger.log('GTS 3');
       } else {
-        Logger.log('gts: ' + event.targetTouches.length);
+        Logger.log('gts: L != 1: ' + event.targetTouches.length);
       }
+    } else {
+      Logger.log('GTS: oneDragElement not set');
     }
   },
 

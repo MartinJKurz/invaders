@@ -1,7 +1,7 @@
 var App = new Class({
   menuSelection: function(type, menu) {
     var idx = menu.selectedId;
-    console.log('Selected: ' + idx + ' ' + menu.items[idx].text);
+    Logger.log('Selected: ' + idx + ' ' + menu.items[idx].text);
     if (menu.items[idx].action) {
       menu.items[idx].action();
     }
@@ -9,6 +9,7 @@ var App = new Class({
   
   initialize: function() {
     var items = [
+      {text: 'show second menu with a simple click', action: this.showSecond.bind(this)},
       {text: 'one'},
       {text: 'two'},
       {text: 'three'},
