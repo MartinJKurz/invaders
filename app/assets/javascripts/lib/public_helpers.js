@@ -1,3 +1,9 @@
+/****************************************************************
+ * public_helpers
+ * to be removed
+ ****************************************************************/
+
+
 function getMetaContents(mn) {
   var m = document.getElementsByTagName('meta');
   for(var i in m){
@@ -18,10 +24,6 @@ function irand(i) {
 function randomColor () {
 	return [irand(255), irand(255), irand(255)].rgbToHex();
 };
-
-function isInt(val) {
-  return (val.toString().search(/^-?[0-9]+$/) == 0);
-}
 
 
 function clamp(val, low, high) {

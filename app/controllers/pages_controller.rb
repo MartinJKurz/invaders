@@ -198,6 +198,11 @@ class PagesController < ApplicationController
     render :layout => false
   end
 
+  def menu_test2
+    @title = '9 - Menu'
+    render :layout => false
+  end
+
   def test_post_browser_info
     ua = request.env["HTTP_USER_AGENT"]   # send with every request
     ssz = params['screenSize']            # send with special post request

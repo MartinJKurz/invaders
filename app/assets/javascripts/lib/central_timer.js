@@ -1,5 +1,8 @@
-// requires Emitter
-// requires Receiver
+/****************************************************************
+ * central_timer
+ ****************************************************************/
+
+//= require lib/emitter
 
 window.setTimeoutOrg = window.setTimeout;
 window.setIntervalOrg = window.setInterval;

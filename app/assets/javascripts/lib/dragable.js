@@ -1,3 +1,10 @@
+/****************************************************************
+ * dragable
+ ****************************************************************/
+
+//= require lib/central_timer
+//= require lib/interpolator
+
 
 // plan B
 // one DragManager, auto instanciated
@@ -643,3 +650,4 @@ var Dragable = new Class({
     }
   },
 });
+

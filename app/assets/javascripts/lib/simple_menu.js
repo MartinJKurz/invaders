@@ -1,3 +1,8 @@
+/****************************************************************
+ * simple_menu
+ * to be removed
+ ****************************************************************/
+
 var InfoCanvas = new Class({
   initialize: function(opts) {
     this.canvas = new Element('canvas');

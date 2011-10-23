@@ -1,3 +1,8 @@
+/****************************************************************
+ * font_helper
+ ****************************************************************/
+
+
 var TMClass = new Class({
   initialize: function() {
     this.test = document.body._measure_text;

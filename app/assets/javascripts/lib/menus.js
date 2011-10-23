@@ -1,13 +1,22 @@
+/****************************************************************
+ * menus
+ ****************************************************************/
+
+//= require lib/dragable
+//= require lib/font_helper
+
 var DT = 1000/60;
 
 var SplashMenu = new Class({
   Extends: Emitter,
 
   table: null,
-  /*
-  initialize: function(items, options) {
+  name: null,
+
+  initialize: function(name, items, options, cb) {
+    this.name = name;
     this.items = items;
-    var box, i, tr, b;
+    var box, i, tr, b, btype, chk, lab;
     var localClick;
     var it, obj, method;
 
@@ -15,60 +24,27 @@ var SplashMenu = new Class({
     this.table.setAttribute('cellspacing', '0');
     this.elements = [];
 
-    localClick = function(ev) {
-      if (!Menus.menuDiv.dragging) {
-        this.selectedId = ev.target.id.toInt();
-        this.notify('selected', this);
+    getTarget = function(ev) {
+      var t = ev.target;
+      while (!t.hasClass('menu-button')) {
+        t = t.parentNode;
       }
+      return t;
     }
-
-    this.opts = {
-      fontFamily: 'Arial',
-      fontSize: 20,
-      fontWeight: 'bold'
-    }
-
-    for (i=0; i<items.length; i++) {
-      it = items[i];
-      tr = new Element('tr');
-      this.table.appendChild(tr);
-      b = new Element('button', {text: items[i].text});
-
-      this.elements.push(b);
-
-      b.setAttribute('class', 'menu-button');
-      b.setStyle('font-family', this.opts.fontFamily);
-      b.setStyle('font-style', this.opts.fontStyle);
-      b.setStyle('font-variant', this.opts.fontVariant);
-      b.setStyle('font-weight', this.opts.fontWeight);
-      b.id = i;
-
-      tr.appendChild(b);
-
-      if ($defined(it.obj)) {
-        // if (!$defined(it.method)) {
-        b.addEventListener('click', localClick.bind(this));
-        this.addReceiver(it.obj, ['selected'], it.method);
-      }
-    }
-
-    this.resize();
-  },
-  */
-  initialize: function(items, options, cb) {
-    this.items = items;
-    var box, i, tr, b;
-    var localClick;
-    var it, obj, method;
-
-    this.table = new Element('table');
-    this.table.setAttribute('cellspacing', '0');
-    this.elements = [];
 
     localClick = function(ev) {
+      var it;
+      var t = getTarget(ev);
       if (!Menus.menuDiv.dragging) {
-        this.selectedId = ev.target.id.toInt();
-        this.notify('selected', this);
+        this.selectedId = t.id.toInt();
+        it = this.items[this.selectedId];
+        if (it.submenu) {
+          Menus.showSubMenu(it.submenu);
+        } else if (it.mainmenu) {
+          Menus.showMainMenu();
+        } else {
+          this.notify('selected', this);
+        }
       }
     }
 
@@ -76,23 +52,71 @@ var SplashMenu = new Class({
       fontFamily: 'Arial',
       fontSize: 30,       // starting point for font size search
       fontMinSize: 30,    // lower limit: no smaller font
-      fontWeight: 'bold'
+      fontWeight: 'bold',
+      fixedFontSize: options.fixedFontSize
     }
+
+    function toggleCheckButton(ev) {
+      if (Menus.menuDiv.dragging) {
+        return;
+      }
+      var b = getTarget(ev);
+      var idx = b.id.toInt();
+      var it = this.items[idx];
+      var c = b.getAttribute('checked');
+      if ('true' === c) {
+        b.setAttribute('checked', 'false');
+        it.checked = false;
+      } else {
+        b.setAttribute('checked', 'true');
+        it.checked = true;
+      }
+    };
 
     for (i=0; i<items.length; i++) {
       it = items[i];
       tr = new Element('tr');
       this.table.appendChild(tr);
-      b = new Element('button', {text: it.text});
+
+      chk = $defined(it.check);
+      if (chk) {
+        //b = new Element('div');
+        b = new Element('button');
+        if (it.check) {
+          b.setAttribute('checked', true);
+          it.checked = true;
+        } else {
+          b.setAttribute('checked', false);
+          it.checked = false;
+        }
+        b.addClass('menu-checkbox');
+        // b.innerHTML = it.text;
+        lab = new Element('label', {text: it.text});
+        b.appendChild(lab);
+        lab.style.verticalAlign = 'text-bottom';
+        checkedImg = new Element('img');
+        checkedImg.addClass('check-image');
+        checkedImg.src = '../assets/checked.png';
+        checkedImg.style.height = '30px';
+        b.appendChild(checkedImg);
+        uncheckedImg = new Element('img');
+        uncheckedImg.addClass('uncheck-image');
+        uncheckedImg.src = '../assets/unchecked.png';
+        uncheckedImg.style.height = '30px';
+        b.appendChild(uncheckedImg);
+      } else {
+        b = new Element('button', {text: it.text});
+      }
 
       this.elements.push(b);
 
-      b.setAttribute('class', 'menu-button');
+      b.addClass('menu-button');
       b.setStyle('font-family', this.opts.fontFamily);
       b.setStyle('font-style', this.opts.fontStyle);
       b.setStyle('font-variant', this.opts.fontVariant);
       b.setStyle('font-weight', this.opts.fontWeight);
       b.id = i;
+      b.addEventListener('click', toggleCheckButton.bind(this));
 
       tr.appendChild(b);
 
@@ -104,35 +128,52 @@ var SplashMenu = new Class({
   },
 
   resize: function() {
-    if (this.used_width === window.innerWidth && this.used_height === window.innerHeight) {
-      return;
-    }
-    this.used_width = window.innerWidth;
-    this.used_height = window.innerHeight;
+    var font, tfont, b, box;
+    if (this.opts.fixedFontSize) {
+      fs = this.opts.fixedFontSize;
 
-    var font, tfont, b;
-    box = {
-      // w : 0.8*window.innerWidth,
-      w : 0.95*window.innerWidth,
-      // h : 0.8*window.innerHeight / this.items.length
-      h: 50   // upper limit -> max px tall
-    };
-
-    for (i=0; i<this.items.length; i++) {
-      tfont = TM.findFontForSize(this.items[i].text, box, this.opts);
-      if (!font || tfont.size < font.size) {
-        font = tfont;
+      for (i=0; i<this.items.length; i++) {
+        b = this.elements[i];
+        b.setStyle('font-size', fs);
       }
+
+      $$('.check-image, .uncheck-image').each(function(el) {
+        el.style.height = 1.25*fs + 'px';
+      });
+
+      this.table.style.minHeight = Menus.menuDiv.el.offsetHeight;
+    } else {
+      if (this.used_width === window.innerWidth && this.used_height === window.innerHeight) {
+        return;
+      }
+      this.used_width = window.innerWidth;
+      this.used_height = window.innerHeight;
+
+      box = {
+        w : 0.95*window.innerWidth,
+        h: 50   // upper limit -> max px tall
+      };
+
+      for (i=0; i<this.items.length; i++) {
+        tfont = TM.findFontForSize(this.items[i].text, box, this.opts);
+        if (!font || tfont.size < font.size) {
+          font = tfont;
+        }
+      }
+
+      for (i=0; i<this.items.length; i++) {
+        b = this.elements[i];
+        b.setStyle('font-size', font.size);
+      }
+
+      $$('.check-image, .uncheck-image').each(function(el) {
+        el.style.height = 1.25*font.size + 'px';
+      });
+
+      Logger.log('Menu-FS: ' + font.size);
+
+      this.table.style.minHeight = Menus.menuDiv.el.offsetHeight;
     }
-
-    for (i=0; i<this.items.length; i++) {
-      b = this.elements[i];
-      b.setStyle('font-size', font.size);
-    }
-
-    Logger.log('Menu-FS: ' + font.size);
-
-    this.table.style.minHeight = Menus.menuDiv.el.offsetHeight;
   },
 
   el: function() {
@@ -142,8 +183,10 @@ var SplashMenu = new Class({
 
 
 var MenusClass = new Class({
-  splashMenus: [],
-  currentSplashMenu: -1,
+  // splashMenus: [],
+  menuStack: [],
+  allMenus: {},
+  currentSplashMenuName: null,
   bgCanvas: null,
   bgCtx: null,
   startX: -1,
@@ -153,7 +196,7 @@ var MenusClass = new Class({
   mPosX: 0,
   mPosY: 0,
 
-  initialize: function() {
+  _createBG: function() {
     var cw = 30, ch = 30;
     this.bgCanvas = new Element('canvas');
     this.bgCanvas.width = cw;
@@ -173,6 +216,12 @@ var MenusClass = new Class({
     this.bgCtx.fillStyle = 'white';
     this.bgCtx.font = 'normal ' + ch*0.35 + 'pt Courier';
     this.bgCtx.fillText('back', 0, ch*0.7);
+  },
+
+  initialize: function() {
+
+    this.initialized = true;
+    // this._createBG();
 
     this.menuDiv = new Dragable('div', true);
     this.menuDiv.motion = Drag.M_VER;
@@ -186,8 +235,10 @@ var MenusClass = new Class({
   },
 
   resizeBGCanvas: function() {
-    this.bgCanvas.style.width = window.innerWidth;
-    this.bgCanvas.style.height = window.innerHeight;
+    if (this.bgCanvas) {
+      this.bgCanvas.style.width = window.innerWidth;
+      this.bgCanvas.style.height = window.innerHeight;
+    }
   },
 
   resize: function() {
@@ -206,30 +257,79 @@ var MenusClass = new Class({
 
   showBGCanvas: function() {
     this.resizeBGCanvas();
-    this.bgCanvas.style.display = '';
+    if (this.bgCanvas) {
+      this.bgCanvas.style.display = '';
+    }
   },
   hideBGCanvas: function() {
-    this.bgCanvas.style.display = 'none';
+    if (this.bgCanvas) {
+      this.bgCanvas.style.display = 'none';
+    }
   },
 
-  createSplashMenu: function(items, options, cb) {
-    if (!this.bgCanvas) {
+  createSplashMenu: function(name, items, options, cb) {
+    if (!this.initialized) {
       this.initialize();
     }
-    this.splashMenus.push(new SplashMenu(items, options, cb));
-    var id = this.splashMenus.length - 1;
-    this.showSplashMenu(id);
+    //if (this.allMenus.contains(name)) {
+    if (this.allMenus[name]) {
+      throw 'Menus.createSplashMenu menu with name "' + name + '" already exists';
+    }
 
-    var el = this.splashMenus[id].el();
-    //el.style.minWidth = this.menuDiv.el.offsetWidth;
+    var sm = new SplashMenu(name, items, options, cb);
+    // this.splashMenus.push(sm);
+    this.allMenus[name] = sm;
+
+
+    this.showSplashMenu(name);
+
+    var el = this.allMenus[name].el();
     el.style.width = '100%';
-    // el.style.minHeight = this.menuDiv.el.offsetHeight;
    
-    this.hideSplashMenu(id);
+    this.hideSplashMenu(name);
 
-    return id;
+    return name;
   },
 
+  showSplashMenu: function(name) {
+    var el, menu;
+    if (this.currentSplashMenuName === name) {
+      return;
+    }
+    if (!this.allMenus[name]) {
+      // ERROR
+      return;
+    }
+    this.currentSplashMenuName = name;
+    this.showBGCanvas();
+    this.menuDiv.el.innerHTML = '';
+    
+    menu = this.allMenus[name];
+    el = menu.el();
+    this.menuDiv.el.appendChild(el);
+
+    this.menuDiv.el.style.display = '';
+    menu.used_width = -1;
+    menu.resize();
+
+    px = (window.innerWidth - this.menuDiv.el.offsetWidth)*0.5;
+    py = (window.innerHeight - this.menuDiv.el.offsetHeight)*0.5;
+
+    if (py < 0) {
+      py = 0;
+    }
+
+    if ($defined(el.cpx)) {
+      px = el.cpx;
+      py = el.cpy;
+    }
+    this._setLimits();
+
+    this.menuDiv.setPosition(px, py);
+
+    DragManager.oneDragElement = this.menuDiv;
+  },
+  /*
   showSplashMenu: function(id) {
     var el, menu;
     if (this.currentSplashMenu === id) {
@@ -268,9 +368,21 @@ var MenusClass = new Class({
 
     DragManager.oneDragElement = this.menuDiv;
   },
+  */
+  showSubMenu: function(menuName) {
+    var current = this.currentSplashMenuName;
+    var next = menuName;
+    this.menuStack.push(current);
+    this.swapMenus(current, next, 'shift.right_to_left');
+  },
+  showMainMenu: function() {
+    var current = this.currentSplashMenuName;
+    var next = this.menuStack.pop();
+    this.swapMenus(current, next, 'shift.left_to_right');
+  },
 
   _setLimits: function() {
-    var menu = this.splashMenus[this.currentSplashMenu];
+    var menu = this.allMenus[this.currentSplashMenuName];
     el = menu.el();
     var CH = parseFloat(el.style.minHeight);
     if (isNaN(CH)) {
@@ -280,7 +392,7 @@ var MenusClass = new Class({
   },
 
   _saveCurrentPos: function() {
-    var menu = this.splashMenus[this.currentSplashMenu];
+    var menu = this.allMenus[this.currentSplashMenuName];
     var el = menu.el();
     el.cpx = this.menuDiv.el.cpx;
     el.cpy = this.menuDiv.el.cpy;
@@ -299,7 +411,7 @@ var MenusClass = new Class({
   },
 
   hideSplashMenu: function() {
-    if (this.currentSplashMenu < 0) {
+    if (this.currentSplashMenuName === null) {
       return;
     }
   
@@ -308,18 +420,18 @@ var MenusClass = new Class({
     DragManager.oneDragElement = null;
     this.hideBGCanvas();
     this.menuDiv.el.innerHTML = '';
-    this.currentSplashMenu = -1;
+    this.currentSplashMenu = null;
   },
 
-  swapMenus: function(id1, id2, method) {
+  swapMenus: function(name1, name2, method) {
     if (this._swapping) {
       return;
     }
     this._swapping = true;
 
-    var el1 = this.splashMenus[id1].el();
-    var el2 = this.splashMenus[id2].el();
-    this.id2 = id2;
+    var el1 = this.allMenus[name1].el();
+    var el2 = this.allMenus[name2].el();
+    this.name2 = name2;
 
     method = method.split('.');
     method[0] = '_swap_' + method[0];
@@ -350,7 +462,7 @@ var MenusClass = new Class({
 
     this.menuDiv.el.style.display = 'none';
 
-    this.showSplashMenu(this.id2);
+    this.showSplashMenu(this.name2);
 
     var pos2 = this._currentPos();
 
@@ -445,7 +557,7 @@ var MenusClass = new Class({
     document.body.removeChild(this.clipDiv2);
     this.page1.style.position = '';
     this.page2.style.position = '';
-    this.showSplashMenu(this.id2);
+    this.showSplashMenu(this.name2);
     this._swapping = false;
   },
   _swapOverCB: function(type, timer) {
@@ -525,7 +637,8 @@ var MenusClass = new Class({
 
 
   currentMenu: function() {
-    return this.currentSplashMenu > -1 ? this.splashMenus[this.currentSplashMenu] : null;
+    //return this.currentSplashMenu > -1 ? this.splashMenus[this.currentSplashMenu] : null;
+    return this.allMenus[this.currentSplashMenuName];
   },
 
   cb: function(type, dragable) {

@@ -1385,10 +1385,7 @@ var Controller = new Class({
 
 		parentDiv.set('class', 'container');
         document.body.setStyle('margin', '0 0 0 0');
-        document.body.setStyle('background-image', 'url(../assets/background.png)');
-        //document.body.setStyle('background-image', 'url(background.png)');
-        //document.body.setStyle('background-image', 'url(assets/images/background.png)');
-        //document.body.setStyle('background-image', 'url(images/background.png)');
+        document.body.setStyle('background-image', 'url(../assets/background.jpg)');
 
 
 		var canvas = new Element('canvas');

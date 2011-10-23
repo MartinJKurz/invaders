@@ -1,20 +1,8 @@
 <html>
   <head>
     <title><%= @title %></title>
-    <!-- PRODUCTION -->
-    <!-- %= javascript_include_tag "dragable_test_content" % -->
-
-    <!-- DEVELOPMENT -->
-    <script src="/assets/lib/mootools-core-1.4.0-full-compat.js" type="text/javascript"></script>
-    <script src='/assets/lib/log.js' type='text/javascript'></script>
-    <script src='/assets/lib/js_helper.js' type='text/javascript'></script>
-    <script src='/assets/lib/font_helper.js' type='text/javascript'></script>
-    <script src='/assets/lib/receiver.js' type='text/javascript'></script>
-    <script src='/assets/lib/emitter.js' type='text/javascript'></script>
-    <script src='/assets/lib/central_timer.js' type='text/javascript'></script>
-    <script src='/assets/lib/interpolator.js' type='text/javascript'></script>
-    <script src='/assets/lib/dragable.js' type='text/javascript'></script>
-    <script src='/assets/dragable_test/dragable_test.js' type='text/javascript'></script>
+    <!-- PRODUCTION & DEVELOPMENT -->
+    <%= javascript_include_tag "dragable_test_content", :debug => Rails.env.development? %>
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 

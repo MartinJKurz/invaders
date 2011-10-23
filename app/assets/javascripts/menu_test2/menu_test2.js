@@ -1,5 +1,41 @@
+/****************************************************************
+ * menu_test2
+ ****************************************************************/
 
+//= require lib/mootools-core-1.4.0-full-compat-yc
+//= require lib/log
+//= require lib/js_helper
+//= require lib/menus
 
+/*
+ * testing a hierarchy of menus,
+ *
+ *
+ * settings
+ *  style
+ * texts
+ *  political
+ *  controvery
+ * recipies
+ *  meat
+ *    chicken
+ *    beef
+ *    pig
+ *  vegetarian
+ *    apples
+ *    oranges
+ * music
+ *  classical
+ *  ballads
+ *  loud
+ *  punk
+ * applications
+ *  invaders
+ *  pong
+ *
+ *
+ * 1. 
+ */
 
 var App = new Class({
   menuSelection: function(type, menu) {
@@ -16,68 +52,45 @@ var App = new Class({
         it.action();
       }
     }
-/*
-    if (it.text.contains('Style')) {
-      idx = parseInt(it.text.substring(5));
-      setActiveStyleSheet(this.styles[idx]);
-    }
-*/
   },
   
   initialize: function() {
     var i, n, sn;
     var items = [
-      {text: 'show second menu with a simple click', action: this.showSecond.bind(this)},
-      {text: 'one ', check: true},
-      {text: 'two ', check: false},
-      {text: 'three'},
-      {text: 'New Callback Technique'},
-      {text: 'C'},
-      {text: 'testing long texts with this entry. should be visible on a mobile device. the line must be tall enough to be selectable'},
-      {text: 'E'},
-      {text: 'F'},
-      {text: 'G'},
-      {text: 'H'},
-      {text: 'I'},
-      {text: 'J'},
-      {text: 'K'},
-      {text: 'L'},
-      {text: 'M'},
-      {text: 'N'},
-      {text: 'O'},
-      {text: 'P'},
-      {text: 'Q'},
-      {text: 'R'},
-      {text: 'S'},
-      {text: 'T'},
-      {text: 'U'},
-      {text: 'V'},
-      {text: 'W'},
-      {text: 'X'},
-      {text: 'Y'},
-      {text: 'Z'},
-      {text: 'show second menu with a simple click', action: this.showSecond.bind(this)},
+      {text: 'Settings', submenu: 'settings'},
+      {text: 'Texts', submenu: 'texts'},
+      {text: 'Recipies', submenu: 'recipies'},
+      {text: 'Music', submenu: 'music'},
+      {text: 'Applications', submenu: 'applications'},
     ];
 
-    var options = {};
+    var options = {fixedFontSize: 30};
     this.mainMenu = Menus.createSplashMenu('main', items, options, {obj:this, method:'menuSelection'});
 
+    // Settings
     items = [
-      {text: 'Second Menu'},
-      {text: 'show first menu', action: this.showFirst.bind(this)},
-      {text: 'one ', check: true},
+      //{text: 'Settings', caption: true},
+      {text: 'Styles', submenu: 'styles'},
+      {text: 'back', mainmenu: true},
+    ];
+    // options = {};
+    this.settingsMenu = Menus.createSplashMenu('settings', items, options, {obj:this, method:'menuSelection'});
+
+    // Styles
+    items = [
+      {text: 'Styles', caption: true},
     ];
     this.styles = getAlternateStyleSheetNames();
     n = this.styles.length;
     for (i=0; i<n; i++) {
       sn = this.styles[i];
-      //items.push({text: 'Style: ' + sn, action: setActiveStyleSheet, args: [sn]});
       items.push({text: 'Style: ' + sn, action: setActiveStyleSheet, args: [i]});
     }
-    
+    items.push({text: 'back', mainmenu: true});
     options = {};
-    this.secondMenu = Menus.createSplashMenu('second', items, options, {obj:this, method:'menuSelection'});
+    this.stylesMenu = Menus.createSplashMenu('styles', items, options, {obj:this, method:'menuSelection'});
 
+    
     Menus.showSplashMenu(this.mainMenu);
   },
   showSecond: function() {
