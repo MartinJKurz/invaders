@@ -1,0 +1,12 @@
+.menu-button {
+  background: rgba(0,255,0,0.5);
+  border: 2px solid gray;
+}
+
+.menu-button:active {
+  background: rgba(255,0,0,0.5);
+  border: 2px solid red;
+  text-shadow: #666 3px 3px 4px;
+  color: red;
+}
+

@@ -1428,20 +1428,20 @@ var Controller = new Class({
 		if (!this.sounds.supported) {
 			return;
 		}
-		this.sounds.createSound('explosion', '/invader_sounds/explosion_2-short.ogg', 1, 10);
+		this.sounds.createSound('explosion',     '/invader_sounds/ogg/explosion_2-short.ogg', 1, 10);
 		this.sounds.createSound('invaderkilled', '/invader_sounds/ogg/duck_1.ogg', 1, 10);
-		this.sounds.createSound('shoot', '/invader_sounds/ogg/gunshot.ogg', 1, 10);
+		this.sounds.createSound('shoot',         '/invader_sounds/ogg/gunshot.ogg', 1, 10);
 		this.sounds.createSound('ufo_highpitch', '/invader_sounds/ogg/chimpanzee_1_1.ogg', 1, 10);
-		this.sounds.createSound('ufo_lowpitch', '/invader_sounds/ogg/coyote-short.ogg', 1, 10);
-		this.sounds.createSound('march', '/invader_sounds/ogg/clock_single.ogg', 1.0, 10);
-		this.sounds.createSound('laughter', '/invader_sounds/ogg/laughter-2-short.ogg', 1.0, 10);
-		this.sounds.createSound('applause-4.0', '/invader_sounds/ogg/applause-3-4.0s.ogg', 1.0, 10);
-		this.sounds.createSound('applause-3.0', '/invader_sounds/ogg/applause-3-3.0s.ogg', 1.0, 10);
-		this.sounds.createSound('applause-2.0', '/invader_sounds/ogg/applause-3-2.0s.ogg', 1.0, 10);
-		this.sounds.createSound('applause-1.5', '/invader_sounds/ogg/applause-3-1.5s.ogg', 1.0, 10);
-		this.sounds.createSound('applause-1.0', '/invader_sounds/ogg/applause-3-1.0s.ogg', 1.0, 10);
-		this.sounds.createSound('applause-0.5', '/invader_sounds/ogg/applause-3-0.5s.ogg', 1.0, 10);
-		this.sounds.createSound('doh', '/invader_sounds/ogg/doh.ogg', 1.0, 10);
+		this.sounds.createSound('ufo_lowpitch',  '/invader_sounds/ogg/coyote-short.ogg', 1, 10);
+		this.sounds.createSound('march',         '/invader_sounds/ogg/clock_single.ogg', 1.0, 10);
+		this.sounds.createSound('laughter',      '/invader_sounds/ogg/laughter-2-short.ogg', 1.0, 10);
+		this.sounds.createSound('applause-4.0',  '/invader_sounds/ogg/applause-3-4.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-3.0',  '/invader_sounds/ogg/applause-3-3.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-2.0',  '/invader_sounds/ogg/applause-3-2.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-1.5',  '/invader_sounds/ogg/applause-3-1.5s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-1.0',  '/invader_sounds/ogg/applause-3-1.0s.ogg', 1.0, 10);
+		this.sounds.createSound('applause-0.5',  '/invader_sounds/ogg/applause-3-0.5s.ogg', 1.0, 10);
+		this.sounds.createSound('doh',           '/invader_sounds/ogg/doh.ogg', 1.0, 10);
 	},
 	loadSounds_org: function() {
 		if (!this.sounds.supported) {

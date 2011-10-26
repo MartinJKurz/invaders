@@ -1,0 +1,15 @@
+.menu-button {
+  color: white;
+  background: black;
+
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: white;
+}
+
+.menu-button:active {
+  border-color: red;
+  color: black;
+  text-shadow: #fff 0px 0px 8px;
+}
+

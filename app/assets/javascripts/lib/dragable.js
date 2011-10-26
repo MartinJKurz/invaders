@@ -22,6 +22,7 @@ var Drag = {
   M_HOR: 1,           // "           horizontal "
   M_BOTH: 2,          // drag direction determined after start
   M_FREE: 3,          // free 2d dragging
+  M_NONE: 4,
   TARGET_NEAREST: 0,
   TARGET_STOP: 1,
   TARGET_COAST: 3
@@ -172,8 +173,8 @@ var Dragable = new Class({
   },
 
   setPosition: function(px, py) {
-    this.el.style.left = px;
-    this.el.style.top = py;
+    this.el.style.left = px + 'px';
+    this.el.style.top = py + 'px';
 
     this.el.cpx = px;
     this.el.cpy = py;
@@ -270,31 +271,31 @@ var Dragable = new Class({
 
       d = Math.sqrt(dx*dx+dy*dy);
       started = false;
-      if (d > DragManager.dragLimit && !this.dragging) {
-        this.dragging = true;
-        started = true;
-        switch (this.motion) {
-          case Drag.M_HOR:
-            this.hor = true;
-            break;
-          case Drag.M_VER:
-            this.ver = true;
-            break;
-          case Drag.M_BOTH:
-            if (Math.abs(dx) < 2) {
-              this.ver = true;
-            } else if (Math.abs(dy) < 2) {
+      if (this.motion !== Drag.M_NONE) {
+        if (d > DragManager.dragLimit && !this.dragging) {
+          this.dragging = true;
+          started = true;
+          switch (this.motion) {
+            case Drag.M_HOR:
               this.hor = true;
-            }
-            break;
-          case Drag.M_FREE:
-            // no restriction
-            break;
+              break;
+            case Drag.M_VER:
+              this.ver = true;
+              break;
+            case Drag.M_BOTH:
+              if (Math.abs(dx) < 2) {
+                this.ver = true;
+              } else if (Math.abs(dy) < 2) {
+                this.hor = true;
+              }
+              break;
+            case Drag.M_FREE:
+              // no restriction
+              break;
+          }
         }
       }
 
-      // android browser hangs sometimes
-      //
       if (this.dragging) {
         try {
           this.el.setStyle ('left', this.el.cpx + dx); 
@@ -502,85 +503,18 @@ var Dragable = new Class({
 
     if (this.ver) {
       vx = 0;
-      this.limits[0][0] = px;
-      this.limits[1][0] = px;
+      this.limits[0][0] = parseFloat(this.el.style.left);//px;
+      this.limits[1][0] = parseFloat(this.el.style.left);//px;
     } else if (this.hor) {
       vy = 0;
-      this.limits[0][1] = py;
-      this.limits[1][1] = py;
+      this.limits[0][1] = parseFloat(this.el.style.top);//py;
+      this.limits[1][1] = parseFloat(this.el.style.top);//py;
     }
     tx = this.limits[0][0];
     ty = this.limits[0][1];
-    // var move = new Move(this.el, tx, ty, vx, vy);
     this.move = new Move(this.el, vx, vy, this.limits[0][0], this.limits[0][1], this.limits[1][0], this.limits[1][1]);
     this.move.start();
   },
-  /*
-  _mu_coast: function() {
-    // 
-    var dt, T, times, positions, px, py, vx, vy, v, dx, dy, tx, ty;
-
-    dt = 1000/60;
-    T = 1000;
-
-    px = this.el.cpx;
-    py = this.el.cpy;
-
-    var check = this._inLimits(px, py);
-    if (check !== -1) {
-      return;
-    }
-
-    tx = px;
-    ty = py;
-
-    times = [];
-    positions = [];
-
-    vx = this.vx;
-    vy = this.vy;
-
-    if (this.ver) {
-      vx = 0;
-      this.limits[0][0] = px;
-      this.limits[1][0] = px;
-    } else if (this.hor) {
-      vy = 0;
-      this.limits[0][1] = py;
-      this.limits[1][1] = py;
-    }
-
-    v = Math.sqrt(vx*vx+vy*vy);
-    T = 0;
-    dx = vx / v;
-    dy = vy / v;
-    while (v > 0 && -1 == (check = this._inLimits(tx,ty))) {
-      times.push(T);
-      T += dt;
-      positions.push([tx,ty]);
-      tx += dt*v*dx;
-      ty += dt*v*dy;
-      v -= 0.01;
-    }
-
-    if (-1 !== check) {
-      times.push(T);
-      positions.push([this.limits[check][0],this.limits[check][1]]);
-    }
-
-    //T -= dt;
-    T = this._adjustInterpolationValues(T, times, positions, px, py, tx, ty);
-    times[0] = 0;
-    times[times.length-1] = 1;
-
-    inter = new VectorInterpolator(times, positions);
-    this.timer = new IntervalTimer(Math.round(dt), {duration: T, delay: 0});
-    this.timer.addReceiver(inter, ['tick', 'finished']);
-    inter.addReceiver(this, ['value_changed', 'finished']);
-
-    this.timer.start();
-  },
-  */
 
   mu: function(ev) {
     DragManager.dragElement = null;

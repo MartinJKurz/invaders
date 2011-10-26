@@ -60,7 +60,7 @@ var App = new Class({
     ];
 
     var options = {};
-    this.mainMenu = Menus.createSplashMenu('main', items, options, {obj:this, method:'menuSelection'});
+    this.mainMenu = Pages.createSplashMenu(null, 'main', items, options, {obj:this, method:'menuSelection'});
 
     items = [
       {text: 'Second Menu'},
@@ -76,17 +76,17 @@ var App = new Class({
     }
     
     options = {};
-    this.secondMenu = Menus.createSplashMenu('second', items, options, {obj:this, method:'menuSelection'});
+    this.secondMenu = Pages.createSplashMenu(null, 'second', items, options, {obj:this, method:'menuSelection'});
 
-    Menus.showSplashMenu(this.mainMenu);
+    Pages.showPage(this.mainMenu);
   },
   showSecond: function() {
-    Menus.swapMenus(this.mainMenu, this.secondMenu, 'shift.left_to_right');
-    // Menus.swapMenus(this.mainMenu, this.secondMenu, 'over.left_to_right');
+    Pages.swapMenus(this.mainMenu, this.secondMenu, 'shift.left_to_right');
+    // Pages.swapMenus(this.mainMenu, this.secondMenu, 'over.left_to_right');
   },
   showFirst: function() {
-    Menus.swapMenus(this.secondMenu, this.mainMenu, 'shift.right_to_left');
-    //Menus.swapMenus(this.secondMenu, this.mainMenu, 'over.right_to_left');
+    Pages.swapMenus(this.secondMenu, this.mainMenu, 'shift.right_to_left');
+    //Pages.swapMenus(this.secondMenu, this.mainMenu, 'over.right_to_left');
   },
 });
 

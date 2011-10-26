@@ -1,0 +1,22 @@
+.menu-button {
+  background: none;
+
+  color: white;
+
+  border-width: 1px 0;
+  border-style: solid;
+  border-color: black;
+}
+
+.menu-button:active {
+  text-shadow: #666 3px 3px 4px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+  text-shadow: -1px 0 1px black, 0 1px 1px black, 1px 0 1px black, 0 -1px 1px black;
+  text-shadow: -1px 0 3px black, 0 1px 3px black, 1px 0 3px black, 0 -1px 3px black;
+  text-shadow: -1px 0 3px yellow, 0 1px 3px green, 1px 0 3px blue, 0 -1px 3px #f0f;
+  text-shadow: -1px -1px 3px black, 1px 1px 3px black;
+  text-shadow: 0px 0px 3px black, 0px 0px 3px black, 0px 0px 3px black, 0px 0px 3px black;
+  color: red;
+  border-color: red;
+}
+

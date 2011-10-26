@@ -7,20 +7,91 @@
 
 var DT = 1000/60;
 
+var BACK_BUTTON_WIDTH = 0.1;
+
+
+var TextPage = new Class({
+  Extends: Emitter,
+
+  content: null,
+  name: null,
+
+  initialize: function(parentMenu, name, content, options) {
+    this.parentMenu = parentMenu;
+    this.name = name;
+    this.content = content;
+    var box;
+    var obj, method;
+
+    this.contentContainer = new Element('p');
+    // this.contentContainer.style.backgroundColor = 'red';
+    this.contentContainer.style.margin = 0;
+    this.contentContainer.style.padding = 0;
+
+    this.opts = {
+      fontFamily: 'Arial',
+      fontSize: 30,       // starting point for font size search
+      fontMinSize: 30,    // lower limit: no smaller font
+      fontWeight: 'normal',
+      fixedFontSize: options.fixedFontSize
+    }
+    this.contentContainer.style.fontFamily = this.opts.fontFamily;
+    this.contentContainer.style.fontSize = this.opts.fontSize;
+    this.contentContainer.style.fontWeight = this.opts.fontWeight;
+
+    this.contentContainer.innerHTML = this.content;
+
+    this.resize();
+  },
+
+  resize: function() {
+    var fs;
+    if (this.opts.fixedFontSize) {
+      fs = this.opts.fixedFontSize;
+    } else {
+      if (this.used_width === window.innerWidth && this.used_height === window.innerHeight) {
+        return;
+      }
+      this.used_width = window.innerWidth;
+      this.used_height = window.innerHeight;
+      fs = window.innerWidth * 0.05;
+    }
+
+    if (Pages.pageDiv.el.hasChild(this.contentContainer)) {
+      this.contentContainer.style.minHeight = 0;
+      this.contentContainer.setStyle('font-size', fs);
+
+      this.contentContainer.style.minHeight = Pages.pageDiv.el.offsetHeight;
+    }
+  },
+
+  el: function() {
+    return this.contentContainer;
+  }
+});
+
+
 var SplashMenu = new Class({
   Extends: Emitter,
 
   table: null,
   name: null,
 
-  initialize: function(name, items, options, cb) {
+  initialize: function(parentMenu, name, items, options, cb) {
+    this.parentMenu = parentMenu;
     this.name = name;
     this.items = items;
     var box, i, tr, b, btype, chk, lab;
     var localClick;
     var it, obj, method;
 
+    this.fixed = options.fixed ? true : false;
+    this.vcentered = options.vcentered ? true : false;
+
     this.table = new Element('table');
+    if (options.classes) {
+      this.table.addClass(options.classes);
+    }
     this.table.setAttribute('cellspacing', '0');
     this.elements = [];
 
@@ -35,13 +106,15 @@ var SplashMenu = new Class({
     localClick = function(ev) {
       var it;
       var t = getTarget(ev);
-      if (!Menus.menuDiv.dragging) {
+      if (!Pages.pageDiv.dragging) {
         this.selectedId = t.id.toInt();
         it = this.items[this.selectedId];
         if (it.submenu) {
-          Menus.showSubMenu(it.submenu);
+          Pages.showSubMenu(it.submenu);
         } else if (it.mainmenu) {
-          Menus.showMainMenu();
+          Pages.showMainMenu();
+        } else if (it.caption) {
+          // nothing
         } else {
           this.notify('selected', this);
         }
@@ -57,7 +130,7 @@ var SplashMenu = new Class({
     }
 
     function toggleCheckButton(ev) {
-      if (Menus.menuDiv.dragging) {
+      if (Pages.pageDiv.dragging) {
         return;
       }
       var b = getTarget(ev);
@@ -71,7 +144,27 @@ var SplashMenu = new Class({
         b.setAttribute('checked', 'true');
         it.checked = true;
       }
-    };
+    }
+
+    function setStandardMenuElement(el, opts) {
+      el.addClass('menu-item');
+      el.setStyle('font-family', opts.fontFamily);
+      el.setStyle('font-style', opts.fontStyle);
+      el.setStyle('font-variant', opts.fontVariant);
+      el.setStyle('font-weight', opts.fontWeight);
+    }
+
+    function setActiveMenuElement(el, context, opts) {
+      setStandardMenuElement(el, opts);
+      el.addClass('menu-button');
+      el.addEventListener('click', toggleCheckButton.bind(context));
+      el.addEventListener('click', localClick.bind(context));
+    }
+
+    function setPassiveMenuElement(el, opts) {
+      setStandardMenuElement(el, opts);
+      el.addClass('menu-caption');
+    }
 
     for (i=0; i<items.length; i++) {
       it = items[i];
@@ -80,7 +173,6 @@ var SplashMenu = new Class({
 
       chk = $defined(it.check);
       if (chk) {
-        //b = new Element('div');
         b = new Element('button');
         if (it.check) {
           b.setAttribute('checked', true);
@@ -104,25 +196,28 @@ var SplashMenu = new Class({
         uncheckedImg.src = '../assets/unchecked.png';
         uncheckedImg.style.height = '30px';
         b.appendChild(uncheckedImg);
+        setActiveMenuElement(b, this, this.opts);
+      } else if (it.caption) {
+        // b = new Element('h2', {text: it.text});
+        b = new Element('button', {text: it.text});
+        b.addClass('menu-caption');
+        setPassiveMenuElement(b, this.opts);
       } else {
         b = new Element('button', {text: it.text});
+        setActiveMenuElement(b, this, this.opts);
+      }
+
+      if (options.item_classes) {
+        b.addClass(options.item_classes);
       }
 
       this.elements.push(b);
-
-      b.addClass('menu-button');
-      b.setStyle('font-family', this.opts.fontFamily);
-      b.setStyle('font-style', this.opts.fontStyle);
-      b.setStyle('font-variant', this.opts.fontVariant);
-      b.setStyle('font-weight', this.opts.fontWeight);
       b.id = i;
-      b.addEventListener('click', toggleCheckButton.bind(this));
-
       tr.appendChild(b);
-
-      b.addEventListener('click', localClick.bind(this));
     }
-    this.addReceiver(cb.obj, ['selected'], cb.method);
+    if (cb) {
+      this.addReceiver(cb.obj, ['selected'], cb.method);
+    }
 
     this.resize();
   },
@@ -141,7 +236,7 @@ var SplashMenu = new Class({
         el.style.height = 1.25*fs + 'px';
       });
 
-      this.table.style.minHeight = Menus.menuDiv.el.offsetHeight;
+      this.table.style.minHeight = Pages.pageDiv.el.offsetHeight;
     } else {
       if (this.used_width === window.innerWidth && this.used_height === window.innerHeight) {
         return;
@@ -172,7 +267,7 @@ var SplashMenu = new Class({
 
       Logger.log('Menu-FS: ' + font.size);
 
-      this.table.style.minHeight = Menus.menuDiv.el.offsetHeight;
+      this.table.style.minHeight = Pages.pageDiv.el.offsetHeight;
     }
   },
 
@@ -183,141 +278,241 @@ var SplashMenu = new Class({
 
 
 var MenusClass = new Class({
-  // splashMenus: [],
-  menuStack: [],
   allMenus: {},
-  currentSplashMenuName: null,
-  bgCanvas: null,
+  currentPage: null,
+  background: null,
   bgCtx: null,
   startX: -1,
   startY: -1,
-  menuDiv: null,
+  pageDiv: null,
   posIdx: 0,
   mPosX: 0,
   mPosY: 0,
 
-  _createBG: function() {
+  createDefaultBG: function() {
     var cw = 30, ch = 30;
-    this.bgCanvas = new Element('canvas');
-    this.bgCanvas.width = cw;
-    this.bgCanvas.height = ch;
-    this.bgCanvas.style.display = 'none';
-    this.bgCanvas.style.position = 'absolute';
-    this.bgCanvas.style.left = '0px';
-    this.bgCanvas.style.top = '0px';
-    document.body.appendChild(this.bgCanvas);
+    var bg = new Element('canvas');
+    bg.width = cw;
+    bg.height = ch;
 
-    this.bgCtx = this.bgCanvas.getContext('2d');
-    this.bgCtx.clearRect(0, 0, cw, ch);
-    // this.bgCtx.fillStyle = 'rgba(0,255,0,0.5)';
-    this.bgCtx.fillStyle = '#888';
-    this.bgCtx.fillRect(0, 0, cw, ch);
+    var bgCtx = bg.getContext('2d');
+    bgCtx.clearRect(0, 0, cw, ch);
+    // this.bgCtx.fillStyle = 'rgba(255,255,255,0.5)';
+    bgCtx.fillStyle = '#888';
+    bgCtx.fillRect(0, 0, cw, ch);
 
-    this.bgCtx.fillStyle = 'white';
-    this.bgCtx.font = 'normal ' + ch*0.35 + 'pt Courier';
-    this.bgCtx.fillText('back', 0, ch*0.7);
+    bgCtx.fillStyle = 'white';
+    bgCtx.font = 'normal ' + ch*0.35 + 'pt Courier';
+    bgCtx.fillText('back', 0, ch*0.7);
+
+    this.setBG(bg);
+  },
+
+  createBG: function(rgba) {
+    var cw = 30, ch = 30;
+    var bg = new Element('canvas');
+    bg.width = cw;
+    bg.height = ch;
+
+    var bgCtx = bg.getContext('2d');
+    bgCtx.clearRect(0, 0, cw, ch);
+    bgCtx.fillStyle = rgba;
+    bgCtx.fillRect(0, 0, cw, ch);
+
+    this.setBG(bg);
+  },
+
+  deleteBG: function() {
+    if (this.background) {
+      this.background.parentNode.removeChild(this.background);
+      this.background = null;
+    }
+  },
+
+  setBG: function(bg) {
+    this.deleteBG();
+
+    bg.id = 'the-background';
+
+    this.background = bg;
+
+    this.background.style.position = 'absolute';
+    this.background.style.left = '0px';
+    this.background.style.top = '0px';
+    this.background.style.width = '100%';
+    this.background.style.height = '100%';
+    // document.body.appendChild(this.background);
+    this.bgDiv.appendChild(this.background);
   },
 
   initialize: function() {
 
     this.initialized = true;
-    // this._createBG();
 
-    this.menuDiv = new Dragable('div', true);
-    this.menuDiv.motion = Drag.M_VER;
-    //this.menuDiv.motionTarget = Drag.TARGET_NEAREST;
-    this.menuDiv.motionTarget = Drag.TARGET_COAST;
-    this.menuDiv.addReceiver(this, 'finished');
-    this.menuDiv.el.set('class', 'splash-menu');
-    document.body.appendChild(this.menuDiv.el);
+    this.bgDiv = new Element('div');
+    this.bgDiv.style.display = 'none';
+    this.bgDiv.style.position = 'absolute';
+    this.bgDiv.style.left = '0';
+    this.bgDiv.style.top = '0';
+    this.bgDiv.style.width = '100%';
+    this.bgDiv.style.height = '100%';
+    document.body.appendChild(this.bgDiv);
+
+    // this.createDefaultBG();
+    // this.createBG('rgba(255,255,255,0.5)');
+
+
+    this.pageDiv = new Dragable('div', true);
+    this.pageDiv.motion = Drag.M_VER;
+    this.pageDiv.motionTarget = Drag.TARGET_COAST;
+    this.pageDiv.addReceiver(this, 'finished');
+    this.pageDiv.el.set('class', 'splash-menu');
+    document.body.appendChild(this.pageDiv.el);
+
+
+    // new: back button
+    this.backButton = new Element('div');
+    this.backButton.set('class', 'splash-menu-back');
+    //this.backButton.style.backgroundColor = 'red';
+    this.backButton.style.width = window.innerWidth * BACK_BUTTON_WIDTH;
+    this.backButton.style.height = '100%';
+    document.body.appendChild(this.backButton);
+    this.backButton.style.display = 'none';
+    this.backButton.addEventListener('click', this.showMainMenu.bind(this));
+    this.backButton.style.verticalAlign = 'middle';
+
+
+    this.backImg = new Element('img');
+    this.backImg.src = '../assets/back.png';
+    this.backImg.style.width = '30px';
+    this.backButton.appendChild(this.backImg);
+
+    this.resize();
+
 
     window.addEventListener('resize', this.resize.bind(this));
   },
-
+/*
   resizeBGCanvas: function() {
-    if (this.bgCanvas) {
-      this.bgCanvas.style.width = window.innerWidth;
-      this.bgCanvas.style.height = window.innerHeight;
+    if (this.background) {
+      this.background.style.width = window.innerWidth;
+      this.background.style.height = window.innerHeight;
+      console.log('resize BG');
     }
+  },
+*/
+  _calcPosition: function(menu) {
+    var px, py;
+    if (menu.vcentered) {
+      py = (window.innerHeight - this.pageDiv.el.offsetHeight)*0.5;
+      if (py < 0) {
+        py = 0;
+      }
+    } else {
+      py = 0;
+    }
+
+    px = 0;
+
+    return {x:px, y:py};
   },
 
   resize: function() {
+    var pos;
     Logger.log('MenuClass: ' + window.innerWidth + ' ' + window.innerHeight);
-    this.resizeBGCanvas();
-    var m = this.currentMenu();
+    // this.resizeBGCanvas();
+    var m = this.currentPage;
     if (m) {
       m.resize();
 
-      px = (window.innerWidth - this.menuDiv.el.offsetWidth)*0.5;
-      py = (window.innerHeight - this.menuDiv.el.offsetHeight)*0.5;
-      this.menuDiv.setPosition(px, py);
+      pos = this._calcPosition(m);
+      this.pageDiv.setPosition(pos.x, pos.y);
+      this._setLimits();
     }
-    this._setLimits();
+    this.backImg.style.width = BACK_BUTTON_WIDTH*window.innerWidth;
+    this.backImg.style.height= BACK_BUTTON_WIDTH*window.innerWidth;
+    this.backButton.style.height = window.innerHeight;
   },
 
   showBGCanvas: function() {
-    this.resizeBGCanvas();
-    if (this.bgCanvas) {
-      this.bgCanvas.style.display = '';
+    // this.resizeBGCanvas();
+    if (this.background) {
+      this.bgDiv.style.display = '';
     }
   },
   hideBGCanvas: function() {
-    if (this.bgCanvas) {
-      this.bgCanvas.style.display = 'none';
+    if (this.background) {
+      this.bgDiv.style.display = 'none';
     }
   },
 
-  createSplashMenu: function(name, items, options, cb) {
-    if (!this.initialized) {
-      this.initialize();
-    }
-    //if (this.allMenus.contains(name)) {
-    if (this.allMenus[name]) {
-      throw 'Menus.createSplashMenu menu with name "' + name + '" already exists';
-    }
+  createTextPage: function (parentMenu, name, content, options) {
+    var current = this.currentPage;
+    var sm = new TextPage(parentMenu, name, content, options);
 
-    var sm = new SplashMenu(name, items, options, cb);
-    // this.splashMenus.push(sm);
     this.allMenus[name] = sm;
 
-
-    this.showSplashMenu(name);
+    this.showPage(name);
 
     var el = this.allMenus[name].el();
-    el.style.width = '100%';
-   
-    this.hideSplashMenu(name);
+    
+    el.style.width = parentMenu ? (100-BACK_BUTTON_WIDTH*100) + '%' : '100%';
 
-    return name;
+    this.hidePage(name);
+
+    if (current) {
+      this.showPage(current);
+    }
+
+    return sm;
   },
 
-  showSplashMenu: function(name) {
-    var el, menu;
-    if (this.currentSplashMenuName === name) {
-      return;
+  createSplashMenu: function(parentMenu, name, items, options, cb) {
+    if (!this.initialized) {
+      this.initialize();
+      console.log('CALLING INITIALIZE');
     }
-    if (!this.allMenus[name]) {
-      // ERROR
-      return;
+    var current = this.currentPage;
+    if (this.allMenus[name]) {
+      throw 'Pages.createSplashMenu menu with name "' + name + '" already exists';
     }
-    this.currentSplashMenuName = name;
-    this.showBGCanvas();
-    this.menuDiv.el.innerHTML = '';
-    
-    menu = this.allMenus[name];
-    el = menu.el();
-    this.menuDiv.el.appendChild(el);
 
-    this.menuDiv.el.style.display = '';
+    var sm = new SplashMenu(parentMenu, name, items, options, cb);
+    this.allMenus[name] = sm;
+
+    this.showPage(name);
+
+    var el = this.allMenus[name].el();
+    // el.style.width = '100%';
+    el.style.width = parentMenu ? (100-BACK_BUTTON_WIDTH*100) + '%' : '100%';
+
+    this.hidePage(name);
+
+    if (current) {
+      this.showPage(current);
+    }
+
+    return sm;
+  },
+  _showPage: function(menu) {
+    var name, el, pos, px, py;
+    if (this.currentPage === menu) {
+      return;
+    }
+    this.currentPage = menu;
+    this.showBGCanvas();
+    this.pageDiv.el.innerHTML = '';
+    
+    el = menu.el();
+    this.pageDiv.el.appendChild(el);
+
+    this.pageDiv.el.style.display = '';
     menu.used_width = -1;
     menu.resize();
 
-    px = (window.innerWidth - this.menuDiv.el.offsetWidth)*0.5;
-    py = (window.innerHeight - this.menuDiv.el.offsetHeight)*0.5;
-
-    if (py < 0) {
-      py = 0;
-    }
+    pos = this._calcPosition(menu);
+    px = pos.x;
+    py = pos.y;
 
     if ($defined(el.cpx)) {
       px = el.cpx;
@@ -325,77 +520,66 @@ var MenusClass = new Class({
     }
     this._setLimits();
 
-    this.menuDiv.setPosition(px, py);
-
-    DragManager.oneDragElement = this.menuDiv;
-  },
-  /*
-  showSplashMenu: function(id) {
-    var el, menu;
-    if (this.currentSplashMenu === id) {
-      return;
-    }
-    if (id < 0 || id >= this.splashMenus.length) {
-      // ERROR
-      return;
-    }
-    this.currentSplashMenu = id;
-    this.showBGCanvas();
-    this.menuDiv.el.innerHTML = '';
+    this.pageDiv.setPosition(px, py);
     
-    menu = this.splashMenus[id];
-    el = menu.el();
-    this.menuDiv.el.appendChild(el);
+    // this.backButton.style.display = this.currentPage.parentMenu ? '' : 'none';
 
-    this.menuDiv.el.style.display = '';
-    menu.used_width = -1;
-    menu.resize();
+    DragManager.oneDragElement = this.pageDiv;
 
-    px = (window.innerWidth - this.menuDiv.el.offsetWidth)*0.5;
-    py = (window.innerHeight - this.menuDiv.el.offsetHeight)*0.5;
-
-    if (py < 0) {
-      py = 0;
+    if (menu.fixed) {
+      this.pageDiv.motion = Drag.M_NONE;
+      // this.pageDiv.motionTarget = Drag.TARGET_COAST;
+    } else {
+      this.pageDiv.motion = Drag.M_VER;
+      this.pageDiv.motionTarget = Drag.TARGET_COAST;
     }
-
-    if ($defined(el.cpx)) {
-      px = el.cpx;
-      py = el.cpy;
-    }
-    this._setLimits();
-
-    this.menuDiv.setPosition(px, py);
-
-    DragManager.oneDragElement = this.menuDiv;
   },
-  */
-  showSubMenu: function(menuName) {
-    var current = this.currentSplashMenuName;
-    var next = menuName;
-    this.menuStack.push(current);
+  _menuFromMenuOrName: function(nameOrMenu) {
+    if ($type(nameOrMenu) === 'object') {
+      return nameOrMenu;
+    } else {
+      return this.allMenus[nameOrMenu];
+    }
+  },
+  showPage: function(nameOrMenu) {
+    var menu = this._menuFromMenuOrName(nameOrMenu);
+    return this._showPage(menu);
+  },
+
+  showSubMenu: function(nameOrMenu) {
+    var next = this._menuFromMenuOrName(nameOrMenu);
+    if (!next) {
+      return;
+    }
+    var current = this.currentPage;
     this.swapMenus(current, next, 'shift.right_to_left');
   },
   showMainMenu: function() {
-    var current = this.currentSplashMenuName;
-    var next = this.menuStack.pop();
+    var current = this.currentPage;
+    var next = current.parentMenu;
     this.swapMenus(current, next, 'shift.left_to_right');
   },
 
   _setLimits: function() {
-    var menu = this.allMenus[this.currentSplashMenuName];
+    var menu = this.currentPage;
     el = menu.el();
     var CH = parseFloat(el.style.minHeight);
     if (isNaN(CH)) {
       CH = 100;
     }
-    this.menuDiv.setLimits([[0,0],[0,-(CH - window.innerHeight)]]);
+    
+    if (CH >= window.innerHeight) {
+      this.pageDiv.setLimits([[0,0],[0,window.innerHeight - CH]]);
+    } else {
+      this.pageDiv.setLimits([[0,0],[0,0]]);
+    }
   },
 
   _saveCurrentPos: function() {
-    var menu = this.allMenus[this.currentSplashMenuName];
+    var menu = this.currentPage;
     var el = menu.el();
-    el.cpx = this.menuDiv.el.cpx;
-    el.cpy = this.menuDiv.el.cpy;
+    el.cpx = this.pageDiv.el.cpx;
+    el.cpy = this.pageDiv.el.cpy;
 
     return {
       x: el.cpx,
@@ -405,13 +589,13 @@ var MenusClass = new Class({
 
   _currentPos: function() {
     return {
-      x: this.menuDiv.el.cpx,
-      y: this.menuDiv.el.cpy
+      x: this.pageDiv.el.cpx,
+      y: this.pageDiv.el.cpy
     };
   },
 
-  hideSplashMenu: function() {
-    if (this.currentSplashMenuName === null) {
+  hidePage: function() {
+    if (this.currentPage === null) {
       return;
     }
   
@@ -419,19 +603,21 @@ var MenusClass = new Class({
 
     DragManager.oneDragElement = null;
     this.hideBGCanvas();
-    this.menuDiv.el.innerHTML = '';
-    this.currentSplashMenu = null;
+    this.pageDiv.el.innerHTML = '';
+    this.currentPage = null;
   },
-
-  swapMenus: function(name1, name2, method) {
+  swapMenus: function(menu1, menu2, method) {
     if (this._swapping) {
       return;
     }
+
+    this.backButton.style.display = 'none';
+
     this._swapping = true;
 
-    var el1 = this.allMenus[name1].el();
-    var el2 = this.allMenus[name2].el();
-    this.name2 = name2;
+    var el1 = menu1.el();
+    var el2 = menu2.el();
+    this.menu2 = menu2;
 
     method = method.split('.');
     method[0] = '_swap_' + method[0];
@@ -443,11 +629,13 @@ var MenusClass = new Class({
       this.swapDirection = 'right_to_left';
     }
 
-    this[method[0]](el1, el2);
+    var back1 = menu1.parentMenu !== null;
+    var back2 = menu2.parentMenu !== null;
+
+    this[method[0]](el1, el2, back1, back2);
   },
   /////////////////////////////////////////////////////////////
-  _swap_shift: function(page1, page2) {
-  
+  _swap_shift: function(page1, page2, back1, back2) {
 
     var times = [];
     var positions = [];
@@ -457,12 +645,13 @@ var MenusClass = new Class({
 
     this.page1 = page1;
     this.page2 = page2;
+
     
     var pos1 = this._saveCurrentPos();
 
-    this.menuDiv.el.style.display = 'none';
+    this.pageDiv.el.style.display = 'none';
 
-    this.showSplashMenu(this.name2);
+    this.showPage(this.menu2);
 
     var pos2 = this._currentPos();
 
@@ -476,21 +665,21 @@ var MenusClass = new Class({
       if (!isNumber(y)) {
         y = 0;
       }
-      this._createLeftToRight(times, positions, pos1.y, pos2.y);
+      this._createLeftToRight(times, positions, pos1.y, pos2.y, back1, back2);
       duration = 500;
     } else if (this.swapDirection === 'right_to_left') {
       var y = parseFloat(page1.style.top);
       if (!isNumber(y)) {
         y = 0;
       }
-      this._createRightToLeft(times, positions, pos1.y, pos2.y);
+      this._createRightToLeft(times, positions, pos1.y, pos2.y, back1, back2);
       duration = 500;
     } else if (this.swapDirection === 'top_to_bottom') {
       var x = parseFloat(page1.style.left);
       if (!isNumber(x)) {
         x = 0;
       }
-      this._createTopToBottom(times, positions, pos1.x, pos2.x);
+      this._createTopToBottom(times, positions, pos1.x, pos2.x, back1, back2);
       duration = 2500;
     }
 
@@ -501,13 +690,13 @@ var MenusClass = new Class({
     timer.start();
   },
 
-  _swap_over: function(page1, page2) {
+  _swap_over: function(page1, page2, todo) {
     this.page1 = page1;
     this.page2 = page2;
     var pos1 = this._saveCurrentPos();
     var timer;
     var duration = 500;
-    this.menuDiv.el.removeChild(page1);
+    this.pageDiv.el.removeChild(page1);
     if (!this.clipDiv2) {
       this.clipDiv1 = new Element('div');
       this.clipDiv1.style.position = 'absolute';
@@ -515,7 +704,6 @@ var MenusClass = new Class({
       this.clipDiv1.style.top = '0px';
       this.clipDiv1.style.width = '100%';
       this.clipDiv1.style.height = '100%';
-      //this.clipDiv1.style.backgroundColor = 'blue';
       this.clipDiv1.style.overflow = 'hidden';
       
       this.clipDiv2 = new Element('div');
@@ -524,7 +712,6 @@ var MenusClass = new Class({
       this.clipDiv2.style.top = '0px';
       this.clipDiv2.style.width = '100%';
       this.clipDiv2.style.height = '100%';
-      //this.clipDiv2.style.backgroundColor = 'green';
       this.clipDiv2.style.overflow = 'hidden';
     }
     page1.style.position = 'absolute';
@@ -541,7 +728,7 @@ var MenusClass = new Class({
     this.clipDiv2.appendChild(page2);
     this.clipDiv2.content = page2;
 
-    this.clipDiv1.content.style.top = this.menuDiv.el.cpy;
+    this.clipDiv1.content.style.top = this.pageDiv.el.cpy;
     this.clipDiv2.content.style.top = this.page2.cpy;
 
     timer = new IntervalTimer(DT, {duration: duration});
@@ -557,8 +744,9 @@ var MenusClass = new Class({
     document.body.removeChild(this.clipDiv2);
     this.page1.style.position = '';
     this.page2.style.position = '';
-    this.showSplashMenu(this.name2);
+    this.showPage(this.menu2);
     this._swapping = false;
+    this.backButton.style.display = this.currentPage.parentMenu ? 'table-cell' : 'none';
   },
   _swapOverCB: function(type, timer) {
     var t = this._oneToOne(timer._rel_elapsed);
@@ -578,8 +766,8 @@ var MenusClass = new Class({
   _moveCB: function(type, inter) {
     this.page1.style.left = inter.value[0];
     this.page1.style.top = inter.value[1];
-    this.menuDiv.el.style.left = inter.value[2];
-    this.menuDiv.el.style.top = inter.value[3];
+    this.pageDiv.el.style.left = inter.value[2];
+    this.pageDiv.el.style.top = inter.value[3];
 
     if ('finished' === type) {
       Logger.log('fini');
@@ -587,16 +775,17 @@ var MenusClass = new Class({
       this.page2.style.position = '';
       document.body.removeChild(this.page1);
       this._swapping = false;
+      this.backButton.style.display = this.currentPage.parentMenu ? 'table-cell' : 'none';
     }
     if ('started' === type) {
       Logger.log('display');
-      this.menuDiv.el.style.display = '';
+      this.pageDiv.el.style.display = '';
     }
   },
   _oneToOne: function(v) {
     return 0.5*(1-Math.cos(v*Math.PI));
   },
-  _createTopToBottom: function(times, positions, x1, x2) {
+  _createTopToBottom: function(times, positions, x1, x2, todo) {
     var N = 20;
     var i;
     var y;
@@ -607,50 +796,45 @@ var MenusClass = new Class({
       positions.push([x1,y,x1,y-H]);
     }
   },
-  _createLeftToRight: function(times, positions, y1, y2) {
+  _createLeftToRight: function(times, positions, y1, y2, back1, back2) {
     var N = 20;
     var i;
     var x;
     var W = window.innerWidth;
+    var ox1 = back1 ? window.innerWidth*BACK_BUTTON_WIDTH : 0;
+    var ox2 = back2 ? window.innerWidth*BACK_BUTTON_WIDTH : 0;
     for (i=0; i<=N; i++) {
       times.push(i/N);
       x = W*this._oneToOne(i/N);
-      positions.push([x,y1,x-W,y2]);
+      positions.push([ox1+x,y1,ox2+x-W,y2]);
     }
   },
-  _createRightToLeft: function(times, positions, y1, y2) {
+  _createRightToLeft: function(times, positions, y1, y2, back1, back2) {
     var N = 20;
     var i;
     var x;
     var W = window.innerWidth;
+    var ox1 = back1 ? window.innerWidth*BACK_BUTTON_WIDTH : 0;
+    var ox2 = back2 ? window.innerWidth*BACK_BUTTON_WIDTH : 0;
     for (i=0; i<=N; i++) {
       times.push(i/N);
       x = -W*this._oneToOne(i/N);
-      positions.push([x,y1,x+W,y2]);
+      positions.push([ox1+x,y1,ox2+x+W,y2]);
     }
   },
   /////////////////////////////////////////////////////////////
 
 
-
-
-
-
-  currentMenu: function() {
-    //return this.currentSplashMenu > -1 ? this.splashMenus[this.currentSplashMenu] : null;
-    return this.allMenus[this.currentSplashMenuName];
-  },
-
   cb: function(type, dragable) {
     if ('finished' === type) {
-      //Logger.log('Menus: dropped ' + dragable.targetIdx);
+      //Logger.log('Pages: dropped ' + dragable.targetIdx);
       //Logger.log('W/H; ' +window.innerWidth + '/' + window.innerHeight);
     }
   },
 
 });
-var Menus = null;
+var Pages = null;
 window.addEvent('domready', function() {
-  Menus = new MenusClass();
+  Pages = new MenusClass();
 });
 

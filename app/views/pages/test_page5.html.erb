@@ -5,18 +5,39 @@
   <head>
     <title>Puzzle</title>
 
-    <!-- PRODUCTION -->
-    <!-- %= javascript_include_tag "test_page5_content" % -->
-     
-    <!-- DEVELOPMENT -->
-    <script src="/assets/lib/mootools-core-1.4.0-full-compat.js" type="text/javascript"></script>
-    <script src='/assets/lib/log.js' type='text/javascript'></script>
-    <script src='/assets/lib/public_helpers.js' type='text/javascript'></script>
-    <script src='/assets/lib/font_helper.js' type='text/javascript'></script>
-    <script src='/assets/lib/simple_menu.js' type='text/javascript'></script>
-    <script src='/assets/test_page5/test_page5.js' type='text/javascript'></script>
+    <!-- PRODUCTION % DEVELOPMENT -->
+    <%= javascript_include_tag "test_page5_content", :debug => Rails.env.development? %>
+
+
+    <META http-equiv="Default-Style" content="semi_transparent">
+    <%= stylesheet_link_tag 'fullscreen', :media => 'screen' %>
+    <%= stylesheet_link_tag 'menus', :media => 'screen', :rel => 'stylesheet' %>
+
+    <!-- user style specific -->
+    <!-- standard style -->
+    <%= stylesheet_link_tag 'menus_standard', :media => 'screen', :title => 'standard', :rel => 'alternate stylesheet' %>
+
+    <!-- hip style -->
+    <%= stylesheet_link_tag 'menus_hip', :media => 'screen', :title => 'hip', :rel => 'alternate stylesheet' %>
+
+    <!-- transparent style -->
+    <%= stylesheet_link_tag 'menus_transparent', :media => 'screen', :title => 'transparent', :rel => 'alternate stylesheet' %>
+
+    <!-- semi transparent style -->
+    <%= stylesheet_link_tag 'menus_semi_transparent', :media => 'screen', :title => 'semi_transparent', :rel => 'alternate stylesheet' %>
+
+    <!-- transparent_white style -->
+    <%= stylesheet_link_tag 'menus_transparent_white', :media => 'screen', :title => 'transparent_white', :rel => 'alternate stylesheet' %>
+
+    <!-- negative style -->
+    <%= stylesheet_link_tag 'menus_negative', :media => 'screen', :title => 'negative', :rel => 'alternate stylesheet' %>
+
+    <!-- outline style -->
+    <%= stylesheet_link_tag 'menus_outline', :media => 'screen', :title => 'outline', :rel => 'alternate stylesheet' %>
+
 
     <meta name="viewport" content="width=device-width, user-scalable=no">
+    <!--
     <style type="text/css">
       body {
         margin: 0px; padding: 0; overflow: hidden;
@@ -76,6 +97,7 @@
       /* canvas { border: 1px solid black; } */
       /*button { border: 1px solid red; padding: 0; margin: 0;} */
     </style>
+    -->
 
   </head>
   <body onload="onLoad()">

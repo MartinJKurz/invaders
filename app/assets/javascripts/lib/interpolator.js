@@ -302,8 +302,8 @@ var Swap = {
       Logger.log('fini');
       this.page1.style.position = '';
       this.page2.style.position = '';
-      Menus.menuDiv.el.removeChild(this.page1);
-      Menus.menuDiv.el.appendChild(this.page2);
+      Pages.pageDiv.el.removeChild(this.page1);
+      Pages.pageDiv.el.appendChild(this.page2);
     }
   },
 

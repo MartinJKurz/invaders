@@ -17,15 +17,17 @@ function clone(obj) {
 }
 */
 
+/* clash ??
 Object.prototype.keys = function () {
-  var keys = [];
+  var theKeys = [];
   for(var i in this) {
     if (this.hasOwnProperty(i)) {
-      keys.push(i);
+      theKeys.push(i);
     }
   }
-  return keys;
+  return theKeys;
 }
+*/
 
 function isNumber(v) {
   return !isNaN(v);
@@ -113,3 +115,38 @@ function getAlternateStyleSheetNames() {
   }
   return titles;
 }
+
+function rr(f) {
+	return f*(Math.random()-0.5);
+}
+
+function irand(i) {
+	return Math.floor(i*Math.random());
+}
+
+function randomColor () {
+	return [irand(255), irand(255), irand(255)].rgbToHex();
+};
+
+
+
+function getMetaContents(mn) {
+  var m = document.getElementsByTagName('meta');
+  for(var i in m){
+    if(m[i].name == mn){
+      return m[i].content;
+    }
+  }
+}
+
+
+function clamp(val, low, high) {
+	if (val < low) {
+		return low;
+	} else if (val > high) {
+		return high;
+	}
+
+	return val;
+}
+

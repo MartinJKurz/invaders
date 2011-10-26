@@ -5,7 +5,7 @@ Test Page, containing some basic structure plus standard includes
 <html>
   <head>
     <title><%= @title %></title>
-    <%= javascript_include_tag "test_page2_content" %>
+    <%= javascript_include_tag "test_page2_content", :debug => Rails.env.development? %>
     <%= csrf_meta_tag %>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   </head>
