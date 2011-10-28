@@ -2,7 +2,8 @@
  * interpolator
  ****************************************************************/
 
-
+/*global Class, Emitter, $defined, IntervalTimer */
+"use strict";
 
 var Interpolator = new Class({
   Extends: Emitter,
@@ -12,18 +13,18 @@ var Interpolator = new Class({
   initialize: function(times, values) {
     this._times = times;
     this._values = values;
-    if (this._times.length != this._values.length) {
+    if (this._times.length !== this._values.length) {
       throw('Interpolator: times and values must have equal length');
     }
     if (this._times.length === 0) {
       throw('Interpolator: times and values must not be empty');
     }
-    if (this._times[0] !== 0 || this._times[this._times.length-1] !== 1) {
+    if (this._times[0] !== 0 || this._times[this._times.length - 1] !== 1) {
       //throw('Interpolator: first time must be 0, last 1');
       throw('Interpolator: first time must be 0, last 1 len: ' + this._times.length);
     }
     var i, t0 = this._times[0], t1;
-    for (i=1; i<this._times.length; i++) {
+    for (i = 1; i < this._times.length; i++) {
       t1 = this._times[i];
       if (t1 <= t0) {
         throw('Interpolator: times must be continousely increasing');
@@ -32,9 +33,11 @@ var Interpolator = new Class({
     }
   },
   cb: function(type, timer) {
-    var t = timer._rel_elapsed;
-    var info = this._findIndices(t);
-    var ret = this._calculate(info.a, info.b, info.r);
+    var
+      t = timer._rel_elapsed,
+      info = this._findIndices(t),
+      ret = this._calculate(info.a, info.b, info.r);
+
     this.value = ret;
     this.notify('value_changed');
     if ('finished' === type) {
@@ -49,6 +52,7 @@ var Interpolator = new Class({
     return ret;
   },
   _recFind: function(t, a, b) {
+    var r, c;
     if (b < a) {
       console.log('err 1');
       return;
@@ -57,14 +61,14 @@ var Interpolator = new Class({
       console.log('err 2');
       return;
     }
-    if (a+1 === b) {
-      var r = (t - this._times[a]) / (this._times[b] - this._times[a]);
+    if (a + 1 === b) {
+      r = (t - this._times[a]) / (this._times[b] - this._times[a]);
       if (r > 1) {
         console.log('ERR');
       }
-      return {a:a, b:b, r:r};
+      return {a: a, b: b, r: r};
     }
-    var c = Math.floor((a+b)/2);
+    c = Math.floor((a + b) / 2);
     if (t > this._times[c]) {
       return this._recFind(t, c, b);
     } else {
@@ -72,17 +76,17 @@ var Interpolator = new Class({
     }
   },
   _findIndices: function(t) {
-    if (t<=0) {
-      return {a:0, b:0, r:1};
+    if (t <= 0) {
+      return {a: 0, b: 0, r: 1};
     }
-    if (t>=1) {
-      return {a:this._times.length-1, b:this._times.length-1, r:1};
+    if (t >= 1) {
+      return {a: this._times.length - 1, b: this._times.length - 1, r: 1};
     }
-    var a=0;
-    var b=this._times.length-1;
+    var
+      a = 0,
+      b = this._times.length - 1;
     return this._recFind(t, a, b);
   }
-
 });
 
 var LinearInterpolator = new Class({
@@ -92,7 +96,7 @@ var LinearInterpolator = new Class({
     this.parent(times, values);
   },
   _calculate: function(a, b, r) {
-    return (1-r)*this._values[a] + r*this._values[b];
+    return (1 - r) * this._values[a] + r * this._values[b];
   }
 });
 
@@ -104,10 +108,9 @@ var VectorInterpolator = new Class({
     this.length = this._values[0].length;
   },
   _calculate: function(a, b, r) {
-    var i;
-    var ret = [];
-    for (i=0; i<this.length; i++) {
-      ret.push((1-r)*this._values[a][i] + r*this._values[b][i]);
+    var i, ret = [];
+    for (i = 0; i < this.length; i++) {
+      ret.push((1 - r) * this._values[a][i] + r * this._values[b][i]);
     }
     return ret;
   }
@@ -132,8 +135,7 @@ var Move = new Class({
   px: 0,
   py: 0,
   timer: null,
-  dt: 1000/60,
-  //dt: 1/60,
+  dt: 1000 / 60,
 
   initialize: function(el, vx, vy, ax, ay, bx, by) {
     if (!$defined(el)) {
@@ -155,7 +157,7 @@ var Move = new Class({
     this.py = parseFloat(el.style.top);
 
     if ($defined(by)) {
-      this.limits = [[ax,ay],[bx,by]];
+      this.limits = [[ax, ay], [bx, by]];
     } else {
       this.limits = null;
     }
@@ -166,7 +168,7 @@ var Move = new Class({
     this.timer = new IntervalTimer(this.dt);
     this.timer.addReceiver(this, ['tick']);
   },
-  _inLimits: function(px,py) {
+  _inLimits: function(px, py) {
     function between(val, one, two) {
       return (val >= one && val <= two) || (val >= two && val <= one);
     }
@@ -189,7 +191,7 @@ var Move = new Class({
       return -1;
     }
 
-    k = (p-a)/(b-a);
+    k = (p - a) / (b - a);
     return k < 0 ? 0 : k > 1 ? 1 : -1;
   },
   cb: function(type, timer) {
@@ -199,10 +201,10 @@ var Move = new Class({
     this.py += this.vy * this.dt;
 
     check = this._inLimits(this.px, this.py);
-    
-    v = Math.sqrt(this.vx*this.vx+this.vy*this.vy);
 
-    if (-1 == check) {
+    v = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+
+    if (-1 === check) {
       A = MOVE_LIMIT.Ain;
       if (v < MOVE_LIMIT.v) {
         this.timer.stop();
@@ -213,7 +215,7 @@ var Move = new Class({
       ty = this.limits[check][1];
       dx = tx - this.px;
       dy = ty - this.py;
-      d = Math.sqrt(dx*dx+dy*dy);
+      d = Math.sqrt(dx * dx + dy * dy);
       if (v < MOVE_LIMIT.v && d < MOVE_LIMIT.dist) {
         this.timer.stop();
         this.px = this.tx;
@@ -226,20 +228,20 @@ var Move = new Class({
     if (-1 !== check) {
       switch (0) {
         case 0:
-          fx = MOVE_LIMIT.F1*dx;
-          fy = MOVE_LIMIT.F1*dy;
+          fx = MOVE_LIMIT.F1 * dx;
+          fy = MOVE_LIMIT.F1 * dy;
           break;
         case 1:
-          fx = MOVE_LIMIT.F2*dx/d;
-          fy = MOVE_LIMIT.F2*dy/d;
+          fx = MOVE_LIMIT.F2 * dx / d;
+          fy = MOVE_LIMIT.F2 * dy / d;
           break;
         case 2:
-          fx = MOVE_LIMIT.F2*dx/(d+20);
-          fy = MOVE_LIMIT.F2*dy/(d+20);
+          fx = MOVE_LIMIT.F2 * dx / (d + 20);
+          fy = MOVE_LIMIT.F2 * dy / (d + 20);
           break;
       }
-      this.vx += fx*this.dt;
-      this.vy += fy*this.dt;
+      this.vx += fx * this.dt;
+      this.vy += fy * this.dt;
     }
     this.vx *= A;
     this.vy *= A;
@@ -249,7 +251,7 @@ var Move = new Class({
   },
   stop: function() {
     this.timer.stop();
-  },
+  }
 });
 
 /*

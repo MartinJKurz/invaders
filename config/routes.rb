@@ -41,6 +41,14 @@ Game model with these fields:
 
 
 Invaders::Application.routes.draw do
+  # get "articles/new"    this was created
+  # resources :articles, :only => [:show, :new, :create, :edit, :update, :index]
+  resources :articles
+  #get "delete_article" => "articles#delete_article", :as => "delete_article"
+  get "delete_article" => "articles#destroy", :as => "delete_article"
+  
+
+
   get "log_in" => "sessions#new", :as => "log_in"
   get "log_out" => "sessions#destroy", :as => "log_out"
   get "logout_and_delete_user" => "sessions#logout_and_delete_user", :as => "logout_and_delete_user"
@@ -60,6 +68,8 @@ Invaders::Application.routes.draw do
   get "scores/destroy"
   get "scores/destroy_low_scores"
   get "scores/destroy_old_scores"
+
+
 
   get "users/destroy_old_users"
 

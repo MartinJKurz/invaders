@@ -2,6 +2,8 @@
  * mt_blockfont
  ****************************************************************/
 
+"use strict";
+
 var BlockFont = new Class({
 	initialize: function(k) {
 		this.fontData = [

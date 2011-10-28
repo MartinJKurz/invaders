@@ -2,7 +2,7 @@
  * menu_test2
  ****************************************************************/
 
-//= require lib/mootools-core-1.4.0-full-compat-yc
+//= require lib/mootools-core-1.4.0-full-compat
 //= require lib/log
 //= require lib/js_helper
 //= require lib/menus
@@ -67,13 +67,15 @@ var App = new Class({
       {text: 'Applications', submenu: 'applications'},
     ];
     var options = {fixedFontSize: 30};
+    this.textLoader = new TextLoader();
+
     this.mainMenu = Pages.createSplashMenu(null, 'main', items, options, {obj:this, method:'menuSelection'});
 
     this._createSettingsMenu(this.mainMenu);
-    this._createTextsMenu(this.mainMenu);
 
-    // Pages.createBG('rgba(255,255,255,0.5)');
     Pages.showPage(this.mainMenu);
+
+    this.textLoader.loadArticleList(this.receiveArticleList.bind(this));
   },
 
   _createSettingsMenu: function(parentMenu) {
@@ -102,78 +104,545 @@ var App = new Class({
     this.stylesMenu = Pages.createSplashMenu(parentMenu, 'styles', items, options, {obj:this, method:'menuSelection'});
   },
 
-  texts: [],
   _createTextsMenu: function(parentMenu) {
+    var key;
     var items = [
       {text: 'Texts Menu', caption: true},
-      {text: 'Sample 1', action: this.showText, args: ['sample_1']},
     ];
+    var i;
+    for (key in this.theTexts) {
+      if (this.theTexts.hasOwnProperty(key)) {
+        //items.push({text: this.theTexts[key].title, action: this.showText, args: [this.theTexts[key]]});
+        items.push({text: this.theTexts[key].title, action: this.showText, args: [key]});
+      }
+    }
     var options = {};
     this.textsMenu = Pages.createSplashMenu(parentMenu, 'texts', items, options, {obj:this, method:'menuSelection'});
   },
 
-  showText: function(text) {
-    if (!this.texts[text]) {
-      this.texts[text] = Pages.createTextPage(this.textsMenu, 'sample_1', texts['sample_1'], {});
+  /*
+   * TODO:
+   * 1. store as json data            - todo: create editor
+   * 1.b store sample as json         - ok
+   * 2. get json                      - ok
+   * 3. create html from data         - ok
+   * 4. prepare for mobile scrolling  - ok
+   * 5. method for mobile scrolling   - ok
+   * 6. use text style                - ok
+   */
+  receiveTextObject: function(obj) {
+    this.theTexts[obj.id] = obj;
+    this.showText(obj.id);
+  },
+  showText: function(key) {
+    var obj = this.theTexts[key];
+    console.log('showText');
+    if (!obj.content) {
+      console.log('showText - no content');
+      this.textLoader.loadArticle(key, this.receiveTextObject.bind(this));
+      return;
     }
-    Pages.showSubMenu(this.texts[text]);
+
+    if (!obj.page) {
+      console.log('showText - no page');
+      obj.page = Pages.createTextPage(
+        this.textsMenu,
+        obj.title,
+        obj.content,
+        {});
+      // this.theTexts[obj.id] = obj;
+      this.theTexts[obj.id].page = obj.page;
+    }
+
+    this.displayText(obj);
+  },
+
+  displayText: function(obj) {
+    Pages.showSubMenu(obj.page);
+  },
+  // new: load texts from database
+  theTexts: {}, // each element: {id, title, content}
+
+  receiveArticleList: function(list) {
+    for (i=0; i<list.length; i++) {
+      this.theTexts[list[i].id] = list[i];
+    }
+    this._createTextsMenu(this.mainMenu);
+  },
+});
+
+
+/*
+var EditTextApp = new Class({
+  initialize: function(key) {
+    TextLoader.loadArticle(key, this.receiveTextObject.bind(this));
+    
+    this.leftSide = new Element('div');
+    this.leftSide.style.backgroundColor= 'blue';
+    this.leftSide.style.width= '50%';
+    this.leftSide.style.height = '100%';
+    this.leftSide.style.float= 'left';
+    this.leftSide.style.overflow = 'scroll';
+
+    this.table = new Element('table');
+    this.table.style.width = '100%';
+    this.leftSide.appendChild(this.table);
+
+
+/*
+    this.editDiv = new Element('div');
+    this.editDiv.style.backgroundColor= 'green';
+    this.editDiv.style.width= '20%';
+    this.editDiv.style.height = '100%';
+    // this.editDiv.style.float= 'left';
+    this.editDiv.style.overflow = 'scroll';
+    // this.editDiv.style.position = 'absolute';
+    // this.editDiv.style.left = 0;
+    //
+* /
+    this.textDiv = new Element('div');
+    this.textDiv.style.backgroundColor= 'white';
+    this.textDiv.style.width= '50%';
+    this.textDiv.style.height = '100%';
+    this.textDiv.style.float= 'right';
+    this.textDiv.style.overflow = 'scroll';
+    // this.textDiv.style.position = 'absolute';
+    // this.textDiv.style.left = window.innerWidth * 0.5;
+
+    document.body.appendChild(this.leftSide);
+    // document.body.appendChild(this.editDiv);
+    document.body.appendChild(this.textDiv);
+  },
+  receiveTextObject: function(obj) {
+    this.article = JSON.decode(obj.content); // tbr
+    this.html = TextLoader.objToHTML(this.article);
+    // TextLoader.prepareTextHTML(this.html, this.scrollTo.bind(this));
+    TextLoader.prepareTextHTML(this.html, this.scrollTo2.bind(this));
+    Logger.hide();
+    this.showText();
+    // this.createEditor();
+    this.editor = TextLoader.objToHTML(this.article,
+      this.createEditorElement.bind(this),
+      this.addEditorElement.bind(this),
+      this.addEditorText.bind(this));
+
+    // this.editDiv.appendChild(this.editor);
+  },
+  createEditorElement: function(depth, tagName) {
+    
+    function makeSelectable(e) {
+      e.setStyle('user-select', 'text');
+      e.setStyle('-webkit-user-select', 'text');
+      e.setStyle('-moz-user-select', 'text');
+      e.setStyle('-o-user-select', 'text');
+      e.setStyle('-khtml-user-select', 'text');
+    }
+    
+    var e, e2, f, i;
+    switch (tagName) {
+      case 'article':
+      case 'header':
+      case 'nav':
+        // e = document.createElement('div');
+        e = new Element('div');
+        break;
+      case 'h1':
+      case 'h2':
+      case 'h3':
+        e = document.createElement('input');
+        e.type = 'edit';
+        e.style.width = '100%';
+        break;
+      case 'p':
+        e = document.createElement('textarea');
+        e.style.width = '100%';
+        break;
+      default:
+        //e = document.createElement('label');
+        // e.textContent = 'TODO: ' + tagName;
+        e = document.createElement('div');
+        e.style.width = '100%';
+        e.innerHTML = 'TODO: ' + tagName;
+        e.style.backgroundColor = 'red';
+        break;
+    }
+
+    makeSelectable(e);
+
+    e2 = new Element('button');
+    e2.style.width = '100%';
+    e2.style.textAlign = 'left';
+    f = '';
+    for (i=0; i<depth; i++) {
+      f += '_';
+    }
+    e2.innerHTML = f + tagName;
+    var tr = new Element('tr');
+    this.table.appendChild(tr);
+    var li = new Element('td');
+
+    li.align = 'right';
+    li.style.verticalAlign = 'top';
+
+    tr.appendChild(li);
+    li.appendChild(e2);
+
+    li = new Element('td');
+
+    li.style.verticalAlign = 'top';
+
+    tr.appendChild(li);
+    li.appendChild(e);
+
+    //this.leftSide.appendChild(e2);
+
+    return e;
+    // return document.createElement(tagName);
+  },
+  addEditorElement: function(pel, el) {
+    //pel.appendChild(el);
+  },
+  addEditorText: function(el, t) {
+    if ('INPUT' === el.tagName) {
+      el.value = t;
+      //el.textContent = t;
+    } else {
+      el.innerHTML = t;
+    }
+  },
+
+
+  /*
+   * NO!
+   * Editor must be created as the html is created
+   * /
+  createEditor_uu: function() {
+    function print(el, depth) {
+      var f = '', i;
+      for (i=0; i<depth; i++) {
+        f += ' ';
+      }
+      if (el.tagName) {
+        console.log(f + el.tagName);
+      } else {
+        console.log(f + el.data);
+      }
+      for (i=0; i<el.childNodes.length; i++) {
+        print(el.childNodes[i], depth+1);
+      }
+    }
+    function traverse(el, le, depth) {
+      var f = '', i, ee;
+      for (i=0; i<depth; i++) {
+        f += ' ';
+      }
+      if (el.tagName) {
+        console.log(f + el.tagName);
+        switch (el.tagName) {
+          case 'ARTICLE':
+            
+            break;
+          case 'HEADER':
+            ee = new Element('div');
+            
+            break;
+          case 'H1':
+            ee = new Element('input', {type: 'edit'});
+            break;
+          case 'H2':
+            ee = new Element('input', {type: 'edit'});
+            
+            break;
+          case 'UL':
+            
+            break;
+          case 'LI':
+            
+            break;
+          case 'SECTION':
+            
+            break;
+          case 'P':
+            ee = new Element('textarea');
+            
+            break;
+        }
+        if (ee) {
+          le.appendChild(ee);
+        } else {
+          ee = le;  // TBR
+        }
+      } else {
+        console.log(f + el.data);
+        le.value = el.data;
+      }
+      for (i=0; i<el.childNodes.length; i++) {
+        traverse(el.childNodes[i], ee, depth+1);
+      }
+    }
+    traverse (this.html, this.editDiv, 0);
+  },
+  setYPosition: function(el, y) {
+    el.style.top = y;
+  },
+  scrollTo: function(ev) {
+    var id = ev.target.getAttribute('target');
+    var el = this.html.getElementById(id);
+    var y = -parseFloat(el.offsetTop);
+    this.setYPosition(this.textDiv, y);
+  },
+  scrollTo2: function(ev) {
+    var id = ev.target.getAttribute('target');
+    var el = this.html.getElementById(id);
+    var y = parseFloat(el.offsetTop);
+    this.textDiv.scrollTo(0, y);
+  },
+  showText: function() {
+    this.textDiv.innerHTML = '';
+    this.textDiv.appendChild(this.html);
+  }
+});
+*/
+
+var EditTextApp = new Class({
+  elements: {},
+  reverseElements: {},
+  articleElements: {},
+
+  initialize: function(key) {
+    this.textLoader = new TextLoader();
+
+    this.textLoader.setCallbacks(
+      this.createEditorElement.bind(this),
+      this.addEditorElement.bind(this),
+      this.addEditorText.bind(this));
+
+    this.textLoader.loadArticle(key, this.receiveTextObject.bind(this));
+    
+    this.leftSide = new Element('div');
+    this.leftSide.style.backgroundColor= 'blue';
+    this.leftSide.style.width= '50%';
+    this.leftSide.style.height = '100%';
+    this.leftSide.style.float= 'left';
+    this.leftSide.style.overflow = 'scroll';
+
+    this.table = new Element('table');
+    this.table.style.width = '100%';
+    this.leftSide.appendChild(this.table);
+
+
+    this.textDiv = new Element('div');
+    this.textDiv.style.backgroundColor= 'white';
+    this.textDiv.style.width= '50%';
+    this.textDiv.style.height = '100%';
+    this.textDiv.style.float= 'right';
+    this.textDiv.style.overflow = 'scroll';
+
+    document.body.appendChild(this.leftSide);
+    document.body.appendChild(this.textDiv);
+  },
+  receiveTextObject: function(obj) {
+    Logger.hide();
+
+    this.article = JSON.decode(obj.content); // tbr
+
+    this.html = this.textLoader.objToHTML(this.article);
+    //this.editor = this.textLoader.objToHTML(this.article);
+    this.textLoader.prepareTextHTML(this.html, this.scrollTo2.bind(this));
+    this.showText();
+
+
+
   },
   /*
-  showText: function(text) {
-    var current = Pages.currentPage;
-    if (!this.texts[text]) {
-      this.texts[text] = Pages.createTextPage(this.textsMenu, 'sample_1', texts['sample_1'], {});
-    }
-    if (current) {
-      Pages.currentPage = current;
-      Pages.showSubMenu(this.texts[text]);
-    } else {
-      Pages.showPage(this.texts[text]);
-    }
+  receiveTextObject: function(obj) {
+    this.article = JSON.decode(obj.content); // tbr
+    this.html = this.textLoader.objToHTML(this.article);
+    this.textLoader.prepareTextHTML(this.html, this.scrollTo2.bind(this));
+    Logger.hide();
+    this.showText();
+
+    this.textLoader.setCallbacks(
+      this.createEditorElement.bind(this),
+      this.addEditorElement.bind(this),
+      this.addEditorText.bind(this));
+
+
+    this.editor = this.textLoader.objToHTML(this.article,
+      this.createEditorElement.bind(this),
+      this.addEditorElement.bind(this),
+      this.addEditorText.bind(this));
   },
   */
+  //createEditorElement: function(depth, articleEl, tagName) {
+  __uid__: 1,
+  createEditorElement: function(depth, el, articleElement, tagName) {
+
+    // var tagName = el.tagName.toLowerCase();
+    
+    function makeSelectable(e) {
+      e.setStyle('user-select', 'text');
+      e.setStyle('-webkit-user-select', 'text');
+      e.setStyle('-moz-user-select', 'text');
+      e.setStyle('-o-user-select', 'text');
+      e.setStyle('-khtml-user-select', 'text');
+    }
+    
+    var e, e2, f, i;
+    switch (tagName) {
+      case 'article':
+      case 'header':
+      case 'nav':
+        // e = document.createElement('div');
+        e = new Element('div');
+        break;
+      case 'h1':
+      case 'h2':
+      case 'h3':
+        e = document.createElement('input');
+        e.addEventListener('change', this.inputValueChanged.bind(this));
+        e.type = 'edit';
+        e.style.width = '100%';
+        break;
+      case 'p':
+        e = document.createElement('textarea');
+        e.style.width = '100%';
+        break;
+      default:
+        //e = document.createElement('label');
+        // e.textContent = 'TODO: ' + tagName;
+        e = document.createElement('div');
+        e.style.width = '100%';
+        e.innerHTML = 'TODO: ' + tagName;
+        e.style.backgroundColor = 'red';
+        break;
+    }
+
+    makeSelectable(e);
+    e.uid = this.__uid__++;
+    this.elements[el.uid] = e;
+    this.reverseElements[e.uid] = el;
+    this.articleElements[e.uid] = articleElement;
+
+    e2 = new Element('button');
+    e2.style.width = '100%';
+    e2.style.textAlign = 'left';
+    f = '';
+    for (i=0; i<depth; i++) {
+      f += '_';
+    }
+    e2.innerHTML = f + tagName;
+    var tr = new Element('tr');
+    this.table.appendChild(tr);
+    var li = new Element('td');
+
+    li.align = 'right';
+    li.style.verticalAlign = 'top';
+
+    tr.appendChild(li);
+    li.appendChild(e2);
+
+    li = new Element('td');
+
+    li.style.verticalAlign = 'top';
+
+    tr.appendChild(li);
+    li.appendChild(e);
+
+    //this.leftSide.appendChild(e2);
+
+    return e;
+    // return document.createElement(tagName);
+  },
+  inputValueChanged: function(ev) {
+
+    // unfinished:
+    // now: changes in tree are changing the displayed document directly
+    // todo: changes in tree must change the article, which then change the displayed document via notification
+    //
+    // building the editor:
+    // now: direct callback
+    // todo: TextHandler is Emitter, emitting 'createElement', 'addElement', 'addElementText'
+    //    this class is a Receiver
+
+    var e = ev.target;
+    var val = e.value;
+
+    // not ok: strings are stored in articleElements, instead of objects
+    // -> artuicle is already stored, wen need the path
+    // TESTING
+    var test = {
+      one: {
+        two: {
+          three: 17
+        }
+      }
+    };
+    var test2 = test.one.two.three;
+    var test3 = test['one'].two.three;
+    var test4 = test['one']['two'].three;
+    var test5 = test['one']['two']['three'];
+
+    // TESTING
+
+    //var ae = this.articleElements[e.uid];
+    //ae.setText(val);
+    // var path = this.paths[];
+    // var ae = this.article[path] = val;
+
+    var re = this.reverseElements[e.uid];
+    re.textContent = val;
+  },
+  addEditorElement: function(pel, el) {
+    //pel.appendChild(el);
+  },
+  addEditorText: function(el, t) {
+    var e = this.elements[el.uid];
+    if (!$defined(e)) {
+      return;
+    }
+    if ('INPUT' === e.tagName) {
+      e.value = t;
+      //el.textContent = t;
+    } else {
+      e.innerHTML = t;
+    }
+  },
+
+  setYPosition: function(el, y) {
+    el.style.top = y;
+  },
+  scrollTo: function(ev) {
+    var id = ev.target.getAttribute('target');
+    var el = this.html.getElementById(id);
+    var y = -parseFloat(el.offsetTop);
+    this.setYPosition(this.textDiv, y);
+  },
+  scrollTo2: function(ev) {
+    var id = ev.target.getAttribute('target');
+    var el = this.html.getElementById(id);
+    var y = parseFloat(el.offsetTop);
+    this.textDiv.scrollTo(0, y);
+  },
+  showText: function() {
+    this.textDiv.innerHTML = '';
+    this.textDiv.appendChild(this.html);
+  }
 });
+
 
 window.addEvent('domready', function() {
   var timer = new OneTimer(1000);     // android needs a delay to get window.innerWidth / ..Height right
   var starter = {
-	cb: function(type, timer) {
-		new App();
-	}
+    cb: function(type, timer) {
+      var app;
+      if (Math.random() < 0.5) {
+        app = new App();
+      } else {
+        app = new EditTextApp('7');
+      }
+    }
   }
   timer.addReceiver(starter, 'finished');
   timer.start();
 });
-
-var texts = {
-  sample_1: "\
-<h1>Oregon</h1>\
-The U.S. state of Oregon has 26 official emblems, as designated by the Oregon State Legislature. Oregon's first state symbol was the motto Alis Volat Propriis, written and translated in 1854. Latin for \"She Flies With Her Own Wings\", the motto remained unchanged until 1957, when \"The Union\" became the official state motto. Alis Volat Propriis became the state motto once again in 1987. Originally designed in 1857, usage of the Oregon State Seal began after Oregon became the 33rd state of the United States on February 14, 1859. The motto and seal served as Oregon's only symbols until over 50 years later, when the Oregon-grape became the state flower in 1899. Oregon had 6 official symbols by 1950 and 22 symbols by 2000. The newest symbol of Oregon is Jory soil, declared the state soil in 2011.",
-
-};
-
-/*
-// better use this
-// -> text - or any apropriate html is on server and loaded via get request.
-// -> the content is added as a child onto the vertically dragable text div
-<p>The U.S. state of <a title="Oregon" href="/wiki/Oregon">Oregon</a> has 26 <a title="Lists of United States state insignia" href="/wiki/Lists_of_United_States_state_insignia">official emblems</a>, as designated by the <a title="Oregon Legislative Assembly" href="/wiki/Oregon_Legislative_Assembly">Oregon State Legislature</a>. Oregon's first <b><a title="List of Oregon state symbols" href="/wiki/List_of_Oregon_state_symbols">state symbol</a></b> was the <a title="List of U.S. state and territory mottos" href="/wiki/List_of_U.S._state_and_territory_mottos">motto</a> <i>Alis Volat Propriis</i>, written and translated in 1854. <a title="Latin" href="/wiki/Latin">Latin</a> for "She Flies With Her Own Wings", the motto remained unchanged until 1957, when "The Union" became the official state motto. <i>Alis Volat Propriis</i> became the state motto once again in 1987. Originally designed in 1857, usage of the Oregon State Seal began after Oregon became the 33rd state of the United States on February 14, 1859. The motto and seal served as Oregon's only symbols until over 50 years later, when the <a title="Oregon-grape" href="/wiki/Oregon-grape">Oregon-grape</a> became the state flower in 1899. Oregon had 6 official symbols by 1950 and 22 symbols by 2000. The newest symbol of Oregon is <a title="Jory (soil)" href="/wiki/Jory_(soil)">Jory soil</a>, declared the <a title="List of U.S. state soils" href="/wiki/List_of_U.S._state_soils">state soil</a> in 2011. (<b><a title="List of Oregon state symbols" href="/wiki/List_of_Oregon_state_symbols">more...</a></b>)</p>
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

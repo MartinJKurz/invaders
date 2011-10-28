@@ -3,6 +3,8 @@
  * to be removed
  ****************************************************************/
 
+"use strict";
+
 var InfoCanvas = new Class({
   initialize: function(opts) {
     this.canvas = new Element('canvas');

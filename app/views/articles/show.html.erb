@@ -1,0 +1,18 @@
+<h1>Article <%= @article.title %></h1>
+
+<%= link_to "Edit", @article.id.to_s + '/edit' %>
+
+
+<div style="width:100%; height: 3px; background-color:red;"></div>
+<h2> as is:</h2>
+<%= @article.content %>
+<div style="width:100%; height: 3px; background-color:red;"></div>
+
+<h2> html_safe:</h2>
+<%= @article.content.html_safe %>
+<div style="width:100%; height: 3px; background-color:red;"></div>
+
+<h2> raw:</h2>
+<%= raw @article.content %>
+<div style="width:100%; height: 3px; background-color:red;"></div>
+

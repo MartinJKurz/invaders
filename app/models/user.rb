@@ -12,6 +12,7 @@ class User < ActiveRecord::Base
   #before_destroy :finish_session
 
   has_many :scores, :dependent => :destroy #, :order => "score asc"
+  has_many :articles, :dependent => :destroy
 
 
   attr_accessible :name, :password, :password_confirmation, :sound, :volume

@@ -2,6 +2,8 @@
  * sound
  ****************************************************************/
 
+"use strict";
+
 
 var Sounds = new Class({
 	initialize: function() {

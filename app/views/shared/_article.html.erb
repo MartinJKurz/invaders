@@ -1,0 +1,20 @@
+<%= simple_form_for article do |f| %>
+  <% if article.errors.any? %>
+    <div class="error_messages">
+      <h2>Form is invalid</h2>
+      <ul>
+        <% for message in article.errors.full_messages %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% else %>
+  <% end %>
+  <!-- %= f.error_messages %> -->
+  <%= f.error_notification %> <!-- ??? no errors displayed -->
+  <%= f.input :title, :input_html => {:size => 40} %>
+  <%= f.input :content %>
+  <%= f.button :submit %>
+<% end %>
+
+

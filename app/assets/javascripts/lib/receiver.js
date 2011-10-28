@@ -1,6 +1,10 @@
 /****************************************************************
  * receiver
  ****************************************************************/
+
+
+"use strict";
+
 /*
  * to be used as a base class,
  * cb method has to be implemented by the class

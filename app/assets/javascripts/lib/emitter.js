@@ -5,6 +5,9 @@
 
 //= require lib/receiver
 
+/*global Class, Receiver, $defined, $type */
+"use strict";
+
 /*
  * to be used as a base class
  *
@@ -33,7 +36,7 @@ var Emitter = new Class({
   //    ...
   // }
   receivers: {},
-  
+
   initialize: function() {
   },
 
@@ -46,8 +49,8 @@ var Emitter = new Class({
     } else if ('array' !== $type(types)) {
       throw('Emitter. ' + from + ': types must be a string, or an array of strings');
     }
-    var i,t;
-    for (i=0; i<types.length; i++) {
+    var i, t;
+    for (i = 0; i < types.length; i++) {
       t = types[i];
       if ('string' !== $type(t)) {
         throw('Emitter. ' + from + '; types array: all items must be strings');
@@ -67,7 +70,7 @@ var Emitter = new Class({
     types = this._getTypes(types, 'addReceiver');
 
     var i, t;
-    for (i=0; i<types.length; i++) {
+    for (i = 0; i < types.length; i++) {
       t = types[i];
       if (!this.receivers[t]) {
         this.receivers[t] = {};
@@ -85,13 +88,13 @@ var Emitter = new Class({
 
   // TODO
   removeReceiver: function(rec, types) {
-    var i,t;
+    var i, t;
     if (!$defined(types)) {
       types = this.receivers.keys();
       this.removeReceiver(rec, types);
     } else {
       types = this._getTypes(types, 'removeReceiver');
-      for (i=0; i<types.length; i++) {
+      for (i = 0; i < types.length; i++) {
         t = types[i];
         if (this.receivers[t]) {
           this.receivers[t].erase(rec);
@@ -102,10 +105,12 @@ var Emitter = new Class({
 
   // TODO
   numReceivers: function(type) {
-    var n = 0;
+    var n = 0, t;
     if (!$defined(type)) {
-      for (type in this.receivers) {
-        n += this.numReceivers(type);
+      for (t in this.receivers) {
+        if (this.receivers.hasOwnProperty(t)) {
+          n += this.numReceivers(t);
+        }
       }
       return n;
     } else {
@@ -123,17 +128,18 @@ var Emitter = new Class({
     if (!$defined(this.receivers[type])) {
       return;
     }
-    var methods = this.receivers[type];
-    var m;
+
+    var methods = this.receivers[type], m, recs, l, i;
+
     for (m in methods) {
       if (methods.hasOwnProperty(m)) {
-        var recs = this.receivers[type][m];
-        var l = recs.length, i;
-        for (i=0; i<l; i++) {
+        recs = this.receivers[type][m];
+        l = recs.length;
+        for (i = 0; i < l; i++) {
           recs[i][m](type, this);
         }
       }
     }
-  },
+  }
 });
 

@@ -2,6 +2,9 @@
  * log
  ****************************************************************/
 
+/*global Class, Element */
+"use strict";
+
 /*
  * on page log output
  */
@@ -13,7 +16,7 @@ var Log = new Class({
 
     function makeTextSelectable(els) {
       var i, el;
-      for (i=0; i<els.length; i++) {
+      for (i = 0; i < els.length; i++) {
         el = els[i];
         el.setStyle('user-select', 'text');
         el.setStyle('-webkit-user-select', 'text');
@@ -32,13 +35,15 @@ var Log = new Class({
     }
 
     //this.div.setStyle('height', '100%');
-    
-    var table = new Element('table');
-    //table.setStyle('height', '100%');
+
+    var
+      table = new Element('table'),
+      head = new Element('tr'),
+      headTD = new Element('td'),
+      content, contentTD, fs;
+
     this.div.appendChild(table);
-    var head = new Element('tr');
     table.appendChild(head);
-    var headTD = new Element('td');
     head.appendChild(headTD);
 
     this.clearButton = new Element('button');
@@ -51,9 +56,9 @@ var Log = new Class({
     headTD.appendChild(this.hideButton);
     this.hideButton.addEventListener('click', this.hide.bind(this));
 
-    var content = new Element('tr');
+    content = new Element('tr');
     table.appendChild(content);
-    var contentTD = new Element('td');
+    contentTD = new Element('td');
     content.appendChild(contentTD);
 
     this.text = new Element('textarea');
@@ -62,7 +67,7 @@ var Log = new Class({
     //this.text.style.height = '100%';
     contentTD.appendChild(this.text);
 
-    var fs = Math.min(12, Math.max(7, window.innerWidth / 25));
+    fs = Math.min(12, Math.max(7, window.innerWidth / 25));
     this.text.setStyle('font-size', fs);
 
 
@@ -146,7 +151,7 @@ var Log = new Class({
       this.text.value += this.N + ' ' + line + '\n';
       this.text.scrollTop = this.text.scrollHeight - this.text.clientHeight;
     }
-  },
+  }
 });
 
 var Logger;

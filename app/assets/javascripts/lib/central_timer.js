@@ -4,6 +4,9 @@
 
 //= require lib/emitter
 
+/*global TimerObserver, Class, Emitter, $defined */
+"use strict";
+
 window.setTimeoutOrg = window.setTimeout;
 window.setIntervalOrg = window.setInterval;
 window.clearTimeoutOrg = window.clearTimeout;
@@ -14,7 +17,7 @@ window.setTimeout = function(func, delay, params) {
   var handle = window.setTimeoutOrg(func, delay, params);
   TimerObserver.addTimeout(handle);
   return handle;
-}
+};
 
 /*
 // setTimeout will call the attached function and do NOTHING more
@@ -37,15 +40,15 @@ window.setInterval = function(func, inter, params) {
   var handle = window.setIntervalOrg(func, inter, params);
   TimerObserver.addInterval(handle);
   return handle;
-}
+};
 window.clearTimeout = function(handle) {
   TimerObserver.removeTimeout(handle);
   return window.clearTimeoutOrg(handle);
-}
+};
 window.clearInterval = function(handle) {
   TimerObserver.removeInterval(handle);
   return window.clearIntervalOrg(handle);
-}
+};
 
 var TimerObserver = {
   timeouts: [],
@@ -113,7 +116,7 @@ var TimerObserver = {
       console.log('removed interval ' + t);
       this.show();
     }
-  },
+  }
 };
 
 var Timer = new Class({
@@ -125,7 +128,7 @@ var Timer = new Class({
   },
   active: function() {
     return this._handle !== 0;
-  },
+  }
 });
 
 
@@ -204,7 +207,7 @@ var IntervalTimer = new Class({
   },
   _upda: function(now, end) {
     if (end) {
-      this._elapsed =this._duration;
+      this._elapsed = this._duration;
       if (this._duration > 0) {
         this._remaining = 0;
         this._rel_elapsed = 1;
@@ -313,9 +316,9 @@ var CT = new Class({
 
   createIntervalTimer: function(interval, options) {
     var t = new IntervalTimer(interval, options);
-    this.timers << t;
+    this.timers.push(t);
     return t;
-  },
+  }
 });
 
 

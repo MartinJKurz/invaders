@@ -1,17 +1,26 @@
 /****************************************************************
- * dragable
- ****************************************************************/
+* dragable
+****************************************************************/
+
+/*global window, Class, Logger, $defined, Emitter, Element, IntervalTimer, Move, VectorInterpolator */
 
 //= require lib/central_timer
 //= require lib/interpolator
 
+// externals
+// var Emitter;
+
+
+"use strict";
 
 // plan B
 // one DragManager, auto instanciated
 //
 
 // code has worked without this ugly hack:
-window.ondragstart = function() { return false; }    // -> ok
+window.ondragstart = function() {
+  return false;
+};    // -> ok
 // but why? and how?
 
 
@@ -35,7 +44,7 @@ var DragManagerClass = new Class({
   oneDragElement: null,
 
   initialize: function() {
-    this.isTouchDevice = "ontouchstart" in window;
+    this.isTouchDevice = $defined(window.ontouchstart); // in window;
     Logger.log('Touch device: ' + this.isTouchDevice);
 
     if (this.isTouchDevice) {
@@ -48,25 +57,24 @@ var DragManagerClass = new Class({
       document.body.addEventListener('mouseup', this.gmu.bind(this));
     }
     document.body.addEventListener('click', function(ev) {
-        if (this.dragElement) {
-          this.dragElement.dragging = false;
-        }
-      }.bind(this));
+      if (this.dragElement) {
+        this.dragElement.dragging = false;
+      }
+    }.bind(this));
   },
 
   gmd: function(ev) {
     //Logger.log(ev.target);
     if (this.oneDragElement) {
       this.oneDragElement.md(ev);
-    } else {
     }
   },
   gts: function(event) {
+    var touch, ev = {};
     Logger.log('GTS: ');
     if (this.oneDragElement) {
-      if (event.targetTouches.length == 1) {
+      if (event.targetTouches.length === 1) {
         touch = event.targetTouches[0];
-        var ev = {};
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
         //ev.target = this.oneDragElement;
@@ -95,11 +103,11 @@ var DragManagerClass = new Class({
     }
   },
   gtm: function(event) {
+    var touch, ev = {};
     if (this.dragElement) {
-      if (event.targetTouches.length == 1) {
+      if (event.targetTouches.length === 1) {
         // Logger.log('gtm --- ', true);
         touch = event.targetTouches[0];
-        var ev = {};
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
         this.dragElement.mm(ev);
@@ -111,11 +119,11 @@ var DragManagerClass = new Class({
     event.preventDefault();
   },
   gte: function(event) {
+    var touch, ev = {};
     if (this.dragElement) {
-      if (event.changedTouches.length == 1) {
+      if (event.changedTouches.length === 1) {
         //Logger.log('gte --- ', true);
         touch = event.changedTouches[0];
-        var ev = {};
         ev.clientX = touch.pageX;
         ev.clientY = touch.pageY;
         this.dragElement.mu(ev);
@@ -145,20 +153,20 @@ var Dragable = new Class({
   motion: Drag.M_BOTH,
   motionTarget: Drag.TARGET_NEAREST,
   full: false,      // if full is true, then there is only one Dragable visible,
-                    // to start drag a point on the page can be used to start drag
-                    // if full is false (the default), the Dragable itself must
-                    // be hit (receive the touchstart/mousedown event)
+  // to start drag a point on the page can be used to start drag
+  // if full is false (the default), the Dragable itself must
+  // be hit (receive the touchstart/mousedown event)
   move: null,
 
   initialize: function(elType, full) {
     this.el = new Element(elType);
-    
+
     // does not work:
     // this.el.addEventListener('dragstart', function(){Logger.log('DS');return false;});
 
     this.el.style.position = 'absolute';
     this.full = $defined(full) ? full : false;
-   
+
 
     if (!this.full) {
       if (DragManager.isTouchDevice) {
@@ -166,10 +174,7 @@ var Dragable = new Class({
       } else {
         this.el.addEventListener('mousedown', this.md.bind(this));
       }
-    } else {
-      // handler already set in DragManager class
     }
-
   },
 
   setPosition: function(px, py) {
@@ -185,14 +190,14 @@ var Dragable = new Class({
   setTargetPositions: function(tp) {
     this.targetPositions = tp;
   },
-  
+
   // 2 positions
   // [[x0,y0],[x1,y1]]
   setLimits: function(limits) {
     this.limits = limits;
     // console.log(limits);
   },
-  
+
   stopAnimation: function() {
     if (this.timer) {
       this.timer.stop();
@@ -204,13 +209,15 @@ var Dragable = new Class({
   },
 
   md: function(ev) {
+    var px, py, x, y;
+
     this.stopAnimation();
     DragManager.dragElement = this;
-    var px = parseFloat(this.el.style.left);
+    px = parseFloat(this.el.style.left);
     if (isNaN(px)) {
       px = 0;
     }
-    var py = parseFloat(this.el.style.top);
+    py = parseFloat(this.el.style.top);
     if (isNaN(py)) {
       py = 0;
     }
@@ -220,8 +227,8 @@ var Dragable = new Class({
     this.el.cpx = px;  // current position
     this.el.cpy = py;
 
-    var x = ev.clientX;
-    var y = ev.clientY;
+    x = ev.clientX;
+    y = ev.clientY;
     this.startX = x;
     this.startY = y;
     this.dragging = false;
@@ -239,10 +246,11 @@ var Dragable = new Class({
   },
 
   ts: function(event) {
-    if (event.targetTouches.length == 1) {
-      var touch = event.targetTouches[0];
+    var touch, ev = {};
+    if (event.targetTouches.length === 1) {
+      touch = event.targetTouches[0];
 
-      var ev = {};
+      ev = {};
       ev.clientX = touch.pageX;
       ev.clientY = touch.pageY;
       this.md(ev);
@@ -257,7 +265,7 @@ var Dragable = new Class({
     if (-1 !== this.startX) {
       x = ev.clientX;
       y = ev.clientY;
-      
+
       this.addPosition(x, y);
 
       dx = x - this.startX;
@@ -269,7 +277,7 @@ var Dragable = new Class({
         dy = 0;
       }
 
-      d = Math.sqrt(dx*dx+dy*dy);
+      d = Math.sqrt(dx * dx + dy * dy);
       started = false;
       if (this.motion !== Drag.M_NONE) {
         if (d > DragManager.dragLimit && !this.dragging) {
@@ -298,13 +306,12 @@ var Dragable = new Class({
 
       if (this.dragging) {
         try {
-          this.el.setStyle ('left', this.el.cpx + dx); 
-          this.el.setStyle ('top', this.el.cpy + dy);
+          this.el.setStyle('left', this.el.cpx + dx);
+          this.el.setStyle('top', this.el.cpy + dy);
         } catch (msg) {
           Logger.log('\nERROR');
           Logger.log(msg);
         }
-      } else {
       }
     } else {
       Logger.log('startX = -1');
@@ -330,7 +337,7 @@ var Dragable = new Class({
   },
 
   _adjustInterpolationValues: function(T, times, positions, startX, startY, endX, endY) {
-    var k;
+    var i, k;
     switch (times.length) {
       case 0:
         times.push(0);
@@ -352,8 +359,8 @@ var Dragable = new Class({
       default:
         break;
     }
-    k = 1/T;
-    for (i=0; i<times.length; i++) {
+    k = 1 / T;
+    for (i = 0; i < times.length; ++i) {
       times[i] *= k;
     }
     return T;
@@ -364,10 +371,9 @@ var Dragable = new Class({
       Logger.log('no time');
       return;
     }
-    var dt = 1000/60;
-
-    var vx, vy, minD, tx, ty, px, py, a, fx, fy, use_x,
-    i, dx, dy, d, times, positions, T, done, inter;
+    var dt = 1000 / 60, vx, vy, minD, tx, ty, px, py,
+       a, fx, fy, use_x, i, dx, dy, d, times, positions,
+       T, done, inter;
 
     px = this.el.cpx;
     py = this.el.cpy;
@@ -378,10 +384,10 @@ var Dragable = new Class({
     this.targetIdx = -1;
     if (this.targetPositions) {
       minD = 1000000;
-      for (i=0; i<this.targetPositions.length; i++) {
-        dx = px-this.targetPositions[i][0];
-        dy = py-this.targetPositions[i][1];
-        d = dx*dx + dy*dy;
+      for (i = 0; i < this.targetPositions.length; i++) {
+        dx = px - this.targetPositions[i][0];
+        dy = py - this.targetPositions[i][1];
+        d = dx * dx + dy * dy;
         if (d < minD) {
           this.targetIdx = i;
           minD = d;
@@ -391,7 +397,7 @@ var Dragable = new Class({
       }
     }
 
-    a = Math.atan2(ty-py, tx-px);
+    a = Math.atan2(ty - py, tx - px);
     fx = Math.cos(a);
     fy = Math.sin(a);
     fx *= 0.03;
@@ -417,10 +423,10 @@ var Dragable = new Class({
       }
       positions.push([px, py]);
       T += dt;
-      px += vx*dt;
-      vx += fx*dt;
-      py += vy*dt;
-      vy += fy*dt;
+      px += vx * dt;
+      vx += fx * dt;
+      py += vy * dt;
+      vy += fy * dt;
       if (use_x) {
         done = fx > 0 ? px > tx : px < tx;
       } else {
@@ -431,9 +437,9 @@ var Dragable = new Class({
 
     T = this._adjustInterpolationValues(T, times, positions, px, py, tx, ty);
     times[0] = 0;
-    times[times.length-1] = 1;
-    positions[times.length-1][0] = tx;
-    positions[times.length-1][1] = ty;
+    times[times.length - 1] = 1;
+    positions[times.length - 1][0] = tx;
+    positions[times.length - 1][1] = ty;
 
     inter = new VectorInterpolator(times, positions);
     this.timer = new IntervalTimer(Math.round(dt), {duration: T, delay: 0});
@@ -446,33 +452,34 @@ var Dragable = new Class({
   _mu_stop: function() {
     // nothing to do here
   },
-/*
+  /*
   _inLimits: function(px,py) {
-    function between(val, one, two) {
-      return (val >= one && val <= two) || (val >= two && val <= one);
-    }
+  function between(val, one, two) {
+  return (val >= one && val <= two) || (val >= two && val <= one);
+  }
 
-    if (!this.limits) {
-      return true;
-    }
+  if (!this.limits) {
+  return true;
+  }
 
-    if (this.ver) {
-      return between(py, this.limits[0][1], this.limits[1][1]);
-    } else if (this.hor) {
-      return between(px, this.limits[0][0], this.limits[1][0]);
-    } else {
-      // TODO
-      return true;
-    }
+  if (this.ver) {
+  return between(py, this.limits[0][1], this.limits[1][1]);
+  } else if (this.hor) {
+  return between(px, this.limits[0][0], this.limits[1][0]);
+  } else {
+  // TODO
+  return true;
+  }
   },
-*/
+  */
   // -1: in limits
   // 0,1 limit point index
-  _inLimits: function(px,py) {
+  _inLimits: function(px, py) {
+    /*
     function between(val, one, two) {
       return (val >= one && val <= two) || (val >= two && val <= one);
     }
-
+    */
     if (!this.limits) {
       return -1;
     }
@@ -491,15 +498,16 @@ var Dragable = new Class({
       return -1;
     }
 
-    k = (p-a)/(b-a);
+    k = (p - a) / (b - a);
     return k < 0 ? 0 : k > 1 ? 1 : -1;
   },
 
   _mu_coast: function() {
 
-    vx = this.vx;
-    vy = this.vy;
-    var tx, ty;
+    var
+      vx = this.vx,
+      vy = this.vy,
+      tx, ty;
 
     if (this.ver) {
       vx = 0;
@@ -554,20 +562,22 @@ var Dragable = new Class({
   },
 
   addPosition: function(x, y) {
-    var SAMPLES = 5;
-    var n = this.positions.length;
-    var li = n;
-    var fi = 0;
-    var es, ee;
+    var
+      SAMPLES = 5,
+      n = this.positions.length,
+      li = n,
+      fi = 0,
+      le, fe;
+
     if (n < SAMPLES) {
-      this.positions.push({x:x, y:y, t:Date.now()});
-      if (n === SAMPLES-1) {
+      this.positions.push({x: x, y: y, t: Date.now()});
+      if (n === SAMPLES - 1) {
         this.posIdx = 0;
       }
     } else {
       li = this.posIdx;
-      this.positions[this.posIdx] = ({x:x, y:y, t:Date.now()});
-      this.posIdx = (this.posIdx+1) % SAMPLES;
+      this.positions[this.posIdx] = ({x: x, y: y, t: Date.now()});
+      this.posIdx = (this.posIdx + 1) % SAMPLES;
       fi = this.posIdx;
     }
 
@@ -582,6 +592,6 @@ var Dragable = new Class({
       this.vx = 0;
       this.vy = 0;
     }
-  },
+  }
 });
 

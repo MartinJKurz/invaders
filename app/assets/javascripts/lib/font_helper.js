@@ -2,6 +2,8 @@
  * font_helper
  ****************************************************************/
 
+/*global Class, Element, $defined */
+"use strict";
 
 var TMClass = new Class({
   initialize: function() {
@@ -16,15 +18,15 @@ var TMClass = new Class({
     }
   },
   setOptions: function(opts) {
-      this.test.style.fontFamily = opts.fontFamily ? opts.fontFamily : 'Arial';
-      this.test.style.fontStyle = opts.fontStyle ? opts.fontStyle : 'normal';
-      this.test.style.fontVariant = opts.fontVariant ? opts.fontVariant : 'normal';
-      var fs = opts.fontSize ? opts.fontSize : 20;
-      this.test.style.fontSize = fs + 'px';
-      this.test.style.fontWeight = opts.fontWeight ? opts.fontWeight : 'normal';
+    this.test.style.fontFamily = $defined(opts.fontFamily) ? opts.fontFamily : 'Arial';
+    this.test.style.fontStyle = $defined(opts.fontStyle) ? opts.fontStyle : 'normal';
+    this.test.style.fontVariant = $defined(opts.fontVariant) ? opts.fontVariant : 'normal';
+    var fs = $defined(opts.fontSize) ? opts.fontSize : 20;
+    this.test.style.fontSize = fs + 'px';
+    this.test.style.fontWeight = $defined(opts.fontWeight) ? opts.fontWeight : 'normal';
   },
   setFontSize: function(size) {
-      this.test.style.fontSize = size + 'px';
+    this.test.style.fontSize = size + 'px';
   },
   measure: function(text, opts) {
 
@@ -33,19 +35,21 @@ var TMClass = new Class({
     }
 
     this.test.textContent = text;
-    var w = this.test.offsetWidth;
-    var h = this.test.offsetHeight;
+    var w = this.test.offsetWidth,
+      h = this.test.offsetHeight;
     this.test.textContent = '';
     return {
       w: w,
       h: h
-    }
+    };
   },
   findFontForSize: function(text, box, opts) {
     this.setOptions(opts);
-    var fs = (opts && opts.fontSize) ? opts.fontSize : 20;
+    var
+      fs = (opts && opts.fontSize) ? opts.fontSize : 20,
+      m;
     this.setFontSize(fs);
-    var m = this.measure(text);
+    m = this.measure(text);
     while (m.w < box.w && m.h < box.h) {
       fs *= 1.1;
       this.setFontSize(fs);
@@ -65,13 +69,13 @@ var TMClass = new Class({
     return {
       font: this.test.style.font,
       size: fs
-    }
+    };
   }
 });
 
 var TM;
 window.addEvent('domready', function() {
-    TM = new TMClass();
+  TM = new TMClass();
 });
 
 

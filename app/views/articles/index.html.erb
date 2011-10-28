@@ -1,0 +1,36 @@
+<h1>All Articles</h1>
+
+<!-- %= render 'articles' % -->
+<div id="articles_list">
+  <%= paginate @articles %>
+  <table class="font50">
+    <tr>
+      <th class='sortable' width='15%'><%= sortable 'name', :sort_column%></th>
+      <th class='sortable' width='25%'><%= sortable 'created_at', :sort_column, 'Since' %></th>
+      <th class='sortable' width='25%'><%= sortable 'updated_at', :sort_column, 'Last Active' %></th>
+      <% if user_is_admin %>
+        <th class='sortable' width='25%'><%= sortable 'logins', :sort_column %></th>
+      <% end %>
+    </tr>
+
+    <% @articles.each do |article| %>
+      <tr>
+        <td><%= link_to article.title, article %></td>
+        <!-- td>HIGHSCORE</th -->
+        <td><%= localTimeString(article.created_at) %></th>
+        <td><%= localTimeString(article.updated_at) %></th>
+        <% if user_is_tester %>
+          <td>
+            <%= link_to 'Destroy', '/delete_article?id=' + article.id.to_s, :confirm => 'Are you sure?' %>
+            <!-- %= link_to 'Destroy', 'article/destroy?did=' + article.id.to_s, :confirm => 'Are you sure?' % -->
+          </td>
+        <% end %>
+      </tr>
+    <% end %>
+  </table>
+</div>
+
+
+
+
+
